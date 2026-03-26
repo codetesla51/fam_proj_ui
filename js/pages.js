@@ -412,31 +412,36 @@ const pages = {
             <div class="w-full min-w-0">
             ${Card({
                 children: myTx.length ? `
-                    <div class="overflow-x-auto w-full">
-                        <table class="w-full min-w-[500px]">
-                            <thead>
-                                <tr class="border-b border-border bg-table-header text-left">
-                                    <th class="whitespace-nowrap px-3 py-3 text-xs font-medium uppercase tracking-wider text-text-muted">${t('table.date')}</th>
-                                    <th class="whitespace-nowrap px-3 py-3 text-xs font-medium uppercase tracking-wider text-text-muted">${t('table.type')}</th>
-                                    <th class="whitespace-nowrap px-3 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-muted">${t('table.amount')}</th>
-                                    <th class="whitespace-nowrap px-3 py-3 text-xs font-medium uppercase tracking-wider text-text-muted">${t('table.reason')}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-border">
-                                ${myTx.map((tx, i) => `
-                                    <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} active:bg-surface-raised transition-colors">
-                                        <td class="whitespace-nowrap px-3 py-3 text-sm text-text-secondary">${formatDate(tx.date)}</td>
-                                        <td class="whitespace-nowrap px-3 py-3 text-sm font-medium ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
-                                            ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()} ${tx.type === 'credit' ? t('table.moneyIn') : t('table.moneyOut')}
-                                        </td>
-                                        <td class="whitespace-nowrap px-3 py-3 text-right text-sm font-semibold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
-                                            ${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}
-                                        </td>
-                                        <td class="whitespace-nowrap px-3 py-3 text-sm">${tx.reason}</td>
+                    <div class="rounded-xl overflow-hidden border border-border">
+                        <div class="overflow-x-auto w-full">
+                            <table class="w-full min-w-[520px]">
+                                <thead>
+                                    <tr class="bg-table-header text-left border-b border-border">
+                                        <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.date')}</th>
+                                        <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.type')}</th>
+                                        <th class="whitespace-nowrap px-4 py-3.5 text-right text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.amount')}</th>
+                                        <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.reason')}</th>
                                     </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody class="divide-y divide-border">
+                                    ${myTx.map((tx, i) => `
+                                        <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} hover:bg-surface-raised transition-colors cursor-pointer">
+                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${formatDate(tx.date)}</td>
+                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm font-medium ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
+                                                <span class="inline-flex items-center gap-1.5">
+                                                    ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()} 
+                                                    ${tx.type === 'credit' ? t('table.moneyIn') : t('table.moneyOut')}
+                                                </span>
+                                            </td>
+                                            <td class="whitespace-nowrap px-4 py-3.5 text-right text-sm font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
+                                                ${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}
+                                            </td>
+                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${tx.reason}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 ` : EmptyState({ icon: Icons.wallet(), message: t('member.noPayments') })
             })}
@@ -560,33 +565,38 @@ const pages = {
             <div class="w-full min-w-0">
             ${Card({
                 children: myTx.length ? `
-                    <div class="overflow-x-auto w-full">
-                        <table class="w-full min-w-[500px]">
-                            <thead>
-                                <tr class="border-b border-border bg-table-header text-left">
-                                    <th class="whitespace-nowrap px-3 py-3 text-xs font-medium uppercase tracking-wider text-text-muted">${t('table.date')}</th>
-                                    <th class="whitespace-nowrap px-3 py-3 text-xs font-medium uppercase tracking-wider text-text-muted">${t('table.type')}</th>
-                                    <th class="whitespace-nowrap px-3 py-3 text-xs font-medium uppercase tracking-wider text-text-muted">${t('table.fund')}</th>
-                                    <th class="whitespace-nowrap px-3 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-muted">${t('table.amount')}</th>
-                                    <th class="whitespace-nowrap px-3 py-3 text-xs font-medium uppercase tracking-wider text-text-muted">${t('table.reason')}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-border">
-                                ${myTx.map((tx, i) => `
-                                    <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} active:bg-surface-raised transition-colors">
-                                        <td class="whitespace-nowrap px-3 py-3 text-sm text-text-secondary">${formatDate(tx.date)}</td>
-                                        <td class="whitespace-nowrap px-3 py-3 text-sm font-medium ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
-                                            ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()} ${tx.type === 'credit' ? t('table.moneyIn') : t('table.moneyOut')}
-                                        </td>
-                                        <td class="whitespace-nowrap px-3 py-3">${PoolTag({ pool: tx.pool })}</td>
-                                        <td class="whitespace-nowrap px-3 py-3 text-right text-sm font-semibold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
-                                            ${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}
-                                        </td>
-                                        <td class="whitespace-nowrap px-3 py-3 text-sm">${tx.reason}</td>
+                    <div class="rounded-xl overflow-hidden border border-border">
+                        <div class="overflow-x-auto w-full">
+                            <table class="w-full min-w-[560px]">
+                                <thead>
+                                    <tr class="bg-table-header text-left border-b border-border">
+                                        <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.date')}</th>
+                                        <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.type')}</th>
+                                        <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.fund')}</th>
+                                        <th class="whitespace-nowrap px-4 py-3.5 text-right text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.amount')}</th>
+                                        <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.reason')}</th>
                                     </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody class="divide-y divide-border">
+                                    ${myTx.map((tx, i) => `
+                                        <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} hover:bg-surface-raised transition-colors cursor-pointer">
+                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${formatDate(tx.date)}</td>
+                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm font-medium ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
+                                                <span class="inline-flex items-center gap-1.5">
+                                                    ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()} 
+                                                    ${tx.type === 'credit' ? t('table.moneyIn') : t('table.moneyOut')}
+                                                </span>
+                                            </td>
+                                            <td class="whitespace-nowrap px-4 py-3.5">${PoolTag({ pool: tx.pool })}</td>
+                                            <td class="whitespace-nowrap px-4 py-3.5 text-right text-sm font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
+                                                ${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}
+                                            </td>
+                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${tx.reason}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 ` : EmptyState({ icon: Icons.history(), message: t('common.noData') })
             })}
@@ -815,7 +825,7 @@ const pages = {
                 </h1>
                 <p class="text-xs sm:text-sm text-text-muted">All family transactions</p>
             </div>
-            <button class="flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm font-medium transition-colors active:bg-surface-raised select-none">
+            <button class="flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm font-medium transition-colors hover:bg-surface-soft active:bg-surface-raised select-none">
                 ${Icons.download()}
                 Export CSV
             </button>
@@ -824,35 +834,37 @@ const pages = {
         <div class="w-full min-w-0">
         ${Card({
             children: `
-                <div class="overflow-x-auto w-full">
-                    <table class="w-full min-w-[600px]">
-                        <thead>
-                            <tr class="border-b border-border bg-table-header text-left">
-                                <th class="whitespace-nowrap px-3 py-3 text-xs font-medium uppercase tracking-wider text-text-muted">${t('table.member')}</th>
-                                <th class="whitespace-nowrap px-3 py-3 text-xs font-medium uppercase tracking-wider text-text-muted">${t('table.fund')}</th>
-                                <th class="whitespace-nowrap px-3 py-3 text-xs font-medium uppercase tracking-wider text-text-muted">${t('table.type')}</th>
-                                <th class="whitespace-nowrap px-3 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-muted">${t('table.amount')}</th>
-                                <th class="whitespace-nowrap px-3 py-3 text-xs font-medium uppercase tracking-wider text-text-muted">${t('table.reason')}</th>
-                                <th class="whitespace-nowrap px-3 py-3 text-xs font-medium uppercase tracking-wider text-text-muted">${t('table.date')}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-border">
-                            ${mockData.transactions.map((tx, i) => `
-                                <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} active:bg-surface-raised transition-colors">
-                                    <td class="whitespace-nowrap px-3 py-3 text-sm font-medium">${tx.memberName}</td>
-                                    <td class="whitespace-nowrap px-3 py-3">${PoolTag({ pool: tx.pool })}</td>
-                                    <td class="whitespace-nowrap px-3 py-3 text-sm font-medium ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
-                                        ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
-                                    </td>
-                                    <td class="whitespace-nowrap px-3 py-3 text-right text-sm font-semibold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
-                                        ${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}
-                                    </td>
-                                    <td class="whitespace-nowrap px-3 py-3 text-sm">${tx.reason}</td>
-                                    <td class="whitespace-nowrap px-3 py-3 text-sm text-text-secondary">${formatDate(tx.date)}</td>
+                <div class="rounded-xl overflow-hidden border border-border">
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full min-w-[640px]">
+                            <thead>
+                                <tr class="bg-table-header text-left border-b border-border">
+                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.member')}</th>
+                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.fund')}</th>
+                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.type')}</th>
+                                    <th class="whitespace-nowrap px-4 py-3.5 text-right text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.amount')}</th>
+                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.reason')}</th>
+                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.date')}</th>
                                 </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody class="divide-y divide-border">
+                                ${mockData.transactions.map((tx, i) => `
+                                    <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} hover:bg-surface-raised transition-colors cursor-pointer">
+                                        <td class="whitespace-nowrap px-4 py-3.5 text-sm font-medium">${tx.memberName}</td>
+                                        <td class="whitespace-nowrap px-4 py-3.5">${PoolTag({ pool: tx.pool })}</td>
+                                        <td class="whitespace-nowrap px-4 py-3.5 text-sm font-medium ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
+                                            ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-3.5 text-right text-sm font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
+                                            ${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${tx.reason}</td>
+                                        <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${formatDate(tx.date)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             `
         })}

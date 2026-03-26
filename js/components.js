@@ -74,6 +74,7 @@ const Icons = {
     building: () => icon('building'),
     buildingBank: () => icon('building-bank'),
     handshake: () => icon('handshake'),
+    megaphone: () => icon('megaphone'),
     umbrella: () => icon('umbrella'),
     heartHandshake: () => icon('heart-handshake'),
     target: () => icon('target'),
