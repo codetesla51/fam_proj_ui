@@ -1292,6 +1292,7 @@ function handleLogin(e) {
     const name = document.getElementById('login-name').value;
     const password = document.getElementById('login-password').value;
     const errorEl = document.getElementById('login-error');
+    const btn = document.getElementById('login-btn');
     
     if (!name || !password) {
         errorEl.querySelector('span:last-child').textContent = t('validation.required');
@@ -1299,14 +1300,18 @@ function handleLogin(e) {
         return;
     }
     
-    store.login(name, password, false).then(result => {
-        if (result.success) {
-            store.addNotification('Welcome back, ' + name + '!', 'success');
-            router.navigate('/member/dashboard');
-        } else {
-            errorEl.querySelector('span:last-child').textContent = result.error;
-            errorEl.classList.remove('hidden');
-        }
+    btn.disabled = true;
+    btn.innerHTML = '<div class="loader !w-5 !h-5 !border-2"></div> ' + t('common.loading');
+    
+    store.login(name, password).then(() => {
+        showToast(t('common.success'), 'success');
+        router.navigate('/member/dashboard');
+    }).catch(err => {
+        errorEl.querySelector('span:last-child').textContent = err.message || t('auth.wrongCredentials');
+        errorEl.classList.remove('hidden');
+    }).finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = Icons.logIn() + ' ' + t('auth.signIn');
     });
 }
 
@@ -1315,6 +1320,9 @@ function handleRegister(e) {
     const name = document.getElementById('reg-name').value;
     const password = document.getElementById('reg-password').value;
     const confirm = document.getElementById('reg-confirm').value;
+    const amount = document.getElementById('reg-amount').value;
+    const schedule = document.getElementById('btn-weekly')?.classList.contains('bg-brand') ? 'weekly' : 'monthly';
+    const btn = document.getElementById('reg-btn');
     
     if (!name || !password || !confirm) {
         showToast(t('validation.required'), 'error');
@@ -1326,11 +1334,25 @@ function handleRegister(e) {
         return;
     }
     
-    store.register(name, password, 'monthly', 0, '').then(result => {
-        if (result.success) {
-            store.addNotification('Account created!', 'success');
-            router.navigate('/member/dashboard');
-        }
+    btn.disabled = true;
+    btn.innerHTML = '<div class="loader !w-5 !h-5 !border-2"></div> ' + t('common.loading');
+    
+    const startDate = new Date().toISOString().split('T')[0];
+    
+    store.register({
+        name,
+        password,
+        interval: schedule,
+        committed_amount: parseInt(amount) || 0,
+        start_date: startDate
+    }).then(() => {
+        showToast(t('common.success'), 'success');
+        router.navigate('/member/dashboard');
+    }).catch(err => {
+        showToast(err.message || t('common.error'), 'error');
+    }).finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = Icons.userPlus() + ' ' + t('auth.createAccount');
     });
 }
 
@@ -1338,26 +1360,29 @@ function handleAdminLogin(e) {
     e.preventDefault();
     const password = document.getElementById('admin-password').value;
     const errorEl = document.getElementById('admin-error');
+    const btn = document.querySelector('#admin-password')?.closest('form')?.querySelector('button[type="submit"]');
     
-    store.login('admin', password, true).then(result => {
-        if (result.success) {
-            store.addNotification('Welcome, Manager!', 'success');
-            router.navigate('/admin/dashboard');
-        } else {
-            errorEl.querySelector('span:last-child').textContent = result.error;
-            errorEl.classList.remove('hidden');
-        }
+    if (btn) {
+        btn.disabled = true;
+    }
+    
+    store.adminLogin(password).then(() => {
+        showToast(t('common.success'), 'success');
+        router.navigate('/admin/dashboard');
+    }).catch(err => {
+        errorEl.querySelector('span:last-child').textContent = err.message || t('auth.wrongCredentials');
+        errorEl.classList.remove('hidden');
+    }).finally(() => {
+        if (btn) btn.disabled = false;
     });
 }
 
 function handleMarkAllRead() {
-    store.markAllRead();
-    router.refresh();
+    store.markAllRead().then(() => router.refresh());
 }
 
 function handleMarkRead(id) {
-    store.markRead(id);
-    router.refresh();
+    store.markRead(id).then(() => router.refresh());
 }
 
 function togglePassword(id) {
@@ -1368,37 +1393,189 @@ function togglePassword(id) {
 }
 
 function setSchedule(schedule) {
-    document.getElementById('btn-weekly').className = 'flex-1 rounded-lg py-3 text-sm font-medium transition-colors ' + (schedule === 'weekly' ? 'bg-brand text-white' : 'text-text-secondary');
-    document.getElementById('btn-monthly').className = 'flex-1 rounded-lg py-3 text-sm font-medium transition-colors ' + (schedule === 'monthly' ? 'bg-brand text-white' : 'text-text-secondary');
+    document.getElementById('btn-weekly').className = 'flex-1 rounded-lg py-3 text-sm font-medium transition-all select-none ' + (schedule === 'weekly' ? 'bg-brand text-white shadow-md' : 'text-text-secondary hover:bg-surface-soft');
+    document.getElementById('btn-monthly').className = 'flex-1 rounded-lg py-3 text-sm font-medium transition-all select-none ' + (schedule === 'monthly' ? 'bg-brand text-white shadow-md' : 'text-text-secondary hover:bg-surface-soft');
 }
 
 function setFund(fund) {
-    document.getElementById('fund-pool1').className = 'flex-1 rounded-lg py-3 text-sm font-medium ' + (fund === 'pool1' ? 'bg-brand text-white' : 'text-text-secondary');
-    document.getElementById('fund-pool2').className = 'flex-1 rounded-lg py-3 text-sm font-medium ' + (fund === 'pool2' ? 'bg-brand text-white' : 'text-text-secondary');
+    document.getElementById('fund-pool1').className = 'flex-1 rounded-lg py-3 text-sm font-medium select-none ' + (fund === 'pool1' ? 'bg-brand text-white' : 'text-text-secondary');
+    document.getElementById('fund-pool2').className = 'flex-1 rounded-lg py-3 text-sm font-medium select-none ' + (fund === 'pool2' ? 'bg-brand text-white' : 'text-text-secondary');
 }
 
 function setTxType(type) {
-    document.getElementById('type-credit').className = 'flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium ' + (type === 'credit' ? 'bg-success text-white' : 'text-text-secondary');
-    document.getElementById('type-debit').className = 'flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium ' + (type === 'debit' ? 'bg-error text-white' : 'text-text-secondary');
+    document.getElementById('type-credit').className = 'flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium select-none ' + (type === 'credit' ? 'bg-success text-white' : 'text-text-secondary');
+    document.getElementById('type-debit').className = 'flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium select-none ' + (type === 'debit' ? 'bg-error text-white' : 'text-text-secondary');
 }
 
-function handleRecordPayment(e) {
+// Admin - Record Payment
+async function handleRecordPayment(e) {
     e.preventDefault();
-    showToast('Payment recorded successfully!', 'success');
-    router.navigate('/admin/transactions');
+    const form = e.target;
+    const btn = form.querySelector('button[type="submit"]');
+    const memberId = form.querySelector('select')?.value;
+    const fund = document.getElementById('fund-pool1')?.classList.contains('bg-brand') ? 'pool1' : 'pool2';
+    const type = document.getElementById('type-credit')?.classList.contains('bg-success') ? 'credit' : 'debit';
+    const amount = form.querySelector('input[type="number"]')?.value;
+    const reason = form.querySelector('input[type="text"]')?.value;
+    
+    if (!memberId || !amount || !reason) {
+        showToast(t('validation.required'), 'error');
+        return;
+    }
+    
+    btn.disabled = true;
+    
+    try {
+        // Note: receipt_url required by backend - using empty for now
+        // In production, upload receipt first via admin.uploadReceipt(file)
+        await store.createTransaction({
+            member_id: memberId,
+            pool: fund,
+            type,
+            amount: parseInt(amount),
+            reason,
+            receipt_url: ''
+        });
+        showToast(t('common.success'), 'success');
+        router.navigate('/admin/transactions');
+    } catch (err) {
+        showToast(err.message || t('common.error'), 'error');
+    } finally {
+        btn.disabled = false;
+    }
 }
 
-function handleCareFundRequest(e) {
+// Admin - Add Member
+async function handleAddMember(e) {
     e.preventDefault();
-    showToast('Request sent successfully!', 'success');
+    const form = e.target;
+    const inputs = form.querySelectorAll('input');
+    const name = inputs[0]?.value;
+    const password = inputs[1]?.value;
+    const amount = inputs[2]?.value;
+    const btn = form.querySelector('button[type="submit"]');
+    
+    if (!name || !password) {
+        showToast(t('validation.required'), 'error');
+        return;
+    }
+    
+    btn.disabled = true;
+    
+    try {
+        await store.createMember({
+            name,
+            password,
+            interval: 'monthly',
+            committed_amount: parseInt(amount) || 0,
+            start_date: new Date().toISOString().split('T')[0]
+        });
+        showToast(t('common.success'), 'success');
+        closeAddMemberModal();
+        router.refresh();
+    } catch (err) {
+        showToast(err.message || t('common.error'), 'error');
+    } finally {
+        btn.disabled = false;
+    }
 }
 
-function acceptRequest(id) {
-    showToast('Request accepted!', 'success');
+// Member - Submit Care Fund Request
+async function handleCareFundRequest(e) {
+    e.preventDefault();
+    const form = e.target;
+    const amount = form.querySelector('input[type="number"]')?.value;
+    const btn = form.querySelector('button[type="submit"]');
+    
+    if (!amount) {
+        showToast(t('validation.required'), 'error');
+        return;
+    }
+    
+    btn.disabled = true;
+    
+    try {
+        const dateInput = document.getElementById('care-date-value');
+        await store.submitCareFundRequest({
+            amount: parseInt(amount),
+            occasion: 'other',
+            event_date: dateInput?.value || new Date().toISOString().split('T')[0],
+            description: ''
+        });
+        showToast(t('common.success'), 'success');
+        router.refresh();
+    } catch (err) {
+        showToast(err.message || t('common.error'), 'error');
+    } finally {
+        btn.disabled = false;
+    }
 }
 
-function showDeclineForm(id) {
-    showToast('Please provide a reason', 'info');
+// Admin - Accept Care Fund Request
+async function acceptRequest(id) {
+    try {
+        await store.updateCareFundRequest(id, 'approved');
+        showToast(t('careFund.accepted'), 'success');
+        router.refresh();
+    } catch (err) {
+        showToast(err.message || t('common.error'), 'error');
+    }
+}
+
+// Admin - Decline Care Fund Request
+async function declineRequest(id) {
+    const reason = prompt('Reason for declining:');
+    if (!reason) return;
+    
+    try {
+        await store.updateCareFundRequest(id, 'rejected', reason);
+        showToast(t('careFund.notApproved'), 'info');
+        router.refresh();
+    } catch (err) {
+        showToast(err.message || t('common.error'), 'error');
+    }
+}
+
+// Member - Change Password
+async function handleChangePassword(e) {
+    e.preventDefault();
+    const form = e.target;
+    const inputs = form.querySelectorAll('input');
+    const current = inputs[0]?.value;
+    const newPass = inputs[1]?.value;
+    const confirm = inputs[2]?.value;
+    
+    if (!current || !newPass || !confirm) {
+        showToast(t('validation.required'), 'error');
+        return;
+    }
+    
+    if (newPass !== confirm) {
+        showToast(t('validation.passwordMismatch'), 'error');
+        return;
+    }
+    
+    try {
+        await store.changePassword(current, newPass);
+        showToast(t('common.success'), 'success');
+        form.reset();
+    } catch (err) {
+        showToast(err.message || t('common.error'), 'error');
+    }
+}
+
+// Member - Pool Transfer
+async function handlePoolTransfer() {
+    const amount = prompt('How much to transfer from Care Fund to Savings?');
+    if (!amount || isNaN(amount)) return;
+    
+    try {
+        await store.transferPool(parseInt(amount));
+        showToast(t('common.success'), 'success');
+        router.refresh();
+    } catch (err) {
+        showToast(err.message || t('common.error'), 'error');
+    }
 }
 
 function showAddMemberModal() {
@@ -1410,10 +1587,4 @@ function showAddMemberModal() {
 function closeAddMemberModal() {
     document.getElementById('add-member-modal').classList.add('hidden');
     document.body.classList.remove('overflow-hidden');
-}
-
-function handleAddMember(e) {
-    e.preventDefault();
-    showToast('Family member added successfully!', 'success');
-    closeAddMemberModal();
 }
