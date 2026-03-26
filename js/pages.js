@@ -261,62 +261,110 @@ const pages = {
     `,
     
     adminLogin: () => `
-        <div class="flex min-h-screen flex-col items-center justify-center p-4 pb-24">
-            <div class="w-full max-w-md mx-auto">
-                <div class="mb-6 flex justify-center">
-                    <div class="text-brand flex items-center gap-2">
-                        ${Icons.building()}
-                        <span class="text-lg font-bold">${t('app.name')}</span>
+        <div class="flex min-h-screen">
+            <!-- Left Panel - Brand (hidden on mobile) -->
+            <div class="hidden lg:flex lg:w-1/2 bg-brand relative flex-col items-center justify-center p-12 overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-brand via-brand-hover to-brand-800"></div>
+                <div class="absolute inset-0 opacity-10">
+                    <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <defs>
+                            <pattern id="grid3" width="10" height="10" patternUnits="userSpaceOnUse">
+                                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" stroke-width="0.5"/>
+                            </pattern>
+                        </defs>
+                        <rect width="100" height="100" fill="url(#grid3)"/>
+                    </svg>
+                </div>
+                <div class="relative z-10 text-center">
+                    <div class="mb-8 flex justify-center">
+                        <div class="flex h-24 w-24 items-center justify-center rounded-3xl bg-white/20 backdrop-blur-sm text-white">
+                            ${Icons.shield()}
+                        </div>
+                    </div>
+                    <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">Family Manager</h1>
+                    <p class="text-xl text-white/80 max-w-md">Manage your family savings and care fund</p>
+                    <div class="mt-12 flex items-center justify-center gap-8 text-white/60 text-sm">
+                        <div class="flex flex-col items-center gap-2">
+                            ${Icons.users()}
+                            <span>Manage Members</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2">
+                            ${Icons.piggyBank()}
+                            <span>Track Savings</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2">
+                            ${Icons.heartHandshake()}
+                            <span>Care Fund</span>
+                        </div>
                     </div>
                 </div>
-                <div class="mb-6 flex justify-center">
-                    <div class="inline-flex items-center gap-2 rounded-full bg-brand/10 px-3 py-1 text-sm text-brand font-medium">
-                        ${Icons.shield()}
-                        Family Manager Access
+                <div class="absolute bottom-8 text-white/40 text-sm">© 2026 Odelade Family</div>
+            </div>
+            
+            <!-- Right Panel - Form -->
+            <div class="flex w-full lg:w-1/2 items-center justify-center p-6 pb-24">
+                <div class="w-full max-w-md">
+                    <!-- Mobile Logo -->
+                    <div class="lg:hidden mb-8 flex justify-center">
+                        <div class="text-brand flex items-center gap-2">
+                            ${Icons.shield()}
+                            <span class="text-xl font-bold">Family Manager</span>
+                        </div>
                     </div>
-                </div>
-                <div class="mb-6 flex justify-end">
-                    <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary active:bg-surface-soft select-none">
-                        ${Icons.globe()}
-                    </button>
-                </div>
-                
-                <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8">
-                    <h2 class="mb-6 text-lg sm:text-xl font-semibold flex items-center gap-2">
-                        ${Icons.shield()}
-                        ${t('auth.signInAsManager')}
-                    </h2>
                     
-                    <div id="admin-error" class="mb-4 hidden rounded-xl border border-error/20 bg-error/10 p-4 text-sm text-error flex items-center gap-2">
-                        ${Icons.alertCircle()}
-                        <span></span>
+                    <div class="mb-6 flex justify-center">
+                        <div class="inline-flex items-center gap-2 rounded-full bg-brand/10 px-4 py-2 text-sm text-brand font-bold">
+                            ${Icons.shield()}
+                            Family Manager Access
+                        </div>
                     </div>
                     
-                    <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-                        <div class="space-y-1.5">
-                            <label class="block text-sm font-medium text-text-primary">${t('auth.managerPassword')}</label>
-                            <div class="relative">
-                                <input type="password" id="admin-password"
-                                    class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 pr-12 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                                <button type="button" onclick="togglePassword('admin-password')" class="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center select-none">
-                                    ${Icons.eye()}
-                                </button>
-                            </div>
+                    <div class="mb-6 flex justify-end">
+                        <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary active:bg-surface-soft select-none">
+                            ${Icons.globe()}
+                        </button>
+                    </div>
+                    
+                    <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-6 shadow-lg sm:p-8">
+                        <h2 class="mb-6 text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
+                            ${Icons.logIn()}
+                            ${t('auth.signInAsManager')}
+                        </h2>
+                        
+                        <div id="admin-error" class="mb-4 hidden rounded-xl border border-error/20 bg-error/10 p-4 text-sm text-error flex items-center gap-2">
+                            ${Icons.alertCircle()}
+                            <span></span>
                         </div>
                         
-                        <button type="submit"
-                            class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-medium text-white transition-colors active:bg-brand-hover select-none">
-                            ${Icons.shield()}
-                            ${t('auth.signInAsManager')}
-                        </button>
-                    </form>
-                    
-                    <p class="mt-6 text-center">
-                        <a href="/login" class="flex items-center justify-center gap-2 font-medium text-brand select-none">
-                            ${Icons.arrowLeft()}
-                            ${t('auth.backToFamily')}
-                        </a>
-                    </p>
+                        <form onsubmit="handleAdminLogin(event)" class="space-y-5">
+                            <div class="space-y-2">
+                                <label class="block text-sm font-bold text-text-primary flex items-center gap-1.5">
+                                    ${Icons.lock()}
+                                    ${t('auth.managerPassword')}
+                                </label>
+                                <div class="relative">
+                                    <input type="password" id="admin-password"
+                                        class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 pr-12 text-base sm:text-sm transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                    <button type="button" onclick="togglePassword('admin-password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-95 transition-all select-none">
+                                        ${Icons.eye()}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <button type="submit"
+                                class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-semibold text-white transition-all hover:bg-brand-hover hover:shadow-lg hover:shadow-brand/25 active:scale-[0.98] select-none">
+                                ${Icons.shield()}
+                                ${t('auth.signInAsManager')}
+                            </button>
+                        </form>
+                        
+                        <p class="mt-6 text-center">
+                            <a href="/login" class="flex items-center justify-center gap-2 font-semibold text-brand hover:underline select-none">
+                                ${Icons.arrowLeft()}
+                                ${t('auth.backToFamily')}
+                            </a>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
