@@ -1111,7 +1111,7 @@ const pages = {
         }
         
         return `
-            <div class="w-full min-w-0 px-1">
+            <div class="w-full min-w-0 px-4">
                 <div class="mb-6 flex items-center justify-between">
                     <div>
                         <h1 class="text-xl font-bold text-text-primary">${t('nav.notifications')}</h1>
