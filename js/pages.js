@@ -379,54 +379,60 @@ const pages = {
                 <!-- Greeting -->
                 <div class="mb-6">
                     <div class="flex items-center gap-3 mb-1">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-white font-bold text-lg">
+                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-hover text-white font-bold text-xl shadow-lg shadow-brand/30">
                             ${name.charAt(0)}
                         </div>
                         <div>
-                            <p class="text-xs text-text-muted">${getGreeting()}</p>
-                            <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary">${name}</h1>
+                            <p class="text-xs font-medium text-text-muted">${getGreeting()}</p>
+                            <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-text-primary">${name}</h1>
                         </div>
                     </div>
                 </div>
                 
                 <!-- KPI Grid -->
                 <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                    ${KpiCard({ label: 'Family Savings', amount: d.pool1Balance, subtext: 'Up to date', highlight: true })}
+                    ${KpiCard({ label: 'Family Savings', amount: d.pool1Balance, subtext: 'Up to date ✓', highlight: true })}
                     ${KpiCard({ label: 'Care Fund', amount: d.pool2Balance, subtext: '5 contributing' })}
                     ${KpiCard({ label: 'Last Payment', amount: 15000, subtext: 'Folake - 2 days ago' })}
                     ${KpiCard({ label: 'Alerts', amount: d.pendingRequests, subtext: 'Requests waiting', isCurrency: false })}
                 </div>
                 
-                <!-- Progress -->
-                <div class="w-full min-w-0 mb-6 rounded-2xl border border-border bg-surface p-4">
+                <!-- Progress - Premium -->
+                <div class="w-full min-w-0 mb-6 rounded-2xl border border-border bg-surface p-5 shadow-lg shadow-brand/5">
                     <div class="mb-3 flex items-center justify-between">
-                        <span class="text-xs font-medium text-text-muted uppercase tracking-wider">This month's savings</span>
-                        <span class="text-xs font-semibold text-brand">75%</span>
+                        <span class="text-xs font-bold uppercase tracking-wider text-text-muted">This month's savings</span>
+                        <span class="text-xs font-bold text-brand bg-brand-light px-2 py-1 rounded-lg">75%</span>
                     </div>
-                    <div class="h-2.5 overflow-hidden rounded-full bg-surface-raised">
-                        <div class="h-full w-3/4 rounded-full bg-brand transition-all"></div>
+                    <div class="h-3 overflow-hidden rounded-full bg-surface-raised">
+                        <div class="h-full w-3/4 rounded-full bg-gradient-to-r from-brand to-brand-hover transition-all shadow-sm"></div>
                     </div>
-                    <p class="mt-2 text-xs text-text-muted">₦37,500 of ₦50,000 saved</p>
+                    <p class="mt-3 text-sm text-text-secondary flex items-center gap-2">
+                        ${Icons.piggyBank()} <span class="font-bold text-text-primary">₦37,500</span> of ₦50,000 saved
+                    </p>
                 </div>
                 
-                <!-- Recent Payments -->
+                <!-- Recent Payments - Premium -->
                 <div class="w-full min-w-0">
                     <div class="mb-3 flex items-center justify-between">
-                        <p class="text-xs font-medium text-text-muted uppercase tracking-wider">Recent Activity</p>
-                        <a href="/member/history" class="text-xs font-medium text-brand select-none">View all</a>
+                        <p class="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-2">
+                            ${Icons.activity()} Recent Activity
+                        </p>
+                        <a href="/member/history" class="text-xs font-semibold text-brand hover:underline select-none">View all</a>
                     </div>
                     <div class="w-full min-w-0 space-y-2">
                         ${d.recentPayments.map(p => `
-                            <div class="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3.5">
-                                <div class="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 ${p.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
+                            <div class="flex items-center gap-4 rounded-2xl border border-border bg-surface p-4 hover:shadow-md hover:border-brand/20 transition-all cursor-pointer">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-xl flex-shrink-0 ${p.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
                                     ${p.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-text-primary truncate">${p.memberName}</p>
-                                    <p class="text-xs text-text-muted">${formatDate(p.date)}</p>
+                                    <p class="text-sm font-bold text-text-primary truncate">${p.memberName}</p>
+                                    <p class="text-xs text-text-muted flex items-center gap-1">
+                                        ${Icons.calendar()} ${formatDate(p.date)}
+                                    </p>
                                 </div>
                                 <div class="text-right flex-shrink-0">
-                                    <p class="text-sm font-semibold whitespace-nowrap ${p.type === 'credit' ? 'text-success' : 'text-error'}">
+                                    <p class="text-base font-bold whitespace-nowrap ${p.type === 'credit' ? 'text-success' : 'text-error'}">
                                         ${p.type === 'credit' ? '+' : '-'}${formatCurrency(p.amount)}
                                     </p>
                                 </div>
@@ -437,7 +443,7 @@ const pages = {
                 
                 <!-- CTA -->
                 <div class="w-full min-w-0 mt-6">
-                    <a href="/member/care-fund" class="flex items-center justify-center gap-2.5 rounded-2xl bg-brand p-4 font-medium text-white shadow-sm active:bg-brand-hover select-none">
+                    <a href="/member/care-fund" class="flex items-center justify-center gap-2.5 rounded-2xl bg-brand p-4 font-semibold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/40 hover:-translate-y-0.5 transition-all select-none">
                         ${Icons.heartHandshake()}
                         <span>Request Family Help</span>
                     </a>
@@ -594,24 +600,6 @@ const pages = {
                                     </div>
                                     <div class="text-right flex-shrink-0">
                                         <p class="font-bold text-text-primary">${formatCurrency(r.amount)}</p>
-                                        ${StatusBadge({ status: r.status })}
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : EmptyState({ icon: Icons.heartHandshake(), message: t('careFund.noRequests') })
-                })}
-            </div>
-        `;
-    },
-                                        ${occasionIcons[r.occasion]()}
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-medium truncate">${t('occasions.' + r.occasion)}</p>
-                                        <p class="text-xs text-text-muted">${formatDate(r.createdAt)}</p>
-                                    </div>
-                                    <div class="text-right flex-shrink-0">
-                                        <p class="text-sm font-semibold whitespace-nowrap">${formatCurrency(r.amount)}</p>
                                         ${StatusBadge({ status: r.status })}
                                     </div>
                                 </div>
