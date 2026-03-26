@@ -13,6 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://unpkg.com">
     
+    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     
@@ -136,14 +137,31 @@
     
     <script>
         // Single initialization point
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize store first
-            store.init();
-            // Then start router
-            router.init();
-            // Render language options
-            renderLangOptions();
-        });
+        function initApp() {
+            if (typeof store === 'undefined' || typeof router === 'undefined') {
+                setTimeout(initApp, 50);
+                return;
+            }
+            try {
+                store.init();
+                router.init();
+                renderLangOptions();
+            } catch(e) {
+                console.error('Init error:', e);
+                var overlay = document.getElementById('error-overlay');
+                if (overlay) {
+                    overlay.style.display = 'block';
+                    document.getElementById('error-message').textContent = e.message;
+                    document.getElementById('error-stack').textContent = e.stack || 'No stack';
+                }
+            }
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
         
         // Render language options
         function renderLangOptions() {
