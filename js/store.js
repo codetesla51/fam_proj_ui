@@ -231,6 +231,14 @@ const store = {
         }
     },
     
+    markRead(id) {
+        const notif = this.data.notifications.find(n => n.id == id);
+        if (notif) {
+            notif.read = true;
+            localStorage.setItem('notifications', JSON.stringify(this.data.notifications));
+        }
+    },
+    
     markAllRead() {
         this.data.notifications.forEach(n => n.read = true);
         localStorage.setItem('notifications', JSON.stringify(this.data.notifications));

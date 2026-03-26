@@ -72,6 +72,7 @@ const Icons = {
     zap: () => icon('zap'),
     creditCard: () => icon('credit-card'),
     building: () => icon('building'),
+    buildingBank: () => icon('building-bank'),
     handshake: () => icon('handshake'),
     umbrella: () => icon('umbrella'),
     heartHandshake: () => icon('heart-handshake'),

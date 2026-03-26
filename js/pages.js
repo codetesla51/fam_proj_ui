@@ -3,66 +3,119 @@
 const pages = {
     // Auth Pages
     login: () => `
-        <div class="flex min-h-screen flex-col items-center justify-center p-4 pb-24">
-            <div class="w-full max-w-md mx-auto">
-                <div class="mb-6 flex justify-center">
-                    <div class="text-brand flex items-center gap-2">
-                        ${Icons.building()}
-                        <span class="text-lg font-bold">${t('app.name')}</span>
+        <div class="flex min-h-screen">
+            <!-- Left Panel - Brand (hidden on mobile) -->
+            <div class="hidden lg:flex lg:w-1/2 bg-brand relative flex-col items-center justify-center p-12 overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-brand via-brand-hover to-brand-800"></div>
+                <div class="absolute inset-0 opacity-10">
+                    <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <defs>
+                            <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" stroke-width="0.5"/>
+                            </pattern>
+                        </defs>
+                        <rect width="100" height="100" fill="url(#grid)"/>
+                    </svg>
+                </div>
+                <div class="relative z-10 text-center">
+                    <div class="mb-8 flex justify-center">
+                        <div class="flex h-24 w-24 items-center justify-center rounded-3xl bg-white/20 backdrop-blur-sm text-white">
+                            ${Icons.buildingBank()}
+                        </div>
+                    </div>
+                    <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">${t('app.name')}</h1>
+                    <p class="text-xl text-white/80 max-w-md">Your family savings, all in one place</p>
+                    <div class="mt-12 flex items-center justify-center gap-8 text-white/60 text-sm">
+                        <div class="flex flex-col items-center gap-2">
+                            ${Icons.piggyBank()}
+                            <span>Track Savings</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2">
+                            ${Icons.heartHandshake()}
+                            <span>Care Fund</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2">
+                            ${Icons.users()}
+                            <span>Family First</span>
+                        </div>
                     </div>
                 </div>
-                <div class="mb-6 flex justify-end">
-                    <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary active:bg-surface-soft select-none">
-                        ${Icons.globe()}
-                        <span>${getCurrentLangName()}</span>
-                    </button>
-                </div>
-                
-                <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8">
-                    <h2 class="mb-6 text-lg sm:text-xl font-semibold flex items-center gap-2">
-                        ${Icons.user()}
-                        ${t('auth.signIn')}
-                    </h2>
-                    
-                    <div id="login-error" class="mb-4 hidden rounded-xl border border-error/20 bg-error/10 p-4 text-sm text-error flex items-center gap-2">
-                        ${Icons.alertCircle()}
-                        <span></span>
+                <div class="absolute bottom-8 text-white/40 text-sm">© 2026 Odelade Family</div>
+            </div>
+            
+            <!-- Right Panel - Form -->
+            <div class="flex w-full lg:w-1/2 items-center justify-center p-6 pb-24">
+                <div class="w-full max-w-md">
+                    <!-- Mobile Logo -->
+                    <div class="lg:hidden mb-8 flex justify-center">
+                        <div class="text-brand flex items-center gap-2">
+                            ${Icons.building()}
+                            <span class="text-xl font-bold">${t('app.name')}</span>
+                        </div>
                     </div>
                     
-                    <form onsubmit="handleLogin(event)" class="space-y-4">
-                        <div class="space-y-1.5">
-                            <label class="block text-sm font-medium text-text-primary flex items-center gap-1">
-                                ${Icons.user()}
-                                ${t('auth.yourName')}
-                            </label>
-                            <input type="text" id="login-name" placeholder="${t('auth.yourNamePlaceholder')}"
-                                class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                        </div>
-                        
-                        <div class="space-y-1.5">
-                            <label class="block text-sm font-medium text-text-primary flex items-center gap-1">
-                                ${Icons.lock()}
-                                ${t('auth.password')}
-                            </label>
-                            <div class="relative">
-                                <input type="password" id="login-password" 
-                                    class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 pr-12 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                                <button type="button" onclick="togglePassword('login-password')" class="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center select-none">
-                                    ${Icons.eye()}
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <button type="submit" id="login-btn"
-                            class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-medium text-white transition-colors active:bg-brand-hover select-none">
+                    <div class="mb-6 flex justify-end">
+                        <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary active:bg-surface-soft select-none">
+                            ${Icons.globe()}
+                            <span>${getCurrentLangName()}</span>
+                            ${Icons.chevronDown()}
+                        </button>
+                    </div>
+                    
+                    <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-6 shadow-lg sm:p-8">
+                        <div class="mb-2 text-xs font-medium uppercase tracking-wider text-brand">Welcome back</div>
+                        <h2 class="mb-6 text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
                             ${Icons.logIn()}
                             ${t('auth.signIn')}
-                        </button>
-                    </form>
+                        </h2>
+                        
+                        <div id="login-error" class="mb-4 hidden rounded-xl border border-error/20 bg-error/10 p-4 text-sm text-error flex items-center gap-2">
+                            ${Icons.alertCircle()}
+                            <span></span>
+                        </div>
+                        
+                        <form onsubmit="handleLogin(event)" class="space-y-5">
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-text-primary flex items-center gap-1.5">
+                                    ${Icons.user()}
+                                    ${t('auth.yourName')}
+                                </label>
+                                <input type="text" id="login-name" placeholder="${t('auth.yourNamePlaceholder')}"
+                                    class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-text-primary flex items-center gap-1.5">
+                                    ${Icons.lock()}
+                                    ${t('auth.password')}
+                                </label>
+                                <div class="relative">
+                                    <input type="password" id="login-password" 
+                                        class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 pr-12 text-base sm:text-sm transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                    <button type="button" onclick="togglePassword('login-password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-95 transition-all select-none">
+                                        ${Icons.eye()}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" id="login-btn"
+                                class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-semibold text-white transition-all hover:bg-brand-hover hover:shadow-lg hover:shadow-brand/25 active:scale-[0.98] select-none">
+                                ${Icons.logIn()}
+                                ${t('auth.signIn')}
+                            </button>
+                        </form>
+                        
+                        <p class="mt-6 text-center text-sm text-text-muted">
+                            ${t('auth.noAccount')}
+                            <a href="/register" class="font-semibold text-brand hover:underline">${t('auth.createAccount')}</a>
+                        </p>
+                    </div>
                     
-                    <p class="mt-6 text-center text-sm text-text-muted">
-                        ${t('auth.noAccount')}
-                        <a href="/register" class="font-semibold text-brand">${t('auth.createAccount')}</a>
+                    <p class="mt-8 text-center lg:hidden">
+                        <a href="/admin/login" class="text-sm text-text-muted hover:text-brand flex items-center justify-center gap-1 select-none">
+                            ${Icons.shield()}
+                            Family Manager?
+                        </a>
                     </p>
                 </div>
             </div>
@@ -70,91 +123,138 @@ const pages = {
     `,
     
     register: () => `
-        <div class="flex min-h-screen flex-col items-center justify-center p-4 pb-24">
-            <div class="w-full max-w-md mx-auto">
-                <div class="mb-6 flex justify-center">
-                    <div class="text-brand flex items-center gap-2">
-                        ${Icons.building()}
-                        <span class="text-lg font-bold">${t('app.name')}</span>
+        <div class="flex min-h-screen">
+            <!-- Left Panel - Brand -->
+            <div class="hidden lg:flex lg:w-1/2 bg-brand relative flex-col items-center justify-center p-12 overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-brand via-brand-hover to-brand-800"></div>
+                <div class="absolute inset-0 opacity-10">
+                    <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <defs>
+                            <pattern id="grid2" width="10" height="10" patternUnits="userSpaceOnUse">
+                                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" stroke-width="0.5"/>
+                            </pattern>
+                        </defs>
+                        <rect width="100" height="100" fill="url(#grid2)"/>
+                    </svg>
+                </div>
+                <div class="relative z-10 text-center">
+                    <div class="mb-8 flex justify-center">
+                        <div class="flex h-24 w-24 items-center justify-center rounded-3xl bg-white/20 backdrop-blur-sm text-white">
+                            ${Icons.users()}
+                        </div>
+                    </div>
+                    <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">Join the Family</h1>
+                    <p class="text-xl text-white/80 max-w-md">Start your savings journey with your loved ones</p>
+                    <div class="mt-12 flex items-center justify-center gap-6 text-white/70 text-sm">
+                        <div class="flex flex-col items-center gap-1">
+                            <span class="text-2xl font-bold">₦100K+</span>
+                            <span>Total Saved</span>
+                        </div>
+                        <div class="h-8 w-px bg-white/20"></div>
+                        <div class="flex flex-col items-center gap-1">
+                            <span class="text-2xl font-bold">6</span>
+                            <span>Members</span>
+                        </div>
+                        <div class="h-8 w-px bg-white/20"></div>
+                        <div class="flex flex-col items-center gap-1">
+                            <span class="text-2xl font-bold">2</span>
+                            <span>Funds</span>
+                        </div>
                     </div>
                 </div>
-                <div class="mb-6 flex justify-end">
-                    <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary active:bg-surface-soft select-none">
-                        ${Icons.globe()}
-                    </button>
-                </div>
-                
-                <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8 overflow-hidden">
-                    <h2 class="mb-6 text-lg sm:text-xl font-semibold flex items-center gap-2">
-                        ${Icons.userPlus()}
-                        ${t('auth.createAccount')}
-                    </h2>
+                <div class="absolute bottom-8 text-white/40 text-sm">© 2026 Odelade Family</div>
+            </div>
+            
+            <!-- Right Panel - Form -->
+            <div class="flex w-full lg:w-1/2 items-center justify-center p-6 pb-24">
+                <div class="w-full max-w-md">
+                    <!-- Mobile Logo -->
+                    <div class="lg:hidden mb-8 flex justify-center">
+                        <div class="text-brand flex items-center gap-2">
+                            ${Icons.building()}
+                            <span class="text-xl font-bold">${t('app.name')}</span>
+                        </div>
+                    </div>
                     
-                    <form onsubmit="handleRegister(event)" class="space-y-5">
-                        <div class="space-y-1.5">
-                            <label class="block text-sm font-medium text-text-primary">${t('auth.fullName')} <span class="text-error">*</span></label>
-                            <input type="text" id="reg-name" placeholder="e.g. Taiwo Odelade"
-                                class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                            <p class="text-xs text-text-muted">${t('auth.fullNameHelper')}</p>
-                        </div>
-                        
-                        <div class="space-y-1.5">
-                            <label class="block text-sm font-medium text-text-primary">${t('auth.createPassword')} <span class="text-error">*</span></label>
-                            <div class="relative">
-                                <input type="password" id="reg-password"
-                                    class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 pr-12 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                                <button type="button" onclick="togglePassword('reg-password')" class="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center select-none">
-                                    ${Icons.eye()}
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="space-y-1.5">
-                            <label class="block text-sm font-medium text-text-primary">${t('auth.confirmPassword')} <span class="text-error">*</span></label>
-                            <div class="relative">
-                                <input type="password" id="reg-confirm"
-                                    class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 pr-12 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                                <button type="button" onclick="togglePassword('reg-confirm')" class="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center select-none">
-                                    ${Icons.eye()}
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-text-primary">${t('register.howOften')} <span class="text-error">*</span></label>
-                            <div class="flex rounded-xl border border-border p-1">
-                                <button type="button" onclick="setSchedule('weekly')" id="btn-weekly"
-                                    class="flex-1 rounded-lg py-3 text-sm font-medium transition-colors text-text-secondary select-none">
-                                    ${t('register.everyWeek')}
-                                </button>
-                                <button type="button" onclick="setSchedule('monthly')" id="btn-monthly"
-                                    class="flex-1 rounded-lg py-3 text-sm font-medium bg-brand text-white select-none">
-                                    ${t('register.everyMonth')}
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="space-y-1.5">
-                            <label class="block text-sm font-medium text-text-primary">${t('register.howMuch')} <span class="text-error">*</span></label>
-                            <div class="relative">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">₦</span>
-                                <input type="number" id="reg-amount" placeholder="0"
-                                    class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                            </div>
-                            <p class="text-xs text-text-muted">${t('register.howMuchHelper')}</p>
-                        </div>
-                        
-                        <button type="submit" id="reg-btn"
-                            class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-medium text-white transition-colors active:bg-brand-hover select-none">
+                    <div class="mb-6 flex justify-end">
+                        <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary active:bg-surface-soft select-none">
+                            ${Icons.globe()}
+                        </button>
+                    </div>
+                    
+                    <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-6 shadow-lg sm:p-8 overflow-hidden">
+                        <div class="mb-2 text-xs font-medium uppercase tracking-wider text-brand">New Member</div>
+                        <h2 class="mb-6 text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
                             ${Icons.userPlus()}
                             ${t('auth.createAccount')}
-                        </button>
-                    </form>
-                    
-                    <p class="mt-6 text-center text-sm text-text-muted">
-                        ${t('auth.alreadyHave')}
-                        <a href="/login" class="font-semibold text-brand">${t('auth.signIn')}</a>
-                    </p>
+                        </h2>
+                        
+                        <form onsubmit="handleRegister(event)" class="space-y-5">
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-text-primary">${t('auth.fullName')} <span class="text-error">*</span></label>
+                                <input type="text" id="reg-name" placeholder="e.g. Taiwo Odelade"
+                                    class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                <p class="text-xs text-text-muted">${t('auth.fullNameHelper')}</p>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-text-primary">${t('auth.createPassword')} <span class="text-error">*</span></label>
+                                <div class="relative">
+                                    <input type="password" id="reg-password"
+                                        class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 pr-12 text-base sm:text-sm transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                    <button type="button" onclick="togglePassword('reg-password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-95 transition-all select-none">
+                                        ${Icons.eye()}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-text-primary">${t('auth.confirmPassword')} <span class="text-error">*</span></label>
+                                <div class="relative">
+                                    <input type="password" id="reg-confirm"
+                                        class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 pr-12 text-base sm:text-sm transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                    <button type="button" onclick="togglePassword('reg-confirm')" class="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-95 transition-all select-none">
+                                        ${Icons.eye()}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-text-primary">${t('register.howOften')} <span class="text-error">*</span></label>
+                                <div class="flex rounded-xl border border-border p-1">
+                                    <button type="button" onclick="setSchedule('weekly')" id="btn-weekly"
+                                        class="flex-1 rounded-lg py-3 text-sm font-medium transition-all text-text-secondary select-none">
+                                        ${t('register.everyWeek')}
+                                    </button>
+                                    <button type="button" onclick="setSchedule('monthly')" id="btn-monthly"
+                                        class="flex-1 rounded-lg py-3 text-sm font-medium bg-brand text-white select-none">
+                                        ${t('register.everyMonth')}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-text-primary">${t('register.howMuch')} <span class="text-error">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">₦</span>
+                                    <input type="number" id="reg-amount" placeholder="0"
+                                        class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                </div>
+                                <p class="text-xs text-text-muted">${t('register.howMuchHelper')}</p>
+                            </div>
+                            
+                            <button type="submit" id="reg-btn"
+                                class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-semibold text-white transition-all hover:bg-brand-hover hover:shadow-lg hover:shadow-brand/25 active:scale-[0.98] select-none">
+                                ${Icons.userPlus()}
+                                ${t('auth.createAccount')}
+                            </button>
+                        </form>
+                        
+                        <p class="mt-6 text-center text-sm text-text-muted">
+                            ${t('auth.alreadyHave')}
+                            <a href="/login" class="font-semibold text-brand hover:underline">${t('auth.signIn')}</a>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -932,31 +1032,35 @@ const pages = {
             const cfg = typeConfig[n.type] || typeConfig.info;
             if (isUnread) {
                 return `
-                    <div class="w-full min-w-0 group">
-                        <div class="flex items-start gap-3 rounded-2xl bg-white p-4 shadow-sm border border-transparent hover:border-border transition-all">
+                    <div class="group w-full min-w-0">
+                        <div class="flex items-start gap-3 rounded-2xl bg-white p-4 shadow-sm border-l-4 border-brand hover:shadow-md transition-all cursor-pointer">
                             <div class="mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${cfg.bg} ${cfg.text}">
                                 ${cfg.icon()}
                             </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-[13px] font-semibold text-text-primary leading-snug">${n.message}</p>
-                                <p class="mt-1.5 text-[11px] text-text-muted">${timeAgo(n.time)}</p>
+                            <div class="flex-1 min-w-0 pr-2">
+                                <p class="text-[13px] font-semibold text-text-primary leading-snug line-clamp-2">${n.message}</p>
+                                <p class="mt-1.5 text-[11px] text-text-muted flex items-center gap-1">
+                                    ${Icons.clock()} ${timeAgo(n.time)}
+                                </p>
                             </div>
-                            <div class="flex-shrink-0 mt-1">
-                                <span class="flex h-2.5 w-2.5 rounded-full bg-brand ring-2 ring-brand/20"></span>
-                            </div>
+                            <button onclick="handleMarkRead('${n.id}')" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand opacity-0 group-hover:opacity-100 transition-opacity">
+                                ${Icons.check()}
+                            </button>
                         </div>
                     </div>
                 `;
             }
             return `
                 <div class="w-full min-w-0">
-                    <div class="flex items-start gap-3 rounded-2xl bg-surface-soft p-4">
+                    <div class="flex items-start gap-3 rounded-2xl bg-surface-soft/50 p-4 border border-transparent hover:border-border/50 transition-all cursor-pointer">
                         <div class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg ${cfg.bg} ${cfg.text}">
                             ${cfg.icon()}
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-[13px] text-text-secondary leading-snug">${n.message}</p>
-                            <p class="mt-1 text-[11px] text-text-muted">${timeAgo(n.time)}</p>
+                            <p class="text-[13px] text-text-secondary leading-snug line-clamp-2">${n.message}</p>
+                            <p class="mt-1 text-[11px] text-text-muted flex items-center gap-1">
+                                ${Icons.clock()} ${timeAgo(n.time)}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -965,20 +1069,25 @@ const pages = {
         
         return `
             <div class="w-full min-w-0">
-                <!-- Page Header -->
+                <!-- Page Header - Premium Style -->
                 <div class="mb-5">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand text-white">
-                                ${Icons.bell()}
+                            <div class="relative">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-white shadow-lg shadow-brand/30">
+                                    ${Icons.bell()}
+                                </div>
+                                ${unread > 0 ? `
+                                    <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-error text-[10px] font-bold text-white">${unread > 9 ? '9+' : unread}</span>
+                                ` : ''}
                             </div>
                             <div>
-                                <h1 class="text-lg font-bold text-text-primary">${t('nav.notifications')}</h1>
-                                <p class="text-xs text-text-muted">${unread > 0 ? unread + ' new' : 'Everything read'}</p>
+                                <h1 class="text-xl font-bold text-text-primary">${t('nav.notifications')}</h1>
+                                <p class="text-xs text-text-muted">${unread > 0 ? unread + ' new alert' + (unread > 1 ? 's' : '') : 'All caught up'}</p>
                             </div>
                         </div>
                         ${unread > 0 ? `
-                            <button onclick="handleMarkAllRead()" class="flex h-9 items-center gap-1.5 rounded-lg bg-brand-light px-3 text-xs font-semibold text-brand select-none active:bg-brand/20">
+                            <button onclick="handleMarkAllRead()" class="flex h-10 items-center gap-2 rounded-xl bg-brand-light px-4 text-sm font-semibold text-brand hover:bg-brand/20 active:bg-brand/30 transition-colors select-none">
                                 ${Icons.check()}
                                 <span>Mark all read</span>
                             </button>
@@ -987,21 +1096,42 @@ const pages = {
                 </div>
                 
                 ${notifications.length === 0 ? `
-                    <!-- Empty State -->
+                    <!-- Empty State - Premium -->
                     <div class="flex flex-col items-center justify-center py-16 px-6">
-                        <div class="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-surface-soft">
-                            <span class="text-4xl text-text-muted">${Icons.bell()}</span>
+                        <div class="relative mb-6">
+                            <div class="flex h-24 w-24 items-center justify-center rounded-full bg-surface-soft">
+                                <span class="text-4xl text-text-muted">${Icons.bell()}</span>
+                            </div>
+                            <div class="absolute inset-0 rounded-full bg-brand/5 animate-pulse"></div>
                         </div>
-                        <h3 class="text-base font-semibold text-text-primary mb-1">All quiet here</h3>
-                        <p class="text-sm text-text-muted text-center max-w-xs">You don't have any notifications yet. We'll let you know when something happens.</p>
+                        <h3 class="text-lg font-semibold text-text-primary mb-2">You're all caught up!</h3>
+                        <p class="text-sm text-text-muted text-center max-w-xs">When you have new alerts, they'll show up here. Stay tuned!</p>
+                        <div class="mt-6 flex items-center gap-2 text-xs text-text-muted">
+                            ${Icons.checkCircle()}
+                            <span>No new notifications</span>
+                        </div>
                     </div>
                 ` : `
+                    <!-- Filter Tabs -->
+                    <div class="mb-4 flex gap-1 rounded-xl border border-border bg-surface p-1">
+                        <button class="flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2.5 text-sm font-semibold bg-brand text-white select-none">
+                            ${Icons.bell()} All
+                        </button>
+                        <button class="flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2.5 text-sm font-medium text-text-secondary hover:bg-surface-soft select-none">
+                            ${Icons.megaphone()} Announcements
+                        </button>
+                        <button class="flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2.5 text-sm font-medium text-text-secondary hover:bg-surface-soft select-none">
+                            ${Icons.alertCircle()} Alerts
+                        </button>
+                    </div>
+                    
                     <!-- Unread Notifications -->
                     ${unread > 0 ? `
                         <div class="mb-6">
-                            <div class="mb-2 flex items-center gap-2">
-                                <span class="h-2 w-2 rounded-full bg-brand"></span>
-                                <p class="text-xs font-semibold uppercase tracking-wider text-brand">New</p>
+                            <div class="mb-3 flex items-center gap-2">
+                                <span class="h-2 w-2 rounded-full bg-brand animate-pulse"></span>
+                                <p class="text-xs font-bold uppercase tracking-wider text-brand">New</p>
+                                <span class="ml-auto rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-semibold text-brand">${unread}</span>
                             </div>
                             <div class="space-y-2">
                                 ${notifications.filter(n => !n.read).map(n => renderNotif(n, true)).join('')}
@@ -1012,7 +1142,11 @@ const pages = {
                     <!-- Read Notifications -->
                     ${read.length > 0 ? `
                         <div>
-                            <p class="mb-2 text-xs font-medium uppercase tracking-wider text-text-muted pl-1">Earlier</p>
+                            <p class="mb-3 text-xs font-bold uppercase tracking-wider text-text-muted pl-1 flex items-center gap-2">
+                                ${Icons.archive()}
+                                Earlier
+                                <span class="ml-auto rounded-full bg-surface-soft px-2 py-0.5 text-[11px] font-medium text-text-muted">${read.length}</span>
+                            </p>
                             <div class="space-y-2">
                                 ${read.map(n => renderNotif(n, false)).join('')}
                             </div>
@@ -1127,6 +1261,11 @@ function handleAdminLogin(e) {
 
 function handleMarkAllRead() {
     store.markAllRead();
+    router.refresh();
+}
+
+function handleMarkRead(id) {
+    store.markRead(id);
     router.refresh();
 }
 
