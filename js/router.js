@@ -9,6 +9,7 @@ const router = {
         '/member/savings': 'memberSavings',
         '/member/care-fund': 'memberCareFund',
         '/member/history': 'memberHistory',
+        '/member/transfer': 'memberTransfer',
         '/member/settings': 'memberSettings',
         '/admin/dashboard': 'adminDashboard',
         '/admin/transactions': 'adminTransactions',

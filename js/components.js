@@ -23,6 +23,7 @@ const Icons = {
     check: () => icon('check'),
     arrowUpRight: () => icon('arrow-up-right'),
     arrowDownRight: () => icon('arrow-down-right'),
+    arrowRightLeft: () => icon('arrow-right-left'),
     download: () => icon('download'),
     externalLink: () => icon('external-link'),
     alertCircle: () => icon('alert-circle'),
@@ -176,7 +177,8 @@ function Nav({ currentPath }) {
         { href: '/member/dashboard', label: t('nav.home'), icon: Icons.home },
         { href: '/member/savings', label: t('nav.mySavings'), icon: Icons.wallet },
         { href: '/member/care-fund', label: t('nav.careFund'), icon: Icons.heartHandshake },
-        { href: '/member/history', label: t('nav.myHistory'), icon: Icons.history }
+        { href: '/member/history', label: t('nav.myHistory'), icon: Icons.history },
+        { href: '/member/transfer', label: 'Transfer', icon: Icons.arrowRightLeft }
     ];
     
     const adminNav = [

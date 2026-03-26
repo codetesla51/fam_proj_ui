@@ -422,34 +422,11 @@ const pages = {
                     </p>
                 </div>
                 
-                <!-- Underfunded Members -->
-                ${d.underfunded_members && d.underfunded_members.length > 0 ? `
-                <div class="w-full min-w-0 mb-6 rounded-2xl border border-error/20 bg-error/5 p-4">
-                    <div class="mb-3 flex items-center gap-2">
-                        ${Icons.alertTriangle()}
-                        <p class="text-sm font-semibold text-error">Members Behind on Savings</p>
-                    </div>
-                    <div class="w-full min-w-0 space-y-2">
-                        ${d.underfunded_members.map(m => `
-                            <div class="flex items-center justify-between rounded-xl bg-surface p-3">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-error/10 text-sm font-bold text-error">
-                                        ${m.name?.charAt(0) || '?'}
-                                    </div>
-                                    <span class="text-sm font-medium">${m.name}</span>
-                                </div>
-                                <span class="text-sm font-semibold text-error">${formatCurrency(m.committed_amount - m.current_sum)} behind</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                ` : ''}
-                
-                <!-- CTA -->
+                <!-- Transfer CTA -->
                 <div class="w-full min-w-0">
-                    <a href="/member/care-fund" class="flex items-center justify-center gap-2.5 rounded-2xl bg-brand p-4 font-semibold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/40 hover:-translate-y-0.5 transition-all select-none">
-                        ${Icons.heartHandshake()}
-                        <span>Request Family Help</span>
+                    <a href="/member/transfer" class="flex items-center justify-center gap-2.5 rounded-2xl bg-brand p-4 font-semibold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/40 hover:-translate-y-0.5 transition-all select-none">
+                        ${Icons.arrowRightLeft()}
+                        <span>Transfer Funds</span>
                     </a>
                 </div>
             </div>
@@ -504,6 +481,67 @@ const pages = {
                     </div>
                 ` : EmptyState({ icon: Icons.wallet(), message: t('member.noPayments') })
             })}
+            </div>
+        `;
+    },
+    
+    memberTransfer: async () => {
+        const dashboard = await store.loadDashboard();
+        const d = dashboard || {};
+        return `
+            <div class="w-full min-w-0 mb-6">
+                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
+                    ${Icons.arrowRightLeft()}
+                    Transfer Funds
+                </h1>
+                <p class="text-xs sm:text-sm text-text-muted">Move money from Care Fund to Family Savings</p>
+            </div>
+            
+            <!-- Balances -->
+            <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-3">
+                <div class="rounded-2xl border border-border bg-surface p-4">
+                    <p class="text-xs font-bold uppercase tracking-wider text-text-muted mb-1">${t('member.careFund')}</p>
+                    <p class="text-2xl font-bold text-brand">${formatCurrency(d.my_pool2_contributions || 0)}</p>
+                    <p class="text-xs text-text-muted mt-1">Available to transfer</p>
+                </div>
+                <div class="rounded-2xl border border-border bg-surface p-4">
+                    <p class="text-xs font-bold uppercase tracking-wider text-text-muted mb-1">${t('member.familySavings')}</p>
+                    <p class="text-2xl font-bold text-text-primary">${formatCurrency(d.my_contributions || 0)}</p>
+                    <p class="text-xs text-text-muted mt-1">Current balance</p>
+                </div>
+            </div>
+            
+            <!-- Transfer Form -->
+            <div class="w-full min-w-0">
+                ${Card({
+                    title: 'Transfer from Care Fund to Savings',
+                    children: `
+                        <form onsubmit="handleTransferSubmit(event)" class="space-y-5">
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-text-primary">How much to transfer? <span class="text-error">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
+                                    <input type="number" id="transfer-amount" placeholder="0" max="${d.my_pool2_contributions || 0}"
+                                        class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface py-3 pl-12 pr-4 text-lg font-semibold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                </div>
+                                <p class="text-xs text-text-muted">Maximum: ${formatCurrency(d.my_pool2_contributions || 0)}</p>
+                            </div>
+                            
+                            <button type="submit" id="transfer-btn" class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-bold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/40 hover:-translate-y-0.5 transition-all select-none">
+                                ${Icons.arrowRightLeft()} Transfer Now
+                            </button>
+                        </form>
+                        
+                        <div class="mt-6 rounded-xl bg-surface-soft p-4">
+                            <p class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">How it works</p>
+                            <ul class="space-y-2 text-sm text-text-secondary">
+                                <li class="flex items-start gap-2">${Icons.checkCircle()} Money moves from your Care Fund to your Family Savings</li>
+                                <li class="flex items-start gap-2">${Icons.checkCircle()} This is one-way only - you cannot transfer back</li>
+                                <li class="flex items-start gap-2">${Icons.checkCircle()} Transfer is instant and cannot be undone</li>
+                            </ul>
+                        </div>
+                    `
+                })}
             </div>
         `;
     },
@@ -1393,6 +1431,32 @@ async function handlePoolTransfer() {
         router.refresh();
     } catch (err) {
         showToast(err.message || t('common.error'), 'error');
+    }
+}
+
+// Member - Transfer Form Submit
+async function handleTransferSubmit(e) {
+    e.preventDefault();
+    const amount = document.getElementById('transfer-amount')?.value;
+    const btn = document.getElementById('transfer-btn');
+    
+    if (!amount || parseInt(amount) <= 0) {
+        showToast(t('validation.required'), 'error');
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.innerHTML = '<div class="loader !w-5 !h-5 !border-2"></div> ' + t('common.loading');
+    
+    try {
+        await store.transferPool(parseInt(amount));
+        showToast(t('common.success'), 'success');
+        router.refresh();
+    } catch (err) {
+        showToast(err.message || t('common.error'), 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = Icons.arrowRightLeft() + ' Transfer Now';
     }
 }
 
