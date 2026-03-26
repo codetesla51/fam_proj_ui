@@ -249,10 +249,10 @@ function Nav({ currentPath }) {
                         </a>
                     </div>
                     <div class="flex items-center gap-1">
-                        <a href="/notifications" class="relative flex h-11 w-11 items-center justify-center rounded-xl hover:bg-surface-soft transition-colors select-none">
+                        <button onclick="openNotifModal()" class="relative flex h-11 w-11 items-center justify-center rounded-xl hover:bg-surface-soft transition-colors select-none">
                             ${Icons.bell()}
                             <span id="notif-badge" class="${unread > 0 ? '' : 'hidden'} absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-error text-[10px] font-bold text-white ring-2 ring-white">${unread > 9 ? '9+' : unread}</span>
-                        </a>
+                        </button>
                         <button onclick="openLangModal()" class="flex h-10 items-center gap-1.5 rounded-xl px-2.5 text-text-secondary active:bg-surface-soft sm:px-3 select-none">
                             ${Icons.globe()}
                             <span class="hidden sm:inline text-xs font-medium">${getCurrentLangName()}</span>

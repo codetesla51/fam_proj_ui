@@ -134,6 +134,19 @@
         </div>
     </div>
     
+    <!-- Notifications Popup -->
+    <div id="notif-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/50" onclick="closeNotifModal()"></div>
+        <div class="absolute bottom-0 left-0 right-0 max-h-[80vh] overflow-y-auto rounded-t-3xl bg-surface p-5">
+            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
+            <div class="mb-4 flex items-center justify-between">
+                <h3 class="font-bold text-lg">Notifications</h3>
+                <button onclick="closeNotifModal()" class="text-sm text-brand font-semibold">Close</button>
+            </div>
+            <div id="notif-content"></div>
+        </div>
+    </div>
+    
     <script src="/js/i18n.js"></script>
     <script src="/js/api.js"></script>
     <script src="/js/store.js"></script>
@@ -185,6 +198,73 @@
                     '<span class="flex items-center gap-3"><span class="font-medium">' + lang.name + '</span></span>' +
                     '<span class="check hidden text-brand">✓</span></button>';
             }).join('');
+        }
+        
+        // Notifications Modal
+        function openNotifModal() {
+            var modal = document.getElementById('notif-modal');
+            if (modal) {
+                renderNotifContent();
+                modal.classList.remove('hidden');
+            }
+        }
+        
+        function closeNotifModal() {
+            var modal = document.getElementById('notif-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+        
+        async function renderNotifContent() {
+            var container = document.getElementById('notif-content');
+            if (!container) return;
+            
+            try {
+                var notifications = await store.loadNotifications();
+                var unread = notifications.filter(function(n) { return !n.read; });
+                var read = notifications.filter(function(n) { return n.read; });
+                
+                if (notifications.length === 0) {
+                    container.innerHTML = '<div class="py-12 text-center text-sm text-text-muted">No notifications yet</div>';
+                    return;
+                }
+                
+                var html = '';
+                
+                if (unread.length > 0) {
+                    html += '<p class="mb-2 text-[11px] font-bold uppercase tracking-wider text-brand">New</p>';
+                    html += '<div class="space-y-2 mb-4">';
+                    unread.forEach(function(n) {
+                        html += '<div class="flex items-start gap-3 p-3 rounded-xl bg-brand-light/50 border border-brand/20">';
+                        html += '<div class="flex-shrink-0 mt-0.5"><div class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand text-white"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg></div></div>';
+                        html += '<div class="flex-1 min-w-0"><p class="text-sm font-semibold text-text-primary">' + n.message + '</p><p class="mt-1 text-[11px] text-text-muted">' + timeAgo(n.created_at) + '</p></div>';
+                        html += '<button onclick="handleNotifRead(\'' + n.id + '\')" class="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-brand text-white text-xs select-none">✓</button>';
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                }
+                
+                if (read.length > 0) {
+                    html += '<p class="mb-2 text-[11px] font-bold uppercase tracking-wider text-text-muted">Earlier</p>';
+                    html += '<div class="space-y-2">';
+                    read.forEach(function(n) {
+                        html += '<div class="flex items-start gap-3 p-3 rounded-xl bg-surface-soft">';
+                        html += '<div class="flex-shrink-0 mt-0.5"><div class="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-raised text-text-muted"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg></div></div>';
+                        html += '<div class="flex-1 min-w-0"><p class="text-sm text-text-secondary">' + n.message + '</p><p class="mt-1 text-[11px] text-text-muted">' + timeAgo(n.created_at) + '</p></div>';
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                }
+                
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = '<div class="py-12 text-center text-sm text-text-muted">Could not load notifications</div>';
+            }
+        }
+        
+        async function handleNotifRead(id) {
+            await store.markRead(id);
+            renderNotifContent();
+            store.updateNotifBadge();
         }
         
         // PWA - Service Worker Registration
