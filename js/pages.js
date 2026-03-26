@@ -4,119 +4,122 @@ const pages = {
     // Auth Pages
     login: () => `
         <div class="flex min-h-screen">
-            <!-- Left Panel - Brand (hidden on mobile) -->
-            <div class="hidden lg:flex lg:w-1/2 bg-brand relative flex-col items-center justify-center p-12 overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-br from-brand via-brand-hover to-brand-800"></div>
-                <div class="absolute inset-0 opacity-10">
-                    <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <!-- Left Panel - Premium Brand -->
+            <div class="hidden lg:flex lg:w-[55%] bg-brand relative flex-col items-center justify-center p-12 overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-brand via-brand-hover to-brand-900"></div>
+                <div class="absolute inset-0 opacity-[0.07]">
+                    <svg class="w-full h-full" viewBox="0 0 400 400" preserveAspectRatio="none">
                         <defs>
-                            <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-                                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" stroke-width="0.5"/>
+                            <pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse">
+                                <circle cx="10" cy="10" r="2" fill="white"/>
                             </pattern>
                         </defs>
-                        <rect width="100" height="100" fill="url(#grid)"/>
+                        <rect width="400" height="400" fill="url(#dots)"/>
                     </svg>
                 </div>
-                <div class="relative z-10 text-center">
-                    <div class="mb-8 flex justify-center">
-                        <div class="flex h-24 w-24 items-center justify-center rounded-3xl bg-white/20 backdrop-blur-sm text-white">
-                            ${Icons.buildingBank()}
+                <div class="relative z-10 text-center max-w-lg">
+                    <h1 class="text-5xl lg:text-6xl font-extrabold text-white mb-5 tracking-tight">${t('app.name')}</h1>
+                    <p class="text-xl text-white/70 leading-relaxed">Your family savings, all in one place. Simple, secure, together.</p>
+                    <div class="mt-14 grid grid-cols-3 gap-8">
+                        <div class="flex flex-col items-center gap-3">
+                            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
+                                ${Icons.piggyBank()}
+                            </div>
+                            <span class="text-sm font-medium text-white/80">Track Savings</span>
                         </div>
-                    </div>
-                    <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">${t('app.name')}</h1>
-                    <p class="text-xl text-white/80 max-w-md">Your family savings, all in one place</p>
-                    <div class="mt-12 flex items-center justify-center gap-8 text-white/60 text-sm">
-                        <div class="flex flex-col items-center gap-2">
-                            ${Icons.piggyBank()}
-                            <span>Track Savings</span>
+                        <div class="flex flex-col items-center gap-3">
+                            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
+                                ${Icons.heartHandshake()}
+                            </div>
+                            <span class="text-sm font-medium text-white/80">Care Fund</span>
                         </div>
-                        <div class="flex flex-col items-center gap-2">
-                            ${Icons.heartHandshake()}
-                            <span>Care Fund</span>
-                        </div>
-                        <div class="flex flex-col items-center gap-2">
-                            ${Icons.users()}
-                            <span>Family First</span>
+                        <div class="flex flex-col items-center gap-3">
+                            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
+                                ${Icons.shield()}
+                            </div>
+                            <span class="text-sm font-medium text-white/80">Family First</span>
                         </div>
                     </div>
                 </div>
-                <div class="absolute bottom-8 text-white/40 text-sm">© 2026 Odelade Family</div>
+                <div class="absolute bottom-10 text-white/30 text-xs tracking-wider uppercase">Trusted by the Odelade family</div>
             </div>
             
             <!-- Right Panel - Form -->
-            <div class="flex w-full lg:w-1/2 items-center justify-center p-6 pb-24">
-                <div class="w-full max-w-md">
-                    <!-- Mobile Logo -->
-                    <div class="lg:hidden mb-8 flex justify-center">
-                        <div class="text-brand flex items-center gap-2">
-                            ${Icons.building()}
-                            <span class="text-xl font-bold">${t('app.name')}</span>
+            <div class="flex w-full lg:w-[45%] flex-col">
+                <!-- Language Switcher - Top Right -->
+                <div class="flex justify-end p-6">
+                    <button onclick="openLangModal()" class="flex h-11 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary hover:bg-surface-soft active:scale-95 transition-all select-none">
+                        ${Icons.globe()}
+                        <span>${getCurrentLangName()}</span>
+                        ${Icons.chevronDown()}
+                    </button>
+                </div>
+                
+                <!-- Form Area -->
+                <div class="flex flex-1 items-center justify-center px-6 pb-20">
+                    <div class="w-full max-w-md">
+                        <!-- Mobile Brand -->
+                        <div class="lg:hidden mb-10 text-center">
+                            <h1 class="text-3xl font-extrabold text-brand tracking-tight">${t('app.name')}</h1>
+                            <p class="mt-2 text-sm text-text-muted">Your family savings, all in one place</p>
                         </div>
-                    </div>
-                    
-                    <div class="mb-6 flex justify-end">
-                        <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary active:bg-surface-soft select-none">
-                            ${Icons.globe()}
-                            <span>${getCurrentLangName()}</span>
-                            ${Icons.chevronDown()}
-                        </button>
-                    </div>
-                    
-                    <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-6 shadow-lg sm:p-8">
-                        <div class="mb-2 text-xs font-medium uppercase tracking-wider text-brand">Welcome back</div>
-                        <h2 class="mb-6 text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
-                            ${Icons.logIn()}
-                            ${t('auth.signIn')}
-                        </h2>
                         
-                        <div id="login-error" class="mb-4 hidden rounded-xl border border-error/20 bg-error/10 p-4 text-sm text-error flex items-center gap-2">
+                        <!-- Welcome Text -->
+                        <div class="mb-8">
+                            <h2 class="text-2xl sm:text-3xl font-bold text-text-primary">Welcome back</h2>
+                            <p class="mt-2 text-sm text-text-muted">Sign in to see your family savings</p>
+                        </div>
+                        
+                        <div id="login-error" class="mb-5 hidden rounded-xl border border-error/20 bg-error/5 p-4 text-sm text-error flex items-center gap-2">
                             ${Icons.alertCircle()}
                             <span></span>
                         </div>
                         
                         <form onsubmit="handleLogin(event)" class="space-y-5">
                             <div class="space-y-2">
-                                <label class="block text-sm font-semibold text-text-primary flex items-center gap-1.5">
-                                    ${Icons.user()}
-                                    ${t('auth.yourName')}
-                                </label>
+                                <label class="block text-sm font-semibold text-text-primary">${t('auth.yourName')}</label>
                                 <input type="text" id="login-name" placeholder="${t('auth.yourNamePlaceholder')}"
-                                    class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                    class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                             </div>
                             
                             <div class="space-y-2">
-                                <label class="block text-sm font-semibold text-text-primary flex items-center gap-1.5">
-                                    ${Icons.lock()}
-                                    ${t('auth.password')}
-                                </label>
+                                <label class="block text-sm font-semibold text-text-primary">${t('auth.password')}</label>
                                 <div class="relative">
                                     <input type="password" id="login-password" 
-                                        class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 pr-12 text-base sm:text-sm transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                                    <button type="button" onclick="togglePassword('login-password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-95 transition-all select-none">
+                                        class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                    <button type="button" onclick="togglePassword('login-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
                                         ${Icons.eye()}
                                     </button>
                                 </div>
                             </div>
                             
                             <button type="submit" id="login-btn"
-                                class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-semibold text-white transition-all hover:bg-brand-hover hover:shadow-lg hover:shadow-brand/25 active:scale-[0.98] select-none">
+                                class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-brand text-base font-bold text-white shadow-lg shadow-brand/25 transition-all hover:bg-brand-hover hover:shadow-xl hover:shadow-brand/35 active:scale-[0.98] select-none">
                                 ${Icons.logIn()}
                                 ${t('auth.signIn')}
                             </button>
                         </form>
                         
-                        <p class="mt-6 text-center text-sm text-text-muted">
-                            ${t('auth.noAccount')}
-                            <a href="/register" class="font-semibold text-brand hover:underline">${t('auth.createAccount')}</a>
-                        </p>
-                    </div>
-                    
-                    <p class="mt-8 text-center lg:hidden">
-                        <a href="/admin/login" class="text-sm text-text-muted hover:text-brand flex items-center justify-center gap-1 select-none">
-                            ${Icons.shield()}
-                            ${t('common.familyManager')}?
+                        <!-- Divider -->
+                        <div class="my-8 flex items-center gap-4">
+                            <div class="flex-1 h-px bg-border"></div>
+                            <span class="text-xs text-text-muted uppercase tracking-wider">New here?</span>
+                            <div class="flex-1 h-px bg-border"></div>
+                        </div>
+                        
+                        <!-- Join CTA -->
+                        <a href="/register" class="flex h-14 w-full items-center justify-center gap-3 rounded-xl border-2 border-brand/30 bg-brand-light/30 text-base font-bold text-brand transition-all hover:bg-brand-light hover:border-brand active:scale-[0.98] select-none">
+                            ${Icons.userPlus()}
+                            Join the Odelade Family
                         </a>
-                    </p>
+                    </div>
+                </div>
+                
+                <!-- Manager Link - Mobile -->
+                <div class="pb-8 text-center lg:hidden">
+                    <a href="/admin/login" class="text-sm text-text-muted hover:text-brand transition-colors select-none">
+                        Family Manager? <span class="font-semibold">Sign in here</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -124,85 +127,87 @@ const pages = {
     
     register: () => `
         <div class="flex min-h-screen">
-            <!-- Left Panel - Brand -->
-            <div class="hidden lg:flex lg:w-1/2 bg-brand relative flex-col items-center justify-center p-12 overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-br from-brand via-brand-hover to-brand-800"></div>
-                <div class="absolute inset-0 opacity-10">
-                    <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <!-- Left Panel - Premium Brand -->
+            <div class="hidden lg:flex lg:w-[55%] bg-brand relative flex-col items-center justify-center p-12 overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-brand via-brand-hover to-brand-900"></div>
+                <div class="absolute inset-0 opacity-[0.07]">
+                    <svg class="w-full h-full" viewBox="0 0 400 400" preserveAspectRatio="none">
                         <defs>
-                            <pattern id="grid2" width="10" height="10" patternUnits="userSpaceOnUse">
-                                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" stroke-width="0.5"/>
+                            <pattern id="dots2" width="20" height="20" patternUnits="userSpaceOnUse">
+                                <circle cx="10" cy="10" r="2" fill="white"/>
                             </pattern>
                         </defs>
-                        <rect width="100" height="100" fill="url(#grid2)"/>
+                        <rect width="400" height="400" fill="url(#dots2)"/>
                     </svg>
                 </div>
-                <div class="relative z-10 text-center">
-                    <div class="mb-8 flex justify-center">
-                        <div class="flex h-24 w-24 items-center justify-center rounded-3xl bg-white/20 backdrop-blur-sm text-white">
-                            ${Icons.users()}
+                <div class="relative z-10 text-center max-w-lg">
+                    <h1 class="text-5xl lg:text-6xl font-extrabold text-white mb-5 tracking-tight">Join the Family</h1>
+                    <p class="text-xl text-white/70 leading-relaxed">Start saving together. Build wealth as a family. Be there for each other.</p>
+                    <div class="mt-14 grid grid-cols-3 gap-8">
+                        <div class="flex flex-col items-center gap-3">
+                            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
+                                ${Icons.wallet()}
+                            </div>
+                            <span class="text-2xl font-bold text-white">₦500K+</span>
+                            <span class="text-xs text-white/60">Saved Together</span>
                         </div>
-                    </div>
-                    <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">Join the Family</h1>
-                    <p class="text-xl text-white/80 max-w-md">Start your savings journey with your loved ones</p>
-                    <div class="mt-12 flex items-center justify-center gap-6 text-white/70 text-sm">
-                        <div class="flex flex-col items-center gap-1">
-                            <span class="text-2xl font-bold">₦100K+</span>
-                            <span>Total Saved</span>
+                        <div class="flex flex-col items-center gap-3">
+                            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
+                                ${Icons.users()}
+                            </div>
+                            <span class="text-2xl font-bold text-white">6</span>
+                            <span class="text-xs text-white/60">Family Members</span>
                         </div>
-                        <div class="h-8 w-px bg-white/20"></div>
-                        <div class="flex flex-col items-center gap-1">
-                            <span class="text-2xl font-bold">6</span>
-                            <span>Members</span>
-                        </div>
-                        <div class="h-8 w-px bg-white/20"></div>
-                        <div class="flex flex-col items-center gap-1">
-                            <span class="text-2xl font-bold">2</span>
-                            <span>Funds</span>
+                        <div class="flex flex-col items-center gap-3">
+                            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
+                                ${Icons.heartHandshake()}
+                            </div>
+                            <span class="text-2xl font-bold text-white">2</span>
+                            <span class="text-xs text-white/60">Savings Funds</span>
                         </div>
                     </div>
                 </div>
-                <div class="absolute bottom-8 text-white/40 text-sm">© 2026 Odelade Family</div>
+                <div class="absolute bottom-10 text-white/30 text-xs tracking-wider uppercase">Trusted by the Odelade family</div>
             </div>
             
             <!-- Right Panel - Form -->
-            <div class="flex w-full lg:w-1/2 items-center justify-center p-6 pb-24">
-                <div class="w-full max-w-md">
-                    <!-- Mobile Logo -->
-                    <div class="lg:hidden mb-8 flex justify-center">
-                        <div class="text-brand flex items-center gap-2">
-                            ${Icons.building()}
-                            <span class="text-xl font-bold">${t('app.name')}</span>
+            <div class="flex w-full lg:w-[45%] flex-col">
+                <!-- Language Switcher - Top Right -->
+                <div class="flex justify-end p-6">
+                    <button onclick="openLangModal()" class="flex h-11 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary hover:bg-surface-soft active:scale-95 transition-all select-none">
+                        ${Icons.globe()}
+                    </button>
+                </div>
+                
+                <!-- Form Area -->
+                <div class="flex flex-1 items-start justify-center overflow-y-auto px-6 pb-20">
+                    <div class="w-full max-w-md py-4">
+                        <!-- Mobile Brand -->
+                        <div class="lg:hidden mb-8 text-center">
+                            <h1 class="text-3xl font-extrabold text-brand tracking-tight">${t('app.name')}</h1>
+                            <p class="mt-2 text-sm text-text-muted">Join and start saving with your family</p>
                         </div>
-                    </div>
-                    
-                    <div class="mb-6 flex justify-end">
-                        <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary active:bg-surface-soft select-none">
-                            ${Icons.globe()}
-                        </button>
-                    </div>
-                    
-                    <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-6 shadow-lg sm:p-8 overflow-hidden">
-                        <div class="mb-2 text-xs font-medium uppercase tracking-wider text-brand">${t('common.newMember')}</div>
-                        <h2 class="mb-6 text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
-                            ${Icons.userPlus()}
-                            ${t('auth.createAccount')}
-                        </h2>
+                        
+                        <!-- Welcome Text -->
+                        <div class="mb-8">
+                            <h2 class="text-2xl sm:text-3xl font-bold text-text-primary">Create your account</h2>
+                            <p class="mt-2 text-sm text-text-muted">Tell us a bit about yourself so we can get you started</p>
+                        </div>
                         
                         <form onsubmit="handleRegister(event)" class="space-y-5">
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.fullName')} <span class="text-error">*</span></label>
                                 <input type="text" id="reg-name" placeholder="e.g. Taiwo Odelade"
-                                    class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                                <p class="text-xs text-text-muted">${t('auth.fullNameHelper')}</p>
+                                    class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                <p class="text-xs text-text-muted pl-1">${t('auth.fullNameHelper')}</p>
                             </div>
                             
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.createPassword')} <span class="text-error">*</span></label>
                                 <div class="relative">
                                     <input type="password" id="reg-password"
-                                        class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 pr-12 text-base sm:text-sm transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                                    <button type="button" onclick="togglePassword('reg-password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-95 transition-all select-none">
+                                        class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                    <button type="button" onclick="togglePassword('reg-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
                                         ${Icons.eye()}
                                     </button>
                                 </div>
@@ -212,8 +217,8 @@ const pages = {
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.confirmPassword')} <span class="text-error">*</span></label>
                                 <div class="relative">
                                     <input type="password" id="reg-confirm"
-                                        class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 pr-12 text-base sm:text-sm transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                                    <button type="button" onclick="togglePassword('reg-confirm')" class="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-95 transition-all select-none">
+                                        class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                    <button type="button" onclick="togglePassword('reg-confirm')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
                                         ${Icons.eye()}
                                     </button>
                                 </div>
@@ -221,14 +226,14 @@ const pages = {
                             
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-text-primary">${t('register.howOften')} <span class="text-error">*</span></label>
-                                <div class="flex rounded-xl border border-border p-1">
+                                <div class="flex rounded-xl border-2 border-border p-1.5 gap-2">
                                     <button type="button" onclick="setSchedule('weekly')" id="btn-weekly"
-                                        class="flex-1 rounded-lg py-3 text-sm font-medium transition-all text-text-secondary select-none">
-                                        ${t('register.everyWeek')}
+                                        class="flex-1 rounded-lg py-3.5 text-sm font-semibold transition-all text-text-secondary hover:bg-surface-soft select-none">
+                                        ${Icons.calendar()} ${t('register.everyWeek')}
                                     </button>
                                     <button type="button" onclick="setSchedule('monthly')" id="btn-monthly"
-                                        class="flex-1 rounded-lg py-3 text-sm font-medium bg-brand text-white select-none">
-                                        ${t('register.everyMonth')}
+                                        class="flex-1 rounded-lg py-3.5 text-sm font-semibold bg-brand text-white shadow-md select-none">
+                                        ${Icons.calendar()} ${t('register.everyMonth')}
                                     </button>
                                 </div>
                             </div>
@@ -236,24 +241,32 @@ const pages = {
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-text-primary">${t('register.howMuch')} <span class="text-error">*</span></label>
                                 <div class="relative">
-                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">₦</span>
-                                    <input type="number" id="reg-amount" placeholder="0"
-                                        class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                    <span class="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
+                                    <input type="number" id="reg-amount" placeholder="50,000"
+                                        class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface py-3 pl-12 pr-4 text-lg font-semibold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                                 </div>
-                                <p class="text-xs text-text-muted">${t('register.howMuchHelper')}</p>
+                                <p class="text-xs text-text-muted pl-1">${t('register.howMuchHelper')}</p>
                             </div>
                             
                             <button type="submit" id="reg-btn"
-                                class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-semibold text-white transition-all hover:bg-brand-hover hover:shadow-lg hover:shadow-brand/25 active:scale-[0.98] select-none">
+                                class="flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-brand text-base font-bold text-white shadow-lg shadow-brand/25 transition-all hover:bg-brand-hover hover:shadow-xl hover:shadow-brand/35 active:scale-[0.98] select-none">
                                 ${Icons.userPlus()}
                                 ${t('auth.createAccount')}
                             </button>
                         </form>
                         
-                        <p class="mt-6 text-center text-sm text-text-muted">
-                            ${t('auth.alreadyHave')}
-                            <a href="/login" class="font-semibold text-brand hover:underline">${t('auth.signIn')}</a>
-                        </p>
+                        <!-- Divider -->
+                        <div class="my-8 flex items-center gap-4">
+                            <div class="flex-1 h-px bg-border"></div>
+                            <span class="text-xs text-text-muted uppercase tracking-wider">Already joined?</span>
+                            <div class="flex-1 h-px bg-border"></div>
+                        </div>
+                        
+                        <!-- Login Link -->
+                        <a href="/login" class="flex h-14 w-full items-center justify-center gap-3 rounded-xl border-2 border-brand/30 bg-brand-light/30 text-base font-bold text-brand transition-all hover:bg-brand-light hover:border-brand active:scale-[0.98] select-none">
+                            ${Icons.logIn()}
+                            Sign in to your account
+                        </a>
                     </div>
                 </div>
             </div>

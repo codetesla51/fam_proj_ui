@@ -1,1 +1,6 @@
-data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiBmaWxsPSIjMEQ5NDg4Ii8+CjxyZWN0IHg9IjI0IiB5PSIyNCIgd2lkdGg9IjE0NCIgaGVpZ2h0PSIxNDQiIHJ4PSIyNCIgZmlsbD0id2hpdGUiLz4KPHN2ZyB4PSI0OCIgeT0iNDgiIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjMEQ5NDg4Ij4KPHBhdGggZD0iTTE5IDlINyAzVjVhMiAyIDAgMDEyLTJoMTJhMiAyIDAgMDEyIDJ2NGgtMnYtMmEyIDIgMCAwMC0yLTJIN3Y0SDN6Ii8+CjxwYXRoIGQ9Ik0yMSAyMkgzVjEwSDIxVjIyWk01IDEydjhoMTZ2LThINVoiLz4KPC9zdmc+Cjwvc3ZnPgo=
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <rect width="192" height="192" fill="#0D9488" rx="32"/>
+  <rect x="24" y="24" width="144" height="144" fill="white" rx="20"/>
+  <path d="M96 48l32 48H64l32-48z" fill="#0D9488"/>
+  <rect x="72" y="96" width="48" height="48" fill="#0D9488" rx="4"/>
+</svg>
