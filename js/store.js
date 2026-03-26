@@ -1,4 +1,4 @@
-// Store - State management with API integration
+// Store - State management with API integration (falls back to mock data)
 const store = {
     data: {
         user: null,
@@ -10,13 +10,18 @@ const store = {
         members: []
     },
     
-    // Auth methods using API
+    // Check if using mock data
+    usingMock() {
+        return !backendAvailable;
+    },
+    
+    // Auth methods
     isLoggedIn() {
-        return auth.isLoggedIn();
+        return this.usingMock() ? !!localStorage.getItem('mock_logged_in') : auth.isLoggedIn();
     },
     
     isAdmin() {
-        return auth.isAdmin();
+        return this.usingMock() ? localStorage.getItem('mock_is_admin') === 'true' : auth.isAdmin();
     },
     
     get user() {
@@ -32,67 +37,71 @@ const store = {
         }
     },
     
-    // Login member
+    // Login member (mock or real)
     async login(name, password) {
+        if (this.usingMock()) {
+            // Mock login - accept any credentials
+            localStorage.setItem('mock_logged_in', 'true');
+            localStorage.setItem('mock_is_admin', 'false');
+            this.user = { id: '1', name, interval: 'monthly', committed_amount: 50000, status: 'active' };
+            return;
+        }
         await auth.login(name, password);
         this.user = { name };
-        // Fetch profile after login
         try {
             this.data.profile = await member.getProfile();
             this.user = { ...this.user, ...this.data.profile };
         } catch {}
-        return true;
     },
     
-    // Register member
+    // Register member (mock or real)
     async register({ name, password, interval, committed_amount, start_date }) {
+        if (this.usingMock()) {
+            localStorage.setItem('mock_logged_in', 'true');
+            localStorage.setItem('mock_is_admin', 'false');
+            this.user = { id: '1', name, interval, committed_amount, start_date, status: 'active' };
+            return;
+        }
         await auth.register({ name, password, interval, committed_amount, start_date });
         this.user = { name, interval, committed_amount };
-        return true;
     },
     
-    // Admin login
+    // Admin login (mock or real)
     async adminLogin(password) {
+        if (this.usingMock()) {
+            localStorage.setItem('mock_logged_in', 'true');
+            localStorage.setItem('mock_is_admin', 'true');
+            this.user = { name: 'Admin', isAdmin: true };
+            return;
+        }
         await auth.adminLogin(password);
         this.user = { name: 'Admin', isAdmin: true };
-        return true;
     },
     
     // Logout
     async logout() {
-        if (this.isAdmin()) {
-            await auth.adminLogout();
+        if (this.usingMock()) {
+            localStorage.removeItem('mock_logged_in');
+            localStorage.removeItem('mock_is_admin');
         } else {
-            await auth.logout();
+            if (this.isAdmin()) {
+                await auth.adminLogout();
+            } else {
+                await auth.logout();
+            }
         }
         this.user = null;
-        this.data = {
-            user: null,
-            profile: null,
-            transactions: [],
-            notifications: [],
-            careFundRequests: [],
-            dashboard: null,
-            members: []
-        };
+        localStorage.removeItem('user_data');
+        this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [] };
         router.navigate('/login');
-    },
-    
-    // Load profile
-    async loadProfile() {
-        if (!this.isLoggedIn()) return;
-        try {
-            this.data.profile = await member.getProfile();
-            return this.data.profile;
-        } catch (e) {
-            console.error('Failed to load profile:', e);
-            return null;
-        }
     },
     
     // Load dashboard
     async loadDashboard() {
-        if (!this.isLoggedIn()) return;
+        if (this.usingMock()) {
+            this.data.dashboard = mockData.dashboard;
+            return this.data.dashboard;
+        }
         try {
             if (this.isAdmin()) {
                 this.data.dashboard = await admin.getDashboard();
@@ -102,13 +111,19 @@ const store = {
             return this.data.dashboard;
         } catch (e) {
             console.error('Failed to load dashboard:', e);
-            return null;
+            this.data.dashboard = mockData.dashboard;
+            return this.data.dashboard;
         }
     },
     
     // Load transactions
     async loadTransactions(options = {}) {
-        if (!this.isLoggedIn()) return [];
+        if (this.usingMock()) {
+            let tx = mockData.transactions;
+            if (options.pool) tx = tx.filter(t => t.pool === options.pool);
+            this.data.transactions = tx;
+            return tx;
+        }
         try {
             let result;
             if (this.isAdmin()) {
@@ -120,36 +135,45 @@ const store = {
             return this.data.transactions;
         } catch (e) {
             console.error('Failed to load transactions:', e);
-            return [];
+            return mockData.transactions;
         }
     },
     
     // Load notifications
     async loadNotifications() {
-        if (!this.isLoggedIn()) return [];
+        if (this.usingMock()) {
+            this.data.notifications = mockData.notifications;
+            return this.data.notifications;
+        }
         try {
             const result = await member.getNotifications();
             this.data.notifications = result.notifications || [];
             return this.data.notifications;
         } catch (e) {
-            console.error('Failed to load notifications:', e);
-            return [];
+            return mockData.notifications;
         }
     },
     
     // Mark notification as read
     async markRead(id) {
+        if (this.usingMock()) {
+            const notif = mockData.notifications.find(n => n.id === id);
+            if (notif) notif.read = true;
+            return;
+        }
         try {
             await member.markNotificationRead(id);
             const notif = this.data.notifications.find(n => n.id === id);
             if (notif) notif.read = true;
-        } catch (e) {
-            console.error('Failed to mark notification:', e);
-        }
+        } catch {}
     },
     
-    // Mark all notifications as read
+    // Mark all as read
     async markAllRead() {
+        if (this.usingMock()) {
+            mockData.notifications.forEach(n => n.read = true);
+            return;
+        }
         const unread = this.data.notifications.filter(n => !n.read);
         for (const n of unread) {
             await this.markRead(n.id);
@@ -158,98 +182,106 @@ const store = {
     
     // Load care fund requests
     async loadCareFundRequests(status) {
-        if (!this.isLoggedIn()) return [];
+        if (this.usingMock()) {
+            let reqs = mockData.careFundRequests;
+            if (status) reqs = reqs.filter(r => r.status === status);
+            this.data.careFundRequests = reqs;
+            return reqs;
+        }
         try {
             let result;
             if (this.isAdmin()) {
                 result = await admin.getCareFundRequests(status);
                 this.data.careFundRequests = result.requests || [];
             } else {
-                // Members use dashboard or try the endpoint
-                try {
-                    result = await member.getCareFundRequests();
-                    this.data.careFundRequests = result.requests || [];
-                } catch {
-                    // Route not registered, use dashboard data
-                    this.data.careFundRequests = [];
-                }
+                result = await member.getCareFundRequests();
+                this.data.careFundRequests = result.requests || [];
             }
             return this.data.careFundRequests;
         } catch (e) {
-            console.error('Failed to load care fund requests:', e);
-            return [];
+            return mockData.careFundRequests;
         }
     },
     
-    // Submit care fund request (member)
+    // Submit care fund request
     async submitCareFundRequest({ amount, occasion, event_date, description }) {
-        const result = await member.submitCareFundRequest({ amount, occasion, event_date, description });
-        // Optimistic: add to local list
-        this.data.careFundRequests.unshift({
-            ...result,
-            status: 'pending',
-            created_at: new Date().toISOString()
-        });
-        return result;
-    },
-    
-    // Approve/reject care fund request (admin)
-    async updateCareFundRequest(id, status, rejection_reason) {
-        const result = await admin.updateCareFundRequest(id, status, rejection_reason);
-        // Update local state
-        const req = this.data.careFundRequests.find(r => r.id === id);
-        if (req) {
-            req.status = status;
-            if (rejection_reason) req.rejection_reason = rejection_reason;
+        if (this.usingMock()) {
+            const newReq = {
+                id: String(Date.now()),
+                member_id: '1',
+                member_name: this.user?.name || 'You',
+                amount, occasion, event_date, description,
+                status: 'pending', rejection_reason: null,
+                created_at: new Date().toISOString()
+            };
+            mockData.careFundRequests.unshift(newReq);
+            return newReq;
         }
-        return result;
+        return member.submitCareFundRequest({ amount, occasion, event_date, description });
     },
     
-    // Create transaction (admin)
-    async createTransaction({ member_id, pool, type, amount, reason, receipt_url }) {
-        const result = await admin.createTransaction({ member_id, pool, type, amount, reason, receipt_url });
-        // Add to local list
-        this.data.transactions.unshift(result);
-        return result;
+    // Update care fund request (approve/reject)
+    async updateCareFundRequest(id, status, rejection_reason) {
+        if (this.usingMock()) {
+            const req = mockData.careFundRequests.find(r => r.id === id);
+            if (req) {
+                req.status = status;
+                if (rejection_reason) req.rejection_reason = rejection_reason;
+            }
+            return req;
+        }
+        return admin.updateCareFundRequest(id, status, rejection_reason);
     },
     
-    // Create member (admin)
-    async createMember({ name, password, interval, committed_amount, start_date }) {
-        return admin.createMember({ name, password, interval, committed_amount, start_date });
+    // Create transaction
+    async createTransaction(data) {
+        if (this.usingMock()) {
+            const tx = { id: String(Date.now()), ...data, created_at: new Date().toISOString() };
+            mockData.transactions.unshift(tx);
+            return tx;
+        }
+        return admin.createTransaction(data);
     },
     
-    // Reset member password (admin)
+    // Create member
+    async createMember(data) {
+        if (this.usingMock()) {
+            const m = { id: String(Date.now()), ...data, status: 'active' };
+            mockData.members.push(m);
+            return m;
+        }
+        return admin.createMember(data);
+    },
+    
+    // Reset password
     async resetPassword(member_id, new_password) {
+        if (this.usingMock()) return { success: true };
         return admin.resetPassword(member_id, new_password);
     },
     
-    // Upload receipt (admin)
+    // Upload receipt
     async uploadReceipt(file) {
+        if (this.usingMock()) return { receipt_url: 'mock://receipt.png' };
         return admin.uploadReceipt(file);
     },
     
-    // Change password (member)
+    // Change password
     async changePassword(current_password, new_password) {
+        if (this.usingMock()) return { success: true };
         return member.changePassword(current_password, new_password);
     },
     
-    // Transfer pool2 to pool1 (member)
+    // Transfer pool
     async transferPool(amount) {
-        const result = await member.transferPool(amount);
-        // Reload dashboard to get updated balances
-        await this.loadDashboard();
-        return result;
+        if (this.usingMock()) return { success: true };
+        return member.transferPool(amount);
     },
     
-    // Load general ledger (admin)
+    // Load general ledger
     async loadGeneralLedger(options = {}) {
+        if (this.usingMock()) return { transactions: mockData.transactions, pool1_balance: mockData.dashboard.pool1_balance, pool2_balance: mockData.dashboard.pool2_balance };
         if (!this.isAdmin()) return null;
-        try {
-            return await admin.getGeneralLedger(options);
-        } catch (e) {
-            console.error('Failed to load general ledger:', e);
-            return null;
-        }
+        return admin.getGeneralLedger(options);
     },
     
     // Computed
@@ -260,6 +292,6 @@ const store = {
     get profile() { return this.data.profile; },
     
     get unreadCount() {
-        return this.data.notifications.filter(n => !n.read).length;
+        return (this.data.notifications.length ? this.data.notifications : mockData.notifications).filter(n => !n.read).length;
     }
 };

@@ -1,7 +1,62 @@
 // API Service - All backend communication
-const API_BASE = window.location.origin.includes('localhost') 
-    ? 'http://localhost:8080' 
-    : window.location.origin;
+const API_BASE = 'http://localhost:8080';
+
+// Mock data for development (when backend is not running)
+const mockData = {
+    dashboard: {
+        pool1_balance: 850000,
+        pool2_balance: 385000,
+        member_count: 6,
+        overdue_count: 1,
+        active_count: 5,
+        my_contributions: 150000,
+        my_pool2_contributions: 75000,
+        underfunded_members: [
+            { id: '6', name: 'Emeka Odelade', committed_amount: 50000, current_sum: 25000 }
+        ]
+    },
+    transactions: [
+        { id: '1', member_id: '1', pool: 'pool1', type: 'credit', amount: 50000, reason: 'Monthly contribution', receipt_url: null, created_at: '2026-03-20T10:00:00Z' },
+        { id: '2', member_id: '2', pool: 'pool1', type: 'credit', amount: 50000, reason: 'Monthly contribution', receipt_url: null, created_at: '2026-03-19T10:00:00Z' },
+        { id: '3', member_id: '1', pool: 'pool2', type: 'credit', amount: 15000, reason: 'Care fund contribution', receipt_url: null, created_at: '2026-03-18T10:00:00Z' },
+        { id: '4', member_id: '3', pool: 'pool1', type: 'credit', amount: 50000, reason: 'Monthly contribution', receipt_url: null, created_at: '2026-03-17T10:00:00Z' },
+        { id: '5', member_id: '2', pool: 'pool2', type: 'debit', amount: 100000, reason: 'Wedding support - Kehinde', receipt_url: null, created_at: '2026-03-15T10:00:00Z' },
+        { id: '6', member_id: '4', pool: 'pool1', type: 'credit', amount: 50000, reason: 'Monthly contribution', receipt_url: null, created_at: '2026-03-14T10:00:00Z' },
+        { id: '7', member_id: '5', pool: 'pool1', type: 'credit', amount: 75000, reason: 'Monthly contribution', receipt_url: null, created_at: '2026-03-12T10:00:00Z' },
+        { id: '8', member_id: '1', pool: 'pool1', type: 'credit', amount: 50000, reason: 'February contribution', receipt_url: null, created_at: '2026-02-20T10:00:00Z' }
+    ],
+    notifications: [
+        { id: '1', member_id: '1', message: 'Your payment of ₦50,000 has been recorded', read: false, created_at: '2026-03-20T10:05:00Z' },
+        { id: '2', member_id: '1', message: 'Your care fund request has been approved', read: false, created_at: '2026-03-18T14:00:00Z' },
+        { id: '3', member_id: '1', message: 'Welcome to the Odelade Family Ledger!', read: true, created_at: '2026-03-01T09:00:00Z' }
+    ],
+    careFundRequests: [
+        { id: '1', member_id: '2', member_name: 'Kehinde Odelade', amount: 100000, occasion: 'wedding', event_date: '2026-04-15', description: 'Need support for wedding preparations', status: 'approved', rejection_reason: null, created_at: '2026-03-10T10:00:00Z' },
+        { id: '2', member_id: '1', member_name: 'Taiwo Odelade', amount: 50000, occasion: 'medical', event_date: '2026-03-25', description: 'Hospital bills for my child', status: 'pending', rejection_reason: null, created_at: '2026-03-18T10:00:00Z' },
+        { id: '3', member_id: '4', member_name: 'Folake Odelade', amount: 75000, occasion: 'graduation', event_date: '2026-05-20', description: 'Graduation ceremony and celebration', status: 'pending', rejection_reason: null, created_at: '2026-03-15T10:00:00Z' },
+        { id: '4', member_id: '3', member_name: 'Adebayo Odelade', amount: 30000, occasion: 'birthday', event_date: '2026-03-01', description: '', status: 'rejected', rejection_reason: 'Request amount exceeds care fund balance', created_at: '2026-02-25T10:00:00Z' }
+    ],
+    members: [
+        { id: '1', name: 'Taiwo Odelade', interval: 'monthly', committed_amount: 50000, start_date: '2026-01-01', status: 'active' },
+        { id: '2', name: 'Kehinde Odelade', interval: 'monthly', committed_amount: 50000, start_date: '2026-01-01', status: 'active' },
+        { id: '3', name: 'Adebayo Odelade', interval: 'weekly', committed_amount: 15000, start_date: '2026-01-01', status: 'active' },
+        { id: '4', name: 'Folake Odelade', interval: 'monthly', committed_amount: 50000, start_date: '2026-02-01', status: 'active' },
+        { id: '5', name: 'Ngozi Odelade', interval: 'monthly', committed_amount: 75000, start_date: '2026-01-01', status: 'active' },
+        { id: '6', name: 'Emeka Odelade', interval: 'monthly', committed_amount: 50000, start_date: '2026-01-01', status: 'overdue' }
+    ]
+};
+
+// Check if backend is available
+let backendAvailable = false;
+async function checkBackend() {
+    try {
+        const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(1000) });
+        backendAvailable = res.ok;
+    } catch {
+        backendAvailable = false;
+    }
+}
+checkBackend();
 
 // Token management
 const tokens = {
