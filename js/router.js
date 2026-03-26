@@ -112,7 +112,9 @@ const router = {
         }
         
         // Check auth for protected routes (exclude login pages)
-        if ((path.startsWith('/member') || path.startsWith('/admin')) && path !== '/admin/login') {
+        const isProtected = (path.startsWith('/member') || path.startsWith('/admin')) && path !== '/admin/login';
+        
+        if (isProtected) {
             if (!store.isLoggedIn()) {
                 this.navigate('/login');
                 return;
@@ -121,6 +123,11 @@ const router = {
                 this.navigate('/member/dashboard');
                 return;
             }
+            // Start polling when logged in
+            store.startPolling();
+        } else {
+            // Stop polling on auth pages
+            store.stopPolling();
         }
         
         // Show loading state

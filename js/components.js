@@ -249,9 +249,9 @@ function Nav({ currentPath }) {
                         </a>
                     </div>
                     <div class="flex items-center gap-1">
-                        <a href="/notifications" class="relative flex h-10 w-10 items-center justify-center rounded-xl active:bg-surface-soft select-none">
+                        <a href="/notifications" class="relative flex h-11 w-11 items-center justify-center rounded-xl hover:bg-surface-soft transition-colors select-none">
                             ${Icons.bell()}
-                            ${unread > 0 ? `<span class="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-error text-[10px] font-bold text-white">${unread > 9 ? '9+' : unread}</span>` : ''}
+                            <span id="notif-badge" class="${unread > 0 ? '' : 'hidden'} absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-error text-[10px] font-bold text-white ring-2 ring-white">${unread > 9 ? '9+' : unread}</span>
                         </a>
                         <button onclick="openLangModal()" class="flex h-10 items-center gap-1.5 rounded-xl px-2.5 text-text-secondary active:bg-surface-soft sm:px-3 select-none">
                             ${Icons.globe()}
@@ -333,39 +333,41 @@ function Card({ title, subtitle, children }) {
 
 function KpiCard({ label, amount, subtext, highlight, isCurrency = true }) {
     return `
-        <div class="rounded-2xl border p-5 shadow-sm sm:p-6 transition-all hover:shadow-lg hover:shadow-brand/5 group ${highlight ? 'border-brand/30 bg-gradient-to-br from-brand-light to-white shadow-lg shadow-brand/10' : 'border-border bg-surface'}">
-            <div class="mb-2 text-[11px] font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
-                ${highlight ? `<span class="text-brand">${Icons.piggyBank()}</span>` : ''}
-                ${label === 'Family Savings' ? Icons.piggyBank() : ''}
-                ${label === 'Care Fund' ? Icons.heartHandshake() : ''}
-                ${label === 'Last Payment' ? Icons.clock() : ''}
-                ${label === 'Alerts' ? Icons.bell() : ''}
-                ${label === 'Pending Help Requests' ? Icons.alertCircle() : ''}
-                ${label === 'Family Members' ? Icons.users() : ''}
-                ${label}
+        <div class="group rounded-2xl border p-5 sm:p-6 transition-all hover:shadow-xl hover:shadow-brand/5 ${highlight ? 'border-brand/30 bg-gradient-to-br from-brand-light via-white to-white shadow-lg shadow-brand/15' : 'border-border bg-surface shadow-sm hover:border-brand/20'}">
+            <div class="mb-3 flex items-center gap-2">
+                ${highlight ? `<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.piggyBank()}</span>` : ''}
+                ${label === 'Family Savings' || label === 'My Savings' ? `<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.piggyBank()}</span>` : ''}
+                ${label === 'Care Fund' ? `<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.heartHandshake()}</span>` : ''}
+                ${label === 'Last Payment' ? `<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-raised text-text-secondary">${Icons.clock()}</span>` : ''}
+                ${label === 'Alerts' ? `<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-error/10 text-error">${Icons.bell()}</span>` : ''}
+                ${label === 'Members' || label === 'Family Members' ? `<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.users()}</span>` : ''}
+                ${label === 'Overdue' ? `<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-warning/10 text-warning">${Icons.alertTriangle()}</span>` : ''}
+                ${label === 'Pending Help Requests' ? `<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-warning/10 text-warning">${Icons.alertCircle()}</span>` : ''}
+                <span class="text-[11px] font-bold uppercase tracking-widest text-text-muted">${label}</span>
             </div>
             <div class="text-2xl sm:text-3xl font-extrabold text-text-primary group-hover:scale-105 transition-transform origin-left">${isCurrency ? formatCurrency(amount) : amount}</div>
-            ${subtext ? `<div class="mt-2 text-xs text-text-secondary flex items-center gap-1.5 font-medium">${subtext.includes('up to date') ? Icons.checkCircle() : ''}${subtext.includes('behind') ? Icons.alertTriangle() : ''}${subtext}</div>` : ''}
+            ${subtext ? `<div class="mt-2.5 text-xs text-text-secondary flex items-center gap-1.5 font-medium">${subtext.includes('up to date') || subtext.includes('active') ? Icons.checkCircle() : ''}${subtext.includes('behind') || subtext.includes('Overdue') ? Icons.alertTriangle() : ''}${subtext}</div>` : ''}
         </div>
     `;
 }
 
 function StatusBadge({ status }) {
     const configs = {
-        pending: { bg: 'bg-warning/10', text: 'text-warning', dot: 'bg-warning', icon: Icons.clock, label: t('careFund.pending') },
-        accepted: { bg: 'bg-success/10', text: 'text-success', dot: 'bg-success', icon: Icons.checkCircle, label: t('careFund.accepted') },
-        rejected: { bg: 'bg-error/10', text: 'text-error', dot: 'bg-error', icon: Icons.xCircle, label: t('careFund.notApproved') },
-        active: { bg: 'bg-success/10', text: 'text-success', dot: 'bg-success', icon: Icons.checkCircle, label: 'Up to date' },
-        behind: { bg: 'bg-error/10', text: 'text-error', dot: 'bg-error', icon: Icons.alertTriangle, label: 'Behind' }
+        pending: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-500', label: 'Pending' },
+        approved: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500', label: 'Approved' },
+        accepted: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500', label: 'Approved' },
+        rejected: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', dot: 'bg-red-500', label: 'Rejected' },
+        active: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500', label: 'Active' },
+        overdue: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', dot: 'bg-red-500', label: 'Overdue' }
     };
     const cfg = configs[status] || configs.pending;
-    return `<span class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold ${cfg.bg} ${cfg.text}"><span class="h-2 w-2 rounded-full ${cfg.dot} animate-pulse"></span>${cfg.label}</span>`;
+    return `<span class="inline-flex items-center gap-2 rounded-full border ${cfg.border} ${cfg.bg} px-3 py-1.5 text-xs font-bold ${cfg.text}"><span class="h-2 w-2 rounded-full ${cfg.dot}"></span>${cfg.label}</span>`;
 }
 
 function PoolTag({ pool }) {
     return pool === 'pool1' 
-        ? `<span class="inline-flex items-center gap-1.5 rounded-full bg-pool1/10 px-3 py-1.5 text-xs font-bold text-pool1">${Icons.piggyBank()} ${t('member.familySavings')}</span>`
-        : `<span class="inline-flex items-center gap-1.5 rounded-full bg-pool2/10 px-3 py-1.5 text-xs font-bold text-pool2">${Icons.heartHandshake()} ${t('member.careFund')}</span>`;
+        ? `<span class="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand/5 px-3 py-1.5 text-xs font-bold text-brand">${Icons.piggyBank()} ${t('member.familySavings')}</span>`
+        : `<span class="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-700">${Icons.heartHandshake()} ${t('member.careFund')}</span>`;
 }
 
 function EmptyState({ icon, message }) {

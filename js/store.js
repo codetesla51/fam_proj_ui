@@ -304,6 +304,58 @@ const store = {
         return admin.getGeneralLedger(options);
     },
     
+    // Polling intervals
+    _notifInterval: null,
+    _dashboardInterval: null,
+    
+    // Start polling
+    startPolling() {
+        this.stopPolling();
+        
+        if (!this.isLoggedIn()) return;
+        
+        // Poll notifications every 30 seconds
+        this._notifInterval = setInterval(async () => {
+            try {
+                await this.loadNotifications();
+                this.updateNotifBadge();
+            } catch {}
+        }, 30000);
+        
+        // Poll dashboard every 60 seconds
+        this._dashboardInterval = setInterval(async () => {
+            try {
+                await this.loadDashboard();
+            } catch {}
+        }, 60000);
+    },
+    
+    // Stop polling
+    stopPolling() {
+        if (this._notifInterval) {
+            clearInterval(this._notifInterval);
+            this._notifInterval = null;
+        }
+        if (this._dashboardInterval) {
+            clearInterval(this._dashboardInterval);
+            this._dashboardInterval = null;
+        }
+    },
+    
+    // Update notification badge in nav
+    updateNotifBadge() {
+        const badges = document.querySelectorAll('[id^="notif-badge"]');
+        const count = this.unreadCount;
+        badges.forEach(badge => {
+            if (count > 0) {
+                badge.textContent = count > 9 ? '9+' : count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        });
+    },
+    
     // Computed
     get transactions() { return this.data.transactions; },
     get notifications() { return this.data.notifications; },

@@ -1050,25 +1050,29 @@ const pages = {
     
     notifications: async () => {
         const notifications = await store.loadNotifications();
-        const unread = notifications.filter(n => !n.read).length;
+        const unread = notifications.filter(n => !n.read);
         const read = notifications.filter(n => n.read);
         
         function renderNotif(n, isUnread) {
-            const cfg = { bg: 'bg-sky-50', text: 'text-sky-600', icon: Icons.info };
             if (isUnread) {
                 return `
                     <div class="group w-full min-w-0">
-                        <div class="flex items-start gap-3 rounded-2xl bg-white p-4 shadow-sm border-l-4 border-brand hover:shadow-md transition-all cursor-pointer">
-                            <div class="mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${cfg.bg} ${cfg.text}">
-                                ${cfg.icon()}
+                        <div class="relative flex items-start gap-4 rounded-2xl bg-white p-5 shadow-lg border-l-[5px] border-brand hover:shadow-xl transition-all cursor-pointer">
+                            <div class="absolute -left-1.5 top-6 h-3 w-3 rounded-full bg-brand ring-4 ring-brand/20"></div>
+                            <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-hover text-white shadow-md">
+                                ${Icons.bell()}
                             </div>
-                            <div class="flex-1 min-w-0 pr-2">
-                                <p class="text-[13px] font-semibold text-text-primary leading-snug line-clamp-2">${n.message}</p>
-                                <p class="mt-1.5 text-[11px] text-text-muted flex items-center gap-1">
-                                    ${Icons.clock()} ${timeAgo(n.created_at)}
-                                </p>
+                            <div class="flex-1 min-w-0 pr-3">
+                                <p class="text-sm font-semibold text-text-primary leading-relaxed">${n.message}</p>
+                                <div class="mt-2 flex items-center gap-2">
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-brand animate-pulse"></span>
+                                        New
+                                    </span>
+                                    <span class="text-[11px] text-text-muted">${timeAgo(n.created_at)}</span>
+                                </div>
                             </div>
-                            <button onclick="handleMarkRead('${n.id}')" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="handleMarkRead('${n.id}')" class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-surface-soft text-text-muted hover:bg-brand hover:text-white transition-all opacity-0 group-hover:opacity-100 select-none">
                                 ${Icons.check()}
                             </button>
                         </div>
@@ -1077,14 +1081,15 @@ const pages = {
             }
             return `
                 <div class="w-full min-w-0">
-                    <div class="flex items-start gap-3 rounded-2xl bg-surface-soft/50 p-4 border border-transparent hover:border-border/50 transition-all cursor-pointer">
-                        <div class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg ${cfg.bg} ${cfg.text}">
-                            ${cfg.icon()}
+                    <div class="flex items-start gap-4 rounded-2xl bg-surface-soft/50 p-5 border border-transparent hover:border-border/50 hover:bg-surface-soft transition-all cursor-pointer">
+                        <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-surface-raised text-text-muted">
+                            ${Icons.bell()}
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-[13px] text-text-secondary leading-snug line-clamp-2">${n.message}</p>
-                            <p class="mt-1 text-[11px] text-text-muted flex items-center gap-1">
-                                ${Icons.clock()} ${timeAgo(n.created_at)}
+                            <p class="text-[13px] text-text-secondary leading-relaxed">${n.message}</p>
+                            <p class="mt-2 text-[11px] text-text-muted flex items-center gap-1.5">
+                                ${Icons.clock()}
+                                <span>${timeAgo(n.created_at)}</span>
                             </p>
                         </div>
                     </div>
@@ -1094,71 +1099,69 @@ const pages = {
         
         return `
             <div class="w-full min-w-0">
-                <!-- Page Header - Premium Style -->
-                <div class="mb-5">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="relative">
-                                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-white shadow-lg shadow-brand/30">
-                                    ${Icons.bell()}
-                                </div>
-                                ${unread > 0 ? `
-                                    <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-error text-[10px] font-bold text-white">${unread > 9 ? '9+' : unread}</span>
-                                ` : ''}
+                <!-- Hero Header -->
+                <div class="mb-6 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-hover text-white shadow-lg shadow-brand/30">
+                                ${Icons.bell()}
                             </div>
-                            <div>
-                                <h1 class="text-xl font-bold text-text-primary">${t('nav.notifications')}</h1>
-                                <p class="text-xs text-text-muted">${unread > 0 ? unread + ' new alert' + (unread > 1 ? 's' : '') : 'All caught up'}</p>
-                            </div>
+                            ${unread.length > 0 ? `
+                                <span class="absolute -top-1.5 -right-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-error text-[11px] font-bold text-white shadow-md ring-2 ring-white">${unread.length > 9 ? '9+' : unread.length}</span>
+                            ` : ''}
                         </div>
-                        ${unread > 0 ? `
-                            <button onclick="handleMarkAllRead()" class="flex h-10 items-center gap-2 rounded-xl bg-brand-light px-4 text-sm font-semibold text-brand hover:bg-brand/20 active:bg-brand/30 transition-colors select-none">
-                                ${Icons.check()}
-                                    <span>${t('common.markAllRead')}</span>
-                            </button>
-                        ` : ''}
+                        <div>
+                            <h1 class="text-xl sm:text-2xl font-bold text-text-primary">${t('nav.notifications')}</h1>
+                            <p class="text-sm text-text-muted">${unread.length > 0 ? unread.length + ' new alert' + (unread.length > 1 ? 's' : '') : t('common.allCaughtUp')}</p>
+                        </div>
                     </div>
+                    ${unread.length > 0 ? `
+                        <button onclick="handleMarkAllRead()" class="flex h-11 items-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-white shadow-md hover:shadow-lg hover:bg-brand-hover transition-all active:scale-95 select-none">
+                            ${Icons.check()}
+                            <span class="hidden sm:inline">${t('common.markAllRead')}</span>
+                        </button>
+                    ` : ''}
                 </div>
                 
                 ${notifications.length === 0 ? `
-                    <!-- Empty State - Premium -->
-                    <div class="flex flex-col items-center justify-center py-16 px-6">
+                    <!-- Empty State -->
+                    <div class="flex flex-col items-center justify-center py-20 px-6">
                         <div class="relative mb-6">
-                            <div class="flex h-24 w-24 items-center justify-center rounded-full bg-surface-soft">
-                                <span class="text-4xl text-text-muted">${Icons.bell()}</span>
+                            <div class="flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-surface-soft to-surface-raised">
+                                <span class="text-5xl">${Icons.bell()}</span>
                             </div>
-                            <div class="absolute inset-0 rounded-full bg-brand/5 animate-pulse"></div>
+                            <div class="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full bg-success text-white shadow-lg">
+                                ${Icons.check()}
+                            </div>
                         </div>
-                        <h3 class="text-lg font-semibold text-text-primary mb-2">${t('common.alertsCaughtUp')}</h3>
-                        <p class="text-sm text-text-muted text-center max-w-xs">${t('common.alertsCatchUpDesc')}</p>
-                        <div class="mt-6 flex items-center gap-2 text-xs text-text-muted">
-                            ${Icons.checkCircle()}
-                            <span>${t('common.noNewNotifications')}</span>
-                        </div>
+                        <h3 class="text-xl font-bold text-text-primary mb-2">${t('common.alertsCaughtUp')}</h3>
+                        <p class="text-sm text-text-muted text-center max-w-xs leading-relaxed">${t('common.alertsCatchUpDesc')}</p>
                     </div>
                 ` : `
-                    <!-- Unread Notifications -->
-                    ${unread > 0 ? `
-                        <div class="mb-6">
-                            <div class="mb-3 flex items-center gap-2">
-                                <span class="h-2 w-2 rounded-full bg-brand animate-pulse"></span>
-                                <p class="text-xs font-bold uppercase tracking-wider text-brand">${t('common.new')}</p>
-                                <span class="ml-auto rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-semibold text-brand">${unread}</span>
+                    <!-- Unread Section -->
+                    ${unread.length > 0 ? `
+                        <div class="mb-8">
+                            <div class="mb-4 flex items-center gap-3">
+                                <span class="h-2.5 w-2.5 rounded-full bg-brand animate-pulse"></span>
+                                <p class="text-xs font-bold uppercase tracking-widest text-brand">${t('common.new')}</p>
+                                <div class="flex-1 h-px bg-brand/20"></div>
+                                <span class="rounded-full bg-brand/10 px-3 py-1 text-[11px] font-bold text-brand">${unread.length}</span>
                             </div>
-                            <div class="space-y-2">
-                                ${notifications.filter(n => !n.read).map(n => renderNotif(n, true)).join('')}
+                            <div class="space-y-3">
+                                ${unread.map(n => renderNotif(n, true)).join('')}
                             </div>
                         </div>
                     ` : ''}
                     
-                    <!-- Read Notifications -->
+                    <!-- Read Section -->
                     ${read.length > 0 ? `
                         <div>
-                            <p class="mb-3 text-xs font-bold uppercase tracking-wider text-text-muted pl-1 flex items-center gap-2">
+                            <div class="mb-4 flex items-center gap-3">
                                 ${Icons.archive()}
-                                ${t('common.earlier')}
-                                <span class="ml-auto rounded-full bg-surface-soft px-2 py-0.5 text-[11px] font-medium text-text-muted">${read.length}</span>
-                            </p>
+                                <p class="text-xs font-bold uppercase tracking-widest text-text-muted">${t('common.earlier')}</p>
+                                <div class="flex-1 h-px bg-border"></div>
+                                <span class="rounded-full bg-surface-soft px-3 py-1 text-[11px] font-medium text-text-muted">${read.length}</span>
+                            </div>
                             <div class="space-y-2">
                                 ${read.map(n => renderNotif(n, false)).join('')}
                             </div>
