@@ -608,7 +608,7 @@ const pages = {
         <div class="w-full min-w-0">
             <!-- Header -->
             <div class="mb-6 flex items-center gap-3">
-                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-light text-brand">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-light text-brand shadow-lg shadow-brand/10">
                     ${Icons.settings()}
                 </div>
                 <div>
@@ -617,52 +617,59 @@ const pages = {
                 </div>
             </div>
             
-            <!-- Profile Card -->
-            <div class="w-full min-w-0 mb-4 rounded-2xl border border-border bg-surface p-5">
+            <!-- Profile Card - Premium -->
+            <div class="w-full min-w-0 mb-4 rounded-2xl border border-border bg-surface p-6 shadow-lg shadow-brand/5">
                 <div class="flex items-center gap-4">
-                    <div class="flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white text-xl font-bold">
+                    <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-hover text-white text-2xl font-bold shadow-lg shadow-brand/30">
                         ${(store.user?.name || 'U').charAt(0)}
                     </div>
                     <div>
-                        <p class="text-base font-semibold">${store.user?.name || 'Guest'}</p>
-                        <p class="text-sm text-text-muted">Member since March 2026</p>
+                        <p class="text-lg font-bold text-text-primary">${store.user?.name || 'Guest'}</p>
+                        <p class="text-sm text-text-muted flex items-center gap-1">
+                            ${Icons.calendar()} Member since March 2026
+                        </p>
                     </div>
                 </div>
             </div>
             
-            <!-- Savings Info -->
-            <div class="w-full min-w-0 mb-4 rounded-2xl border border-border bg-surface p-5">
-                <p class="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">Savings Plan</p>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between">
+            <!-- Savings Info - Premium -->
+            <div class="w-full min-w-0 mb-4 rounded-2xl border border-border bg-surface p-6 shadow-sm">
+                <p class="mb-4 text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-2">
+                    ${Icons.piggyBank()} Savings Plan
+                </p>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-surface-soft">
                         <span class="text-sm text-text-secondary flex items-center gap-2">${Icons.calendar()} Schedule</span>
-                        <span class="text-sm font-medium">Monthly</span>
+                        <span class="text-sm font-bold text-text-primary bg-brand-light px-3 py-1 rounded-lg">Monthly</span>
                     </div>
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-surface-soft">
                         <span class="text-sm text-text-secondary flex items-center gap-2">${Icons.dollarSign()} Amount</span>
-                        <span class="text-sm font-medium">${formatCurrency(50000)}</span>
+                        <span class="text-sm font-bold text-text-primary">${formatCurrency(50000)}</span>
                     </div>
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-surface-soft">
                         <span class="text-sm text-text-secondary flex items-center gap-2">${Icons.target()} Status</span>
-                        <span class="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-1 text-xs font-medium text-success">
-                            <span class="h-1.5 w-1.5 rounded-full bg-success"></span>
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-xs font-bold text-success">
+                            <span class="h-2 w-2 rounded-full bg-success animate-pulse"></span>
                             Up to date
                         </span>
                     </div>
                 </div>
             </div>
             
-            <!-- Language -->
-            <div class="w-full min-w-0 mb-4 rounded-2xl border border-border bg-surface p-5">
-                <p class="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">${t('settings.language')}</p>
-                <button onclick="openLangModal()" class="flex items-center gap-3 rounded-xl bg-surface-soft p-3 w-full active:bg-surface-raised select-none">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-light text-brand">
+            <!-- Language - Premium -->
+            <div class="w-full min-w-0 mb-4 rounded-2xl border border-border bg-surface p-6 shadow-sm">
+                <p class="mb-4 text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-2">
+                    ${Icons.globe()} Language
+                </p>
+                <button onclick="openLangModal()" class="flex items-center gap-4 rounded-xl bg-surface-soft p-4 w-full hover:bg-brand-light/30 active:scale-[0.99] transition-all select-none">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-light text-brand shadow-md">
                         ${Icons.globe()}
                     </div>
-                    <div class="text-left">
-                        <p class="text-sm font-medium">${getCurrentLangName()}</p>
-                        <p class="text-xs text-text-muted">Tap to change</p>
+                    <div class="text-left flex-1">
+                        <p class="text-base font-bold text-text-primary">${getCurrentLangName()}</p>
+                        <p class="text-xs text-text-muted">Tap to change language</p>
                     </div>
+                    ${Icons.chevronRight()}
                 </button>
             </div>
         </div>
@@ -956,39 +963,39 @@ const pages = {
                 </h1>
                 <p class="text-xs sm:text-sm text-text-muted">${mockData.members.length} family members</p>
             </div>
-            <button onclick="showAddMemberModal()" class="flex h-12 items-center justify-center gap-2 rounded-xl bg-brand px-4 font-medium text-white transition-colors active:bg-brand-hover select-none sm:w-auto">
-                ${Icons.plus()}
+            <button onclick="showAddMemberModal()" class="flex h-12 items-center justify-center gap-2 rounded-xl bg-brand px-4 font-semibold text-white shadow-lg shadow-brand/20 hover:shadow-xl hover:shadow-brand/30 hover:-translate-y-0.5 transition-all select-none sm:w-auto">
+                ${Icons.userPlus()}
                 <span>${t('members.addMember')}</span>
             </button>
         </div>
         
         <div class="w-full min-w-0 grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
             ${mockData.members.map(m => `
-                <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-4 shadow-sm">
-                    <div class="mb-3 flex items-center gap-3">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-brand/10 text-lg font-bold text-brand flex-shrink-0">
+                <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-5 shadow-sm hover:shadow-lg hover:shadow-brand/5 transition-all group">
+                    <div class="mb-4 flex items-center gap-3">
+                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand/10 to-brand/5 text-xl font-bold text-brand flex-shrink-0 group-hover:scale-110 transition-transform">
                             ${m.name.split(' ').map(n => n[0]).join('')}
                         </div>
-                        <div class="min-w-0">
-                            <h3 class="font-semibold truncate">${m.name}</h3>
+                        <div class="min-w-0 flex-1">
+                            <h3 class="font-bold text-text-primary truncate text-base">${m.name}</h3>
                             <p class="text-xs text-text-muted flex items-center gap-1">
                                 ${Icons.clock()} ${m.schedule === 'weekly' ? 'Weekly' : 'Monthly'} saver
                             </p>
                         </div>
                     </div>
-                    <div class="mb-3 space-y-2 rounded-xl bg-surface-soft p-3">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-text-muted flex items-center gap-1">${Icons.target()} Committed</span>
-                            <span class="font-medium">${formatCurrency(m.committedAmount)}</span>
+                    <div class="mb-4 space-y-2.5 rounded-xl bg-surface-soft p-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-text-muted flex items-center gap-1.5">${Icons.target()} Committed</span>
+                            <span class="font-bold text-text-primary">${formatCurrency(m.committedAmount)}</span>
                         </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-text-muted flex items-center gap-1">${Icons.calendar()} Last Payment</span>
-                            <span class="font-medium">${formatDate(m.lastPaymentDate, { month: 'short', year: 'numeric' })}</span>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-text-muted flex items-center gap-1.5">${Icons.calendar()} Last Payment</span>
+                            <span class="font-medium text-text-secondary">${formatDate(m.lastPaymentDate, { month: 'short', year: 'numeric' })}</span>
                         </div>
                     </div>
                     <div class="flex items-center justify-between">
                         ${StatusBadge({ status: m.status })}
-                        <button class="text-sm text-brand flex items-center gap-1 select-none">
+                        <button class="text-sm text-brand font-medium flex items-center gap-1.5 hover:bg-brand-light px-3 py-1.5 rounded-lg transition-colors select-none">
                             ${Icons.refreshCw()} ${t('members.resetPassword')}
                         </button>
                     </div>
