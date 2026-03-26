@@ -233,28 +233,28 @@ function Nav({ currentPath }) {
     
     return {
         topNav: `
-            <div class="bg-surface/95 backdrop-blur-sm border-b border-border shadow-sm">
+            <div class="bg-surface border-b border-border">
                 <div class="flex h-14 items-center justify-between px-4">
-                    <div class="flex items-center gap-4">
-                        <button onclick="toggleMobileMenu()" class="flex h-11 w-11 items-center justify-center rounded-xl select-none active:bg-surface-soft md:hidden">
+                    <div class="flex items-center gap-3">
+                        <button onclick="toggleMobileMenu()" class="flex h-10 w-10 items-center justify-center rounded-xl select-none active:bg-surface-soft md:hidden">
                             ${Icons.menu()}
                         </button>
-                        <span class="hidden sm:flex text-lg font-bold text-brand items-center gap-2">
+                        <a href="${isAdmin ? '/admin/dashboard' : '/member/dashboard'}" class="hidden sm:flex items-center gap-2.5 text-brand select-none">
                             ${Icons.building()}
-                            ${t('app.name')}
-                        </span>
-                    </div>
-                    <div class="flex items-center gap-1 sm:gap-2">
-                        <a href="/notifications" class="relative flex h-11 w-11 items-center justify-center rounded-xl active:bg-surface-soft select-none">
-                            ${Icons.bell()}
-                            ${unread > 0 ? `<span class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-error text-xs font-bold text-white">${unread > 9 ? '9+' : unread}</span>` : ''}
+                            <span class="text-base font-bold">${t('app.name')}</span>
                         </a>
-                        <button onclick="openLangModal()" class="flex h-11 items-center gap-2 rounded-xl px-3 text-text-secondary active:bg-surface-soft sm:px-4 select-none">
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <a href="/notifications" class="relative flex h-10 w-10 items-center justify-center rounded-xl active:bg-surface-soft select-none">
+                            ${Icons.bell()}
+                            ${unread > 0 ? `<span class="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-error text-[10px] font-bold text-white">${unread > 9 ? '9+' : unread}</span>` : ''}
+                        </a>
+                        <button onclick="openLangModal()" class="flex h-10 items-center gap-1.5 rounded-xl px-2.5 text-text-secondary active:bg-surface-soft sm:px-3 select-none">
                             ${Icons.globe()}
-                            <span class="hidden sm:inline text-sm font-medium">${getCurrentLangName()}</span>
+                            <span class="hidden sm:inline text-xs font-medium">${getCurrentLangName()}</span>
                         </button>
                         ${user ? `
-                            <button onclick="store.logout()" class="flex h-11 w-11 items-center justify-center rounded-xl text-text-secondary active:bg-surface-soft active:text-error select-none">
+                            <button onclick="store.logout()" class="flex h-10 w-10 items-center justify-center rounded-xl text-text-muted active:bg-surface-soft active:text-error select-none">
                                 ${Icons.logOut()}
                             </button>
                         ` : ''}
