@@ -47,16 +47,18 @@ function timeAgo(dateStr) {
 
 function getGreeting() {
     const hour = new Date().getHours();
-    if (hour < 12) return t('member.greeting.morning');
-    if (hour < 18) return t('member.greeting.afternoon');
-    return t('member.greeting.evening');
+    if (hour >= 5 && hour < 12) return t('member.greeting.morning');
+    if (hour >= 12 && hour < 17) return t('member.greeting.afternoon');
+    if (hour >= 17 && hour < 21) return t('member.greeting.evening');
+    return t('member.greeting.night');
 }
 
 function getCurrentSeason() {
     const hour = new Date().getHours();
-    if (hour < 12) return 'morning';
-    if (hour < 18) return 'afternoon';
-    return 'evening';
+    if (hour >= 5 && hour < 12) return 'morning';
+    if (hour >= 12 && hour < 17) return 'afternoon';
+    if (hour >= 17 && hour < 21) return 'evening';
+    return 'night';
 }
 
 function showToast(message, type = 'success', duration = 4000) {

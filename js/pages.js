@@ -384,6 +384,8 @@ const pages = {
     memberDashboard: async () => {
         const dashboard = await store.loadDashboard();
         const d = dashboard || {};
+        const recentTx = await store.loadTransactions();
+        const recent = (recentTx || []).slice(0, 5);
         const name = store.user?.name?.split(' ')[0] || 'Friend';
         return `
             <div class="w-full min-w-0">
@@ -402,31 +404,50 @@ const pages = {
                 
                 <!-- KPI Grid -->
                 <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                    ${KpiCard({ label: 'Family Savings', amount: d.my_contributions || 0, subtext: t('common.upToDate'), highlight: true })}
+                    ${KpiCard({ label: 'My Savings', amount: d.my_contributions || 0, subtext: t('common.upToDate'), highlight: true })}
                     ${KpiCard({ label: 'Care Fund', amount: d.my_pool2_contributions || 0, subtext: (d.member_count || 0) + ' ' + t('common.membersContributing') })}
-                    ${KpiCard({ label: 'Pool Balance', amount: d.pool1_balance || 0, subtext: 'Family total' })}
-                    ${KpiCard({ label: 'Alerts', amount: d.overdue_count || 0, subtext: 'Overdue members', isCurrency: false })}
+                    ${KpiCard({ label: 'Family Pool', amount: d.pool1_balance || 0, subtext: 'Total saved' })}
+                    ${KpiCard({ label: 'Members', amount: d.member_count || 0, subtext: (d.active_count || 0) + ' active', isCurrency: false })}
                 </div>
                 
-                <!-- Progress -->
-                <div class="w-full min-w-0 mb-6 rounded-2xl border border-border bg-surface p-5 shadow-lg shadow-brand/5">
+                <!-- Recent Activity -->
+                <div class="w-full min-w-0 mb-6">
                     <div class="mb-3 flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wider text-text-muted">${t('common.thisMonthSavings')}</span>
-                        <span class="text-xs font-bold text-brand bg-brand-light px-2 py-1 rounded-lg">${d.active_count || 0}/${d.member_count || 0}</span>
+                        <p class="text-xs font-bold uppercase tracking-wider text-text-muted">${Icons.activity()} Recent Activity</p>
+                        <a href="/member/history" class="text-xs font-semibold text-brand hover:underline select-none">View all</a>
                     </div>
-                    <div class="h-3 overflow-hidden rounded-full bg-surface-raised">
-                        <div class="h-full rounded-full bg-gradient-to-r from-brand to-brand-hover transition-all shadow-sm" style="width: ${d.member_count ? Math.round((d.active_count / d.member_count) * 100) : 0}%"></div>
-                    </div>
-                    <p class="mt-3 text-sm text-text-secondary flex items-center gap-2">
-                        ${Icons.users()} <span class="font-bold text-text-primary">${d.active_count || 0}</span> of ${d.member_count || 0} members up to date
-                    </p>
+                    ${recent.length > 0 ? `
+                        <div class="w-full min-w-0 space-y-2">
+                            ${recent.map(p => `
+                                <div class="flex items-center gap-4 rounded-2xl border border-border bg-surface p-4 hover:shadow-md hover:border-brand/20 transition-all cursor-pointer">
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-xl flex-shrink-0 ${p.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
+                                        ${p.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-text-primary truncate">${PoolTag({ pool: p.pool })}</p>
+                                        <p class="text-xs text-text-muted">${p.reason}</p>
+                                    </div>
+                                    <div class="text-right flex-shrink-0">
+                                        <p class="text-base font-bold whitespace-nowrap ${p.type === 'credit' ? 'text-success' : 'text-error'}">
+                                            ${p.type === 'credit' ? '+' : '-'}${formatCurrency(p.amount)}
+                                        </p>
+                                        <p class="text-xs text-text-muted">${formatDate(p.created_at)}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : EmptyState({ icon: Icons.wallet(), message: t('member.noPayments') })}
                 </div>
                 
-                <!-- Transfer CTA -->
-                <div class="w-full min-w-0">
+                <!-- Quick Actions -->
+                <div class="w-full min-w-0 grid grid-cols-2 gap-3">
                     <a href="/member/transfer" class="flex items-center justify-center gap-2.5 rounded-2xl bg-brand p-4 font-semibold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/40 hover:-translate-y-0.5 transition-all select-none">
                         ${Icons.arrowRightLeft()}
-                        <span>Transfer Funds</span>
+                        <span>Transfer</span>
+                    </a>
+                    <a href="/member/care-fund" class="flex items-center justify-center gap-2.5 rounded-2xl border-2 border-border bg-surface p-4 font-semibold hover:border-brand hover:text-brand hover:bg-brand-light/30 transition-all select-none">
+                        ${Icons.heartHandshake()}
+                        <span>Request Help</span>
                     </a>
                 </div>
             </div>
@@ -541,6 +562,60 @@ const pages = {
                             </ul>
                         </div>
                     `
+                })}
+            </div>
+        `;
+    },
+    
+    memberHistory: async () => {
+        const txData = await store.loadTransactions();
+        const transactions = txData || store.transactions;
+        return `
+            <div class="w-full min-w-0 mb-6">
+                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
+                    ${Icons.history()}
+                    ${t('nav.myHistory')}
+                </h1>
+                <p class="text-xs sm:text-sm text-text-muted">All your transactions across both funds</p>
+            </div>
+            
+            <div class="w-full min-w-0">
+                ${Card({
+                    children: transactions.length > 0 ? `
+                        <div class="rounded-xl overflow-hidden border border-border">
+                            <div class="overflow-x-auto w-full">
+                                <table class="w-full min-w-[560px]">
+                                    <thead>
+                                        <tr class="bg-table-header text-left border-b border-border">
+                                            <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.date')}</th>
+                                            <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.type')}</th>
+                                            <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.fund')}</th>
+                                            <th class="whitespace-nowrap px-4 py-3.5 text-right text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.amount')}</th>
+                                            <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.reason')}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-border">
+                                        ${transactions.map((tx, i) => `
+                                            <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} hover:bg-surface-raised transition-colors cursor-pointer">
+                                                <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${formatDate(tx.created_at)}</td>
+                                                <td class="whitespace-nowrap px-4 py-3.5 text-sm font-medium ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
+                                                    <span class="inline-flex items-center gap-1.5">
+                                                        ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()} 
+                                                        ${tx.type === 'credit' ? t('table.moneyIn') : t('table.moneyOut')}
+                                                    </span>
+                                                </td>
+                                                <td class="whitespace-nowrap px-4 py-3.5">${PoolTag({ pool: tx.pool })}</td>
+                                                <td class="whitespace-nowrap px-4 py-3.5 text-right text-sm font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
+                                                    ${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}
+                                                </td>
+                                                <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${tx.reason}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    ` : EmptyState({ icon: Icons.history(), message: t('member.noPayments') })
                 })}
             </div>
         `;
