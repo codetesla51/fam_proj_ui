@@ -333,20 +333,16 @@ function Card({ title, subtitle, children }) {
 
 function KpiCard({ label, amount, subtext, highlight, isCurrency = true }) {
     return `
-        <div class="group rounded-2xl border p-5 sm:p-6 transition-all hover:shadow-xl hover:shadow-brand/5 ${highlight ? 'border-brand/30 bg-gradient-to-br from-brand-light via-white to-white shadow-lg shadow-brand/15' : 'border-border bg-surface shadow-sm hover:border-brand/20'}">
-            <div class="mb-3 flex items-center gap-2">
-                ${highlight ? `<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.piggyBank()}</span>` : ''}
-                ${label === 'Family Savings' || label === 'My Savings' ? `<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.piggyBank()}</span>` : ''}
-                ${label === 'Care Fund' ? `<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.heartHandshake()}</span>` : ''}
-                ${label === 'Last Payment' ? `<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-raised text-text-secondary">${Icons.clock()}</span>` : ''}
-                ${label === 'Alerts' ? `<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-error/10 text-error">${Icons.bell()}</span>` : ''}
-                ${label === 'Members' || label === 'Family Members' ? `<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.users()}</span>` : ''}
-                ${label === 'Overdue' ? `<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-warning/10 text-warning">${Icons.alertTriangle()}</span>` : ''}
-                ${label === 'Pending Help Requests' ? `<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-warning/10 text-warning">${Icons.alertCircle()}</span>` : ''}
-                <span class="text-[11px] font-bold uppercase tracking-widest text-text-muted">${label}</span>
+        <div class="group rounded-2xl border p-4 sm:p-5 transition-all hover:shadow-md ${highlight ? 'border-brand/30 bg-gradient-to-br from-brand-light via-white to-white shadow-lg shadow-brand/15' : 'border-border bg-surface shadow-sm'}">
+            <div class="mb-2 flex items-center gap-2">
+                ${label === 'Family Savings' || label === 'My Savings' ? `<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.piggyBank()}</span>` : ''}
+                ${label === 'Care Fund' ? `<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.heartHandshake()}</span>` : ''}
+                ${label === 'Members' || label === 'Family Members' ? `<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.users()}</span>` : ''}
+                ${label === 'Overdue' ? `<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-warning/10 text-warning">${Icons.alertTriangle()}</span>` : ''}
+                <span class="text-[11px] font-bold uppercase tracking-wider text-text-muted">${label}</span>
             </div>
-            <div class="text-2xl sm:text-3xl font-extrabold text-text-primary group-hover:scale-105 transition-transform origin-left">${isCurrency ? formatCurrency(amount) : amount}</div>
-            ${subtext ? `<div class="mt-2.5 text-xs text-text-secondary flex items-center gap-1.5 font-medium">${subtext.includes('up to date') || subtext.includes('active') ? Icons.checkCircle() : ''}${subtext.includes('behind') || subtext.includes('Overdue') ? Icons.alertTriangle() : ''}${subtext}</div>` : ''}
+            <div class="text-xl sm:text-2xl font-extrabold text-text-primary">${isCurrency ? formatCurrency(amount) : amount}</div>
+            ${subtext ? `<div class="mt-1 text-xs text-text-secondary">${subtext}</div>` : ''}
         </div>
     `;
 }
