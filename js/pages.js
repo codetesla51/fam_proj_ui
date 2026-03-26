@@ -953,6 +953,10 @@ const pages = {
     
     adminCareFund: () => {
         const pending = mockData.careFundRequests.filter(r => r.status === 'pending');
+        const accepted = mockData.careFundRequests.filter(r => r.status === 'accepted');
+        const rejected = mockData.careFundRequests.filter(r => r.status === 'rejected');
+        const activeTab = window.careFundTab || 'pending';
+        
         const occasionIcons = {
             birthday: Icons.cake,
             wedding: Icons.ring,
@@ -961,6 +965,18 @@ const pages = {
             medical: Icons.stethoscope,
             other: Icons.helpCircle
         };
+        
+        function tabBtn(tab, label, count) {
+            const isActive = activeTab === tab;
+            return `<button onclick="window.careFundTab='${tab}'; router.refresh()" class="flex flex-1 items-center justify-center gap-1.5 rounded-lg py-3 text-xs sm:text-sm font-medium select-none transition-all ${isActive ? 'bg-brand text-white shadow-md' : 'text-text-secondary hover:bg-surface-soft'}">
+                ${label} ${count > 0 ? `<span class="rounded-full ${isActive ? 'bg-white/20' : 'bg-surface-soft'} px-2 py-0.5 text-xs">${count}</span>` : ''}
+            </button>`;
+        }
+        
+        let requestsToShow = pending;
+        if (activeTab === 'accepted') requestsToShow = accepted;
+        if (activeTab === 'rejected') requestsToShow = rejected;
+        
         return `
             <div class="w-full min-w-0 mb-6">
                 <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
@@ -971,27 +987,21 @@ const pages = {
             </div>
             
             <div class="w-full min-w-0 mb-4 flex gap-1 rounded-xl border border-border bg-surface p-1">
-                <button class="flex flex-1 items-center justify-center gap-1 rounded-lg py-3 text-xs sm:text-sm font-medium bg-brand text-white select-none">
-                    ${t('careFund.pending')} <span class="rounded-full bg-white/20 px-2 py-0.5 text-xs">${pending.length}</span>
-                </button>
-                <button class="flex flex-1 items-center justify-center gap-1 rounded-lg py-3 text-xs sm:text-sm font-medium text-text-secondary select-none">
-                    ${t('careFund.accepted')}
-                </button>
-                <button class="flex flex-1 items-center justify-center gap-1 rounded-lg py-3 text-xs sm:text-sm font-medium text-text-secondary select-none">
-                    ${t('careFund.notApproved')}
-                </button>
+                ${tabBtn('pending', t('careFund.pending'), pending.length)}
+                ${tabBtn('accepted', t('careFund.accepted'), accepted.length)}
+                ${tabBtn('rejected', t('careFund.notApproved'), rejected.length)}
             </div>
             
             <div class="w-full min-w-0 space-y-4">
-                ${pending.map(r => `
-                    <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                ${requestsToShow.length > 0 ? requestsToShow.map(r => `
+                    <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-5 shadow-sm hover:shadow-md transition-all">
                         <div class="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                             <div class="flex items-center gap-3">
-                                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-brand/10 text-brand flex-shrink-0">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-brand/10 text-brand flex-shrink-0">
                                     ${occasionIcons[r.occasion]()}
                                 </div>
                                 <div>
-                                    <h3 class="font-semibold">${r.memberName}</h3>
+                                    <h3 class="font-bold text-text-primary">${r.memberName}</h3>
                                     <p class="text-sm text-text-muted flex items-center gap-1">
                                         ${occasionIcons[r.occasion]()} ${t('occasions.' + r.occasion)} • ${formatDate(r.eventDate)}
                                     </p>
@@ -1010,6 +1020,7 @@ const pages = {
                                 </p>
                             </div>
                         ` : ''}
+                        ${activeTab === 'pending' ? `
                         <div class="flex gap-3">
                             <button onclick="acceptRequest('${r.id}')" class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-success py-3 font-medium text-white transition-colors active:bg-success/90 select-none">
                                 ${Icons.check()} Accept
@@ -1018,8 +1029,9 @@ const pages = {
                                 ${Icons.x()} Decline
                             </button>
                         </div>
+                        ` : ''}
                     </div>
-                `).join('')}
+                `).join('') : EmptyState({ icon: Icons.heartHandshake(), message: activeTab === 'pending' ? 'No pending requests' : activeTab === 'accepted' ? 'No accepted requests yet' : 'No declined requests' })}
             </div>
         `;
     },
