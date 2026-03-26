@@ -402,3 +402,251 @@ function LoadingSpinner({ size = 'md' }) {
     const sizes = { sm: 'h-4 w-4', md: 'h-8 w-8', lg: 'h-12 w-12' };
     return `<div class="animate-spin rounded-full border-2 border-brand border-t-transparent ${sizes[size]}"></div>`;
 }
+
+// Date Picker Component
+let selectedDate = null;
+
+function DatePicker({ id = 'date-picker', label = '', placeholder = 'Select a date' }) {
+    const today = new Date();
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    
+    return `
+        <div class="relative" id="${id}-wrapper">
+            <input type="hidden" id="${id}-value" value="">
+            <button type="button" onclick="toggleDatePicker('${id}')" id="${id}-button"
+                class="flex h-12 w-full min-w-0 items-center justify-between rounded-xl border-2 border-border bg-surface px-4 text-left text-sm transition-all hover:border-brand/50 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                <span class="flex items-center gap-2 text-text-muted" id="${id}-display">
+                    ${Icons.calendar()} ${placeholder}
+                </span>
+                ${Icons.chevronDown()}
+            </button>
+            <div id="${id}-dropdown" class="hidden absolute left-0 right-0 top-full z-50 mt-2 rounded-2xl border border-border bg-surface shadow-xl shadow-brand/10">
+                <div class="p-4">
+                    <!-- Month/Year Selector -->
+                    <div class="mb-4 flex items-center justify-between">
+                        <button type="button" onclick="prevMonth('${id}')" class="flex h-10 w-10 items-center justify-center rounded-xl text-text-secondary hover:bg-surface-soft active:bg-surface-raised select-none">
+                            ${Icons.chevronLeft()}
+                        </button>
+                        <div class="flex items-center gap-2">
+                            <select id="${id}-month" onchange="updateCalendar('${id}')" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm font-semibold focus:border-brand focus:outline-none">
+                                ${monthNames.map((m, i) => `<option value="${i}">${m}</option>`).join('')}
+                            </select>
+                            <select id="${id}-year" onchange="updateCalendar('${id}')" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm font-semibold focus:border-brand focus:outline-none">
+                                ${Array.from({length: 10}, (_, i) => today.getFullYear() - 5 + i).map(y => `<option value="${y}">${y}</option>`).join('')}
+                            </select>
+                        </div>
+                        <button type="button" onclick="nextMonth('${id}')" class="flex h-10 w-10 items-center justify-center rounded-xl text-text-secondary hover:bg-surface-soft active:bg-surface-raised select-none">
+                            ${Icons.chevronRight()}
+                        </button>
+                    </div>
+                    
+                    <!-- Calendar Grid -->
+                    <div class="mb-3 grid grid-cols-7 gap-1 text-center">
+                        ${['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => `<div class="py-2 text-[11px] font-bold uppercase text-text-muted">${d}</div>`).join('')}
+                    </div>
+                    <div id="${id}-days" class="grid grid-cols-7 gap-1">
+                    </div>
+                    
+                    <!-- Today Button -->
+                    <div class="mt-4 border-t border-border pt-4">
+                        <button type="button" onclick="selectToday('${id}')" class="w-full rounded-xl bg-brand-light py-2.5 text-sm font-semibold text-brand hover:bg-brand/20 active:bg-brand/30 transition-colors select-none">
+                            Today
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function initDatePicker(id) {
+    const monthSelect = document.getElementById(`${id}-month`);
+    const yearSelect = document.getElementById(`${id}-year`);
+    if (monthSelect && yearSelect) {
+        const now = new Date();
+        monthSelect.value = now.getMonth();
+        yearSelect.value = now.getFullYear();
+        updateCalendar(id);
+    }
+}
+
+function updateCalendar(id) {
+    const monthSelect = document.getElementById(`${id}-month`);
+    const yearSelect = document.getElementById(`${id}-year`);
+    const daysContainer = document.getElementById(`${id}-days`);
+    
+    if (!monthSelect || !yearSelect || !daysContainer) return;
+    
+    const month = parseInt(monthSelect.value);
+    const year = parseInt(yearSelect.value);
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = new Date();
+    
+    let html = '';
+    
+    // Empty cells before first day
+    for (let i = 0; i < firstDay; i++) {
+        html += '<div></div>';
+    }
+    
+    // Day buttons
+    for (let day = 1; day <= daysInMonth; day++) {
+        const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+        const isSelected = selectedDate && selectedDate.day === day && selectedDate.month === month && selectedDate.year === year;
+        
+        html += `
+            <button type="button" onclick="selectDay('${id}', ${day})" 
+                class="flex h-10 w-full items-center justify-center rounded-xl text-sm font-medium transition-all select-none
+                    ${isSelected ? 'bg-brand text-white' : isToday ? 'bg-brand-light text-brand font-bold' : 'hover:bg-surface-soft text-text-primary'}">
+                ${day}
+            </button>
+        `;
+    }
+    
+    daysContainer.innerHTML = html;
+}
+
+function toggleDatePicker(id) {
+    const dropdown = document.getElementById(`${id}-dropdown`);
+    if (dropdown) {
+        dropdown.classList.toggle('hidden');
+        if (!dropdown.classList.contains('hidden')) {
+            initDatePicker(id);
+        }
+    }
+}
+
+function selectDay(id, day) {
+    const monthSelect = document.getElementById(`${id}-month`);
+    const yearSelect = document.getElementById(`${id}-year`);
+    const display = document.getElementById(`${id}-display`);
+    const hiddenInput = document.getElementById(`${id}-value`);
+    
+    const month = parseInt(monthSelect.value);
+    const year = parseInt(yearSelect.value);
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    
+    selectedDate = { day, month, year };
+    
+    const formatted = `${monthNames[month]} ${day}, ${year}`;
+    display.innerHTML = `${Icons.calendar()} ${formatted}`;
+    hiddenInput.value = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    
+    document.getElementById(`${id}-dropdown`).classList.add('hidden');
+    updateCalendar(id);
+}
+
+function selectToday(id) {
+    const today = new Date();
+    selectDay(id, today.getDate());
+}
+
+function prevMonth(id) {
+    const monthSelect = document.getElementById(`${id}-month`);
+    const yearSelect = document.getElementById(`${id}-year`);
+    
+    let month = parseInt(monthSelect.value) - 1;
+    let year = parseInt(yearSelect.value);
+    
+    if (month < 0) { month = 11; year--; }
+    
+    monthSelect.value = month;
+    yearSelect.value = year;
+    updateCalendar(id);
+}
+
+function nextMonth(id) {
+    const monthSelect = document.getElementById(`${id}-month`);
+    const yearSelect = document.getElementById(`${id}-year`);
+    
+    let month = parseInt(monthSelect.value) + 1;
+    let year = parseInt(yearSelect.value);
+    
+    if (month > 11) { month = 0; year++; }
+    
+    monthSelect.value = month;
+    yearSelect.value = year;
+    updateCalendar(id);
+}
+
+// Close date picker when clicking outside
+document.addEventListener('click', (e) => {
+    document.querySelectorAll('[id$="-dropdown"]:not(.hidden)').forEach(dropdown => {
+        const wrapper = dropdown.parentElement;
+        if (!wrapper.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
+});
+
+// Skeleton Loader Component
+function Skeleton({ type = 'card', count = 1 }) {
+    const pulse = 'animate-pulse bg-surface-raised';
+    
+    if (type === 'kpi') {
+        return Array.from({ length: count }, () => `
+            <div class="rounded-2xl border border-border bg-surface p-5 sm:p-6">
+                <div class="${pulse} mb-2 h-3 w-24 rounded-lg"></div>
+                <div class="${pulse} h-8 w-32 rounded-lg"></div>
+                <div class="${pulse} mt-2 h-3 w-20 rounded-lg"></div>
+            </div>
+        `).join('');
+    }
+    
+    if (type === 'table') {
+        return Array.from({ length: count }, (_, i) => `
+            <div class="flex items-center gap-4 p-4 border-b border-border">
+                <div class="${pulse} h-10 w-10 rounded-full flex-shrink-0"></div>
+                <div class="flex-1">
+                    <div class="${pulse} h-4 w-32 rounded-lg mb-2"></div>
+                    <div class="${pulse} h-3 w-20 rounded-lg"></div>
+                </div>
+                <div class="${pulse} h-5 w-20 rounded-lg"></div>
+            </div>
+        `).join('');
+    }
+    
+    if (type === 'card-list') {
+        return Array.from({ length: count }, () => `
+            <div class="rounded-2xl border border-border bg-surface p-4">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="${pulse} h-12 w-12 rounded-full flex-shrink-0"></div>
+                    <div class="flex-1">
+                        <div class="${pulse} h-4 w-28 rounded-lg mb-2"></div>
+                        <div class="${pulse} h-3 w-16 rounded-lg"></div>
+                    </div>
+                </div>
+                <div class="${pulse} h-3 w-full rounded-lg mb-2"></div>
+                <div class="${pulse} h-3 w-3/4 rounded-lg"></div>
+            </div>
+        `).join('');
+    }
+    
+    if (type === 'member-card') {
+        return Array.from({ length: count }, () => `
+            <div class="rounded-2xl border border-border bg-surface p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="${pulse} h-14 w-14 rounded-2xl flex-shrink-0"></div>
+                    <div class="flex-1">
+                        <div class="${pulse} h-5 w-32 rounded-lg mb-2"></div>
+                        <div class="${pulse} h-3 w-24 rounded-lg"></div>
+                    </div>
+                </div>
+                <div class="rounded-xl bg-surface-soft p-4 space-y-3">
+                    <div class="${pulse} h-4 w-full rounded-lg"></div>
+                    <div class="${pulse} h-4 w-3/4 rounded-lg"></div>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    // Default card skeleton
+    return Array.from({ length: count }, () => `
+        <div class="rounded-2xl border border-border bg-surface p-4">
+            <div class="${pulse} h-4 w-32 rounded-lg mb-3"></div>
+            <div class="${pulse} h-3 w-full rounded-lg mb-2"></div>
+            <div class="${pulse} h-3 w-3/4 rounded-lg"></div>
+        </div>
+    `).join('');
+}

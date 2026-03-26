@@ -80,10 +80,20 @@ const translations = {
         common: {
             save: "Save", cancel: "Cancel", loading: "Loading...",
             error: "Something went wrong. Please try again.", success: "Success!",
-            markAllRead: "Mark all as read", allCaughtUp: "You are all caught up",
+            markAllRead: "Mark all as read", allCaughtUp: "You are all caught up ✓",
             back: "Back", viewReceipt: "View receipt", justNow: "Just now",
             yesterday: "Yesterday", confirm: "Confirm", delete: "Delete",
-            edit: "Edit", close: "Close", search: "Search", noData: "No data"
+            edit: "Edit", close: "Close", search: "Search", noData: "No data",
+            upToDate: "Up to date ✓", new: "New", earlier: "Earlier",
+            noNewNotifications: "No new notifications",
+            alertsCaughtUp: "You're all caught up!",
+            alertsCatchUpDesc: "When you have new alerts, they'll show up here. Stay tuned!",
+            thisMonthSavings: "This month's savings",
+            membersContributing: "family members contributing",
+            familyManager: "Family Manager",
+            familyManagerAccess: "Family Manager Access",
+            newMember: "New Member",
+            manageAccount: "Manage your account"
         },
         validation: { required: "This field is required", passwordMismatch: "Passwords do not match" },
         errors: {

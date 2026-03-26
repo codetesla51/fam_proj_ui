@@ -114,7 +114,7 @@ const pages = {
                     <p class="mt-8 text-center lg:hidden">
                         <a href="/admin/login" class="text-sm text-text-muted hover:text-brand flex items-center justify-center gap-1 select-none">
                             ${Icons.shield()}
-                            Family Manager?
+                            ${t('common.familyManager')}?
                         </a>
                     </p>
                 </div>
@@ -183,7 +183,7 @@ const pages = {
                     </div>
                     
                     <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-6 shadow-lg sm:p-8 overflow-hidden">
-                        <div class="mb-2 text-xs font-medium uppercase tracking-wider text-brand">New Member</div>
+                        <div class="mb-2 text-xs font-medium uppercase tracking-wider text-brand">${t('common.newMember')}</div>
                         <h2 class="mb-6 text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
                             ${Icons.userPlus()}
                             ${t('auth.createAccount')}
@@ -281,7 +281,7 @@ const pages = {
                             ${Icons.shield()}
                         </div>
                     </div>
-                    <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">Family Manager</h1>
+                    <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">${t('common.familyManager')}</h1>
                     <p class="text-xl text-white/80 max-w-md">Manage your family savings and care fund</p>
                     <div class="mt-12 flex items-center justify-center gap-8 text-white/60 text-sm">
                         <div class="flex flex-col items-center gap-2">
@@ -308,14 +308,14 @@ const pages = {
                     <div class="lg:hidden mb-8 flex justify-center">
                         <div class="text-brand flex items-center gap-2">
                             ${Icons.shield()}
-                            <span class="text-xl font-bold">Family Manager</span>
+                            <span class="text-xl font-bold">${t('common.familyManager')}</span>
                         </div>
                     </div>
                     
                     <div class="mb-6 flex justify-center">
                         <div class="inline-flex items-center gap-2 rounded-full bg-brand/10 px-4 py-2 text-sm text-brand font-bold">
                             ${Icons.shield()}
-                            Family Manager Access
+                            ${t('common.familyManagerAccess')}
                         </div>
                     </div>
                     
@@ -391,7 +391,7 @@ const pages = {
                 
                 <!-- KPI Grid -->
                 <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                    ${KpiCard({ label: 'Family Savings', amount: d.pool1Balance, subtext: 'Up to date ✓', highlight: true })}
+                        ${KpiCard({ label: 'Family Savings', amount: d.pool1Balance, subtext: t('common.upToDate'), highlight: true })}
                     ${KpiCard({ label: 'Care Fund', amount: d.pool2Balance, subtext: '5 contributing' })}
                     ${KpiCard({ label: 'Last Payment', amount: 15000, subtext: 'Folake - 2 days ago' })}
                     ${KpiCard({ label: 'Alerts', amount: d.pendingRequests, subtext: 'Requests waiting', isCurrency: false })}
@@ -400,7 +400,7 @@ const pages = {
                 <!-- Progress - Premium -->
                 <div class="w-full min-w-0 mb-6 rounded-2xl border border-border bg-surface p-5 shadow-lg shadow-brand/5">
                     <div class="mb-3 flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wider text-text-muted">This month's savings</span>
+                        <span class="text-xs font-bold uppercase tracking-wider text-text-muted">${t('common.thisMonthSavings')}</span>
                         <span class="text-xs font-bold text-brand bg-brand-light px-2 py-1 rounded-lg">75%</span>
                     </div>
                     <div class="h-3 overflow-hidden rounded-full bg-surface-raised">
@@ -529,9 +529,9 @@ const pages = {
                     ${t('careFund.balance')}
                 </div>
                 <div class="text-3xl sm:text-4xl font-bold text-brand">${formatCurrency(385000)}</div>
-                <div class="mt-3 flex items-center gap-2 text-xs text-brand/70">
-                    ${Icons.users()} 5 family members contributing
-                </div>
+                        <div class="mt-3 flex items-center gap-2 text-xs text-brand/70">
+                            ${Icons.users()} 5 ${t('common.membersContributing')}
+                        </div>
             </div>
             
             <div class="w-full min-w-0">
@@ -570,7 +570,7 @@ const pages = {
                                 ${Icons.calendar()}
                                 ${t('careFund.whenOccasion')}
                             </label>
-                            <input type="date" class="h-12 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 text-base sm:text-sm transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                            ${DatePicker({ id: 'care-date', placeholder: 'Select a date' })}
                         </div>
                         
                         <button type="submit" class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-bold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/40 hover:-translate-y-0.5 transition-all select-none">
@@ -673,7 +673,7 @@ const pages = {
                 </div>
                 <div>
                     <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary">${t('nav.settings')}</h1>
-                    <p class="text-xs sm:text-sm text-text-muted">Manage your account</p>
+                    <p class="text-xs sm:text-sm text-text-muted">${t('common.manageAccount') || 'Manage your account'}</p>
                 </div>
             </div>
             
@@ -708,9 +708,9 @@ const pages = {
                     </div>
                     <div class="flex items-center justify-between p-3 rounded-xl bg-surface-soft">
                         <span class="text-sm text-text-secondary flex items-center gap-2">${Icons.target()} Status</span>
-                        <span class="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-xs font-bold text-success">
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-xs font-bold text-success">
                             <span class="h-2 w-2 rounded-full bg-success animate-pulse"></span>
-                            Up to date
+                            ${t('common.upToDate')}
                         </span>
                     </div>
                 </div>
@@ -748,7 +748,7 @@ const pages = {
                         </div>
                         <div>
                             <p class="text-xs text-text-muted">${t('admin.familyOverview')}</p>
-                            <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary">Family Manager</h1>
+                            <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary">${t('common.familyManager')}</h1>
                         </div>
                     </div>
                 </div>
@@ -1171,7 +1171,7 @@ const pages = {
                         ${unread > 0 ? `
                             <button onclick="handleMarkAllRead()" class="flex h-10 items-center gap-2 rounded-xl bg-brand-light px-4 text-sm font-semibold text-brand hover:bg-brand/20 active:bg-brand/30 transition-colors select-none">
                                 ${Icons.check()}
-                                <span>Mark all read</span>
+                                    <span>${t('common.markAllRead')}</span>
                             </button>
                         ` : ''}
                     </div>
@@ -1186,11 +1186,11 @@ const pages = {
                             </div>
                             <div class="absolute inset-0 rounded-full bg-brand/5 animate-pulse"></div>
                         </div>
-                        <h3 class="text-lg font-semibold text-text-primary mb-2">You're all caught up!</h3>
-                        <p class="text-sm text-text-muted text-center max-w-xs">When you have new alerts, they'll show up here. Stay tuned!</p>
+                        <h3 class="text-lg font-semibold text-text-primary mb-2">${t('common.alertsCaughtUp')}</h3>
+                        <p class="text-sm text-text-muted text-center max-w-xs">${t('common.alertsCatchUpDesc')}</p>
                         <div class="mt-6 flex items-center gap-2 text-xs text-text-muted">
                             ${Icons.checkCircle()}
-                            <span>No new notifications</span>
+                            <span>${t('common.noNewNotifications')}</span>
                         </div>
                     </div>
                 ` : `
@@ -1199,7 +1199,7 @@ const pages = {
                         <div class="mb-6">
                             <div class="mb-3 flex items-center gap-2">
                                 <span class="h-2 w-2 rounded-full bg-brand animate-pulse"></span>
-                                <p class="text-xs font-bold uppercase tracking-wider text-brand">New</p>
+                                <p class="text-xs font-bold uppercase tracking-wider text-brand">${t('common.new')}</p>
                                 <span class="ml-auto rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-semibold text-brand">${unread}</span>
                             </div>
                             <div class="space-y-2">
@@ -1213,7 +1213,7 @@ const pages = {
                         <div>
                             <p class="mb-3 text-xs font-bold uppercase tracking-wider text-text-muted pl-1 flex items-center gap-2">
                                 ${Icons.archive()}
-                                Earlier
+                                ${t('common.earlier')}
                                 <span class="ml-auto rounded-full bg-surface-soft px-2 py-0.5 text-[11px] font-medium text-text-muted">${read.length}</span>
                             </p>
                             <div class="space-y-2">
