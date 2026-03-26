@@ -3,77 +3,73 @@
 const pages = {
     // Auth Pages
     login: () => `
-        <div class="flex min-h-screen flex-col">
-            <div class="bg-brand p-6 sm:p-8 lg:hidden">
-                <h1 class="text-2xl font-bold text-white flex items-center gap-2">
-                    <span>${Icons.building()}</span>
-                    ${t('app.name')}
-                </h1>
-                <p class="mt-1 text-brand-200 text-sm">${t('app.tagline')}</p>
-            </div>
-            
-            <div class="flex flex-1 flex-col justify-center p-6 pb-24 sm:pb-6">
-                <div class="mx-auto w-full max-w-md">
-                    <div class="mb-6 flex justify-end">
-                        <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary hover:bg-surface-soft active:bg-surface-raised">
-                            ${Icons.globe()}
-                            <span>${getCurrentLangName()}</span>
-                        </button>
+        <div class="flex min-h-screen flex-col items-center justify-center p-4 pb-24">
+            <div class="w-full max-w-md mx-auto">
+                <div class="mb-6 flex justify-center">
+                    <div class="text-brand flex items-center gap-2">
+                        ${Icons.building()}
+                        <span class="text-lg font-bold">${t('app.name')}</span>
+                    </div>
+                </div>
+                <div class="mb-6 flex justify-end">
+                    <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary active:bg-surface-soft select-none">
+                        ${Icons.globe()}
+                        <span>${getCurrentLangName()}</span>
+                    </button>
+                </div>
+                
+                <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8">
+                    <h2 class="mb-6 text-lg sm:text-xl font-semibold flex items-center gap-2">
+                        ${Icons.user()}
+                        ${t('auth.signIn')}
+                    </h2>
+                    
+                    <div id="login-error" class="mb-4 hidden rounded-xl border border-error/20 bg-error/10 p-4 text-sm text-error flex items-center gap-2">
+                        ${Icons.alertCircle()}
+                        <span></span>
                     </div>
                     
-                    <div class="rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8">
-                        <h2 class="mb-6 text-xl font-semibold flex items-center gap-2">
-                            ${Icons.user()}
+                    <form onsubmit="handleLogin(event)" class="space-y-4">
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-text-primary flex items-center gap-1">
+                                ${Icons.user()}
+                                ${t('auth.yourName')}
+                            </label>
+                            <input type="text" id="login-name" placeholder="${t('auth.yourNamePlaceholder')}"
+                                class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                        </div>
+                        
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-text-primary flex items-center gap-1">
+                                ${Icons.lock()}
+                                ${t('auth.password')}
+                            </label>
+                            <div class="relative">
+                                <input type="password" id="login-password" 
+                                    class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 pr-12 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                <button type="button" onclick="togglePassword('login-password')" class="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center select-none">
+                                    ${Icons.eye()}
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" id="login-btn"
+                            class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-medium text-white transition-colors active:bg-brand-hover select-none">
+                            ${Icons.logIn()}
                             ${t('auth.signIn')}
-                        </h2>
-                        
-                        <div id="login-error" class="mb-4 hidden rounded-xl border border-error/20 bg-error/10 p-4 text-sm text-error flex items-center gap-2">
-                            ${Icons.alertCircle()}
-                            <span></span>
-                        </div>
-                        
-                        <form onsubmit="handleLogin(event)" class="space-y-4">
-                            <div class="space-y-1.5">
-                                <label class="block text-sm font-medium text-text-primary flex items-center gap-1">
-                                    ${Icons.user()}
-                                    ${t('auth.yourName')}
-                                </label>
-                                <input type="text" id="login-name" placeholder="${t('auth.yourNamePlaceholder')}"
-                                    class="h-12 w-full rounded-xl border border-border bg-surface px-4 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                            </div>
-                            
-                            <div class="space-y-1.5">
-                                <label class="block text-sm font-medium text-text-primary flex items-center gap-1">
-                                    ${Icons.lock()}
-                                    ${t('auth.password')}
-                                </label>
-                                <div class="relative">
-                                    <input type="password" id="login-password" 
-                                        class="h-12 w-full rounded-xl border border-border bg-surface px-4 pr-12 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                                    <button type="button" onclick="togglePassword('login-password')" class="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted">
-                                        ${Icons.eye()}
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <button type="submit" id="login-btn"
-                                class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-medium text-white transition-colors hover:bg-brand-hover active:bg-brand-hover">
-                                ${Icons.logIn()}
-                                ${t('auth.signIn')}
-                            </button>
-                        </form>
-                        
-                        <p class="mt-6 text-center text-sm text-text-muted">
-                            ${t('auth.noAccount')}
-                            <a href="/register" class="font-semibold text-brand hover:underline"> ${t('auth.createAccount')}</a>
-                        </p>
-                        
-                        <div class="mt-4 border-t border-border pt-4 text-center">
-                            <a href="/admin/login" class="flex items-center justify-center gap-2 text-xs text-text-muted hover:text-brand">
-                                ${Icons.shield()}
-                                ${t('auth.signInAsManager')}?
-                            </a>
-                        </div>
+                        </button>
+                    </form>
+                    
+                    <p class="mt-6 text-center text-sm text-text-muted">
+                        ${t('auth.noAccount')}
+                        <a href="/register" class="font-semibold text-brand">${t('auth.createAccount')}</a>
+                    </p>
+                    
+                    <div class="mt-4 border-t border-border pt-4 text-center">
+                        <a href="/admin/login" class="flex items-center justify-center gap-2 text-xs text-text-muted active:text-brand select-none">
+                            ${Icons.shield()}
+                            ${t('auth.signInAsManager')}?
+                        </a>
                     </div>
                 </div>
             </div>
@@ -81,157 +77,153 @@ const pages = {
     `,
     
     register: () => `
-        <div class="flex min-h-screen flex-col">
-            <div class="bg-brand p-6 sm:p-8 lg:hidden">
-                <h1 class="text-2xl font-bold text-white flex items-center gap-2">
-                    <span>${Icons.building()}</span>
-                    ${t('app.name')}
-                </h1>
-            </div>
-            
-            <div class="flex flex-1 flex-col justify-center overflow-y-auto p-6 pb-24 sm:pb-6">
-                <div class="mx-auto w-full max-w-md">
-                    <div class="mb-6 flex justify-end">
-                        <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary hover:bg-surface-soft active:bg-surface-raised">
-                            ${Icons.globe()}
-                        </button>
+        <div class="flex min-h-screen flex-col items-center justify-center p-4 pb-24">
+            <div class="w-full max-w-md mx-auto">
+                <div class="mb-6 flex justify-center">
+                    <div class="text-brand flex items-center gap-2">
+                        ${Icons.building()}
+                        <span class="text-lg font-bold">${t('app.name')}</span>
                     </div>
+                </div>
+                <div class="mb-6 flex justify-end">
+                    <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary active:bg-surface-soft select-none">
+                        ${Icons.globe()}
+                    </button>
+                </div>
+                
+                <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8 overflow-hidden">
+                    <h2 class="mb-6 text-lg sm:text-xl font-semibold flex items-center gap-2">
+                        ${Icons.userPlus()}
+                        ${t('auth.createAccount')}
+                    </h2>
                     
-                    <div class="rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8">
-                        <h2 class="mb-6 text-xl font-semibold flex items-center gap-2">
+                    <form onsubmit="handleRegister(event)" class="space-y-5">
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-text-primary">${t('auth.fullName')} <span class="text-error">*</span></label>
+                            <input type="text" id="reg-name" placeholder="e.g. Taiwo Odelade"
+                                class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                            <p class="text-xs text-text-muted">${t('auth.fullNameHelper')}</p>
+                        </div>
+                        
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-text-primary">${t('auth.createPassword')} <span class="text-error">*</span></label>
+                            <div class="relative">
+                                <input type="password" id="reg-password"
+                                    class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 pr-12 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                <button type="button" onclick="togglePassword('reg-password')" class="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center select-none">
+                                    ${Icons.eye()}
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-text-primary">${t('auth.confirmPassword')} <span class="text-error">*</span></label>
+                            <div class="relative">
+                                <input type="password" id="reg-confirm"
+                                    class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 pr-12 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                <button type="button" onclick="togglePassword('reg-confirm')" class="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center select-none">
+                                    ${Icons.eye()}
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-text-primary">${t('register.howOften')} <span class="text-error">*</span></label>
+                            <div class="flex rounded-xl border border-border p-1">
+                                <button type="button" onclick="setSchedule('weekly')" id="btn-weekly"
+                                    class="flex-1 rounded-lg py-3 text-sm font-medium transition-colors text-text-secondary select-none">
+                                    ${t('register.everyWeek')}
+                                </button>
+                                <button type="button" onclick="setSchedule('monthly')" id="btn-monthly"
+                                    class="flex-1 rounded-lg py-3 text-sm font-medium bg-brand text-white select-none">
+                                    ${t('register.everyMonth')}
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-text-primary">${t('register.howMuch')} <span class="text-error">*</span></label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">₦</span>
+                                <input type="number" id="reg-amount" placeholder="0"
+                                    class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                            </div>
+                            <p class="text-xs text-text-muted">${t('register.howMuchHelper')}</p>
+                        </div>
+                        
+                        <button type="submit" id="reg-btn"
+                            class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-medium text-white transition-colors active:bg-brand-hover select-none">
                             ${Icons.userPlus()}
                             ${t('auth.createAccount')}
-                        </h2>
-                        
-                        <form onsubmit="handleRegister(event)" class="space-y-5">
-                            <div class="space-y-1.5">
-                                <label class="block text-sm font-medium text-text-primary">${t('auth.fullName')} <span class="text-error">*</span></label>
-                                <input type="text" id="reg-name" placeholder="e.g. Taiwo Odelade"
-                                    class="h-12 w-full rounded-xl border border-border bg-surface px-4 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                                <p class="text-xs text-text-muted">${t('auth.fullNameHelper')}</p>
-                            </div>
-                            
-                            <div class="space-y-1.5">
-                                <label class="block text-sm font-medium text-text-primary">${t('auth.createPassword')} <span class="text-error">*</span></label>
-                                <div class="relative">
-                                    <input type="password" id="reg-password"
-                                        class="h-12 w-full rounded-xl border border-border bg-surface px-4 pr-12 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                                    <button type="button" onclick="togglePassword('reg-password')" class="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted">
-                                        ${Icons.eye()}
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div class="space-y-1.5">
-                                <label class="block text-sm font-medium text-text-primary">${t('auth.confirmPassword')} <span class="text-error">*</span></label>
-                                <div class="relative">
-                                    <input type="password" id="reg-confirm"
-                                        class="h-12 w-full rounded-xl border border-border bg-surface px-4 pr-12 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                                    <button type="button" onclick="togglePassword('reg-confirm')" class="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted">
-                                        ${Icons.eye()}
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-text-primary">${t('register.howOften')} <span class="text-error">*</span></label>
-                                <div class="flex rounded-xl border border-border p-1">
-                                    <button type="button" onclick="setSchedule('weekly')" id="btn-weekly"
-                                        class="flex-1 rounded-lg py-3 text-sm font-medium transition-colors text-text-secondary">
-                                        ${t('register.everyWeek')}
-                                    </button>
-                                    <button type="button" onclick="setSchedule('monthly')" id="btn-monthly"
-                                        class="flex-1 rounded-lg py-3 text-sm font-medium bg-brand text-white">
-                                        ${t('register.everyMonth')}
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div class="space-y-1.5">
-                                <label class="block text-sm font-medium text-text-primary">${t('register.howMuch')} <span class="text-error">*</span></label>
-                                <div class="relative">
-                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">₦</span>
-                                    <input type="number" id="reg-amount" placeholder="0"
-                                        class="h-12 w-full rounded-xl border border-border bg-surface py-3 pl-8 pr-4 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                                </div>
-                                <p class="text-xs text-text-muted">${t('register.howMuchHelper')}</p>
-                            </div>
-                            
-                            <button type="submit" id="reg-btn"
-                                class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-medium text-white transition-colors hover:bg-brand-hover active:bg-brand-hover">
-                                ${Icons.userPlus()}
-                                ${t('auth.createAccount')}
-                            </button>
-                        </form>
-                        
-                        <p class="mt-6 text-center text-sm text-text-muted">
-                            ${t('auth.alreadyHave')}
-                            <a href="/login" class="font-semibold text-brand hover:underline"> ${t('auth.signIn')}</a>
-                        </p>
-                    </div>
+                        </button>
+                    </form>
+                    
+                    <p class="mt-6 text-center text-sm text-text-muted">
+                        ${t('auth.alreadyHave')}
+                        <a href="/login" class="font-semibold text-brand">${t('auth.signIn')}</a>
+                    </p>
                 </div>
             </div>
         </div>
     `,
     
     adminLogin: () => `
-        <div class="flex min-h-screen flex-col">
-            <div class="bg-brand p-6 sm:p-8 lg:hidden">
-                <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm text-white mb-4">
-                    ${Icons.shield()}
-                    Family Manager Access
+        <div class="flex min-h-screen flex-col items-center justify-center p-4 pb-24">
+            <div class="w-full max-w-md mx-auto">
+                <div class="mb-6 flex justify-center">
+                    <div class="text-brand flex items-center gap-2">
+                        ${Icons.building()}
+                        <span class="text-lg font-bold">${t('app.name')}</span>
+                    </div>
                 </div>
-                <h1 class="text-2xl font-bold text-white flex items-center gap-2">
-                    <span>${Icons.building()}</span>
-                    ${t('app.name')}
-                </h1>
-            </div>
-            
-            <div class="flex flex-1 flex-col justify-center p-6 pb-24 sm:pb-6">
-                <div class="mx-auto w-full max-w-md">
-                    <div class="mb-6 flex justify-end">
-                        <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary hover:bg-surface-soft active:bg-surface-raised">
-                            ${Icons.globe()}
-                        </button>
+                <div class="mb-6 flex justify-center">
+                    <div class="inline-flex items-center gap-2 rounded-full bg-brand/10 px-3 py-1 text-sm text-brand font-medium">
+                        ${Icons.shield()}
+                        Family Manager Access
+                    </div>
+                </div>
+                <div class="mb-6 flex justify-end">
+                    <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary active:bg-surface-soft select-none">
+                        ${Icons.globe()}
+                    </button>
+                </div>
+                
+                <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8">
+                    <h2 class="mb-6 text-lg sm:text-xl font-semibold flex items-center gap-2">
+                        ${Icons.shield()}
+                        ${t('auth.signInAsManager')}
+                    </h2>
+                    
+                    <div id="admin-error" class="mb-4 hidden rounded-xl border border-error/20 bg-error/10 p-4 text-sm text-error flex items-center gap-2">
+                        ${Icons.alertCircle()}
+                        <span></span>
                     </div>
                     
-                    <div class="rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8">
-                        <h2 class="mb-6 text-xl font-semibold flex items-center gap-2">
-                            ${Icons.shield()}
-                            ${t('auth.signInAsManager')}
-                        </h2>
-                        
-                        <div id="admin-error" class="mb-4 hidden rounded-xl border border-error/20 bg-error/10 p-4 text-sm text-error flex items-center gap-2">
-                            ${Icons.alertCircle()}
-                            <span></span>
+                    <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-text-primary">${t('auth.managerPassword')}</label>
+                            <div class="relative">
+                                <input type="password" id="admin-password"
+                                    class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 pr-12 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                <button type="button" onclick="togglePassword('admin-password')" class="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center select-none">
+                                    ${Icons.eye()}
+                                </button>
+                            </div>
                         </div>
                         
-                        <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-                            <div class="space-y-1.5">
-                                <label class="block text-sm font-medium text-text-primary">${t('auth.managerPassword')}</label>
-                                <div class="relative">
-                                    <input type="password" id="admin-password"
-                                        class="h-12 w-full rounded-xl border border-border bg-surface px-4 pr-12 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                                    <button type="button" onclick="togglePassword('admin-password')" class="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted">
-                                        ${Icons.eye()}
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <button type="submit"
-                                class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-medium text-white transition-colors hover:bg-brand-hover active:bg-brand-hover">
-                                ${Icons.shield()}
-                                ${t('auth.signInAsManager')}
-                            </button>
-                        </form>
-                        
-                        <p class="mt-6 text-center">
-                            <a href="/login" class="flex items-center justify-center gap-2 font-medium text-brand hover:underline">
-                                ${Icons.arrowLeft()}
-                                ${t('auth.backToFamily')}
-                            </a>
-                        </p>
-                    </div>
+                        <button type="submit"
+                            class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-medium text-white transition-colors active:bg-brand-hover select-none">
+                            ${Icons.shield()}
+                            ${t('auth.signInAsManager')}
+                        </button>
+                    </form>
+                    
+                    <p class="mt-6 text-center">
+                        <a href="/login" class="flex items-center justify-center gap-2 font-medium text-brand select-none">
+                            ${Icons.arrowLeft()}
+                            ${t('auth.backToFamily')}
+                        </a>
+                    </p>
                 </div>
             </div>
         </div>
@@ -241,48 +233,47 @@ const pages = {
     memberDashboard: () => {
         const d = mockData.dashboard;
         return `
-            <div class="mb-6">
-                <h1 class="text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
+            <div class="w-full min-w-0 mb-6">
+                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                     ${Icons.zap()}
                     ${getGreeting()}, ${store.user?.name?.split(' ')[0] || 'Friend'}
                 </h1>
-                <p class="text-sm text-text-muted">Here's your family savings overview</p>
+                <p class="text-xs sm:text-sm text-text-muted">Here's your family savings overview</p>
             </div>
             
-            <div class="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+            <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
                 ${KpiCard({ label: t('member.familySavings'), amount: d.pool1Balance, subtext: t('member.upToDate'), highlight: true })}
                 ${KpiCard({ label: t('member.careFund'), amount: d.pool2Balance, subtext: '5 members contributing' })}
                 ${KpiCard({ label: t('member.lastPayment'), amount: 15000, subtext: 'Folake - 2 days ago' })}
                 ${KpiCard({ label: t('member.alerts'), amount: d.pendingRequests, subtext: 'Help requests waiting', isCurrency: false })}
             </div>
             
-            <div class="mb-2 h-2 overflow-hidden rounded-full bg-surface-raised">
+            <div class="w-full min-w-0 mb-2 h-2 overflow-hidden rounded-full bg-surface-raised">
                 <div class="h-full w-3/4 rounded-full bg-brand"></div>
             </div>
-            <p class="mb-6 text-xs sm:text-sm text-text-muted">Your savings progress this month</p>
+            <p class="w-full min-w-0 mb-6 text-xs sm:text-sm text-text-muted">Your savings progress this month</p>
             
+            <div class="w-full min-w-0">
             ${Card({
                 title: t('member.recentPayments'),
                 subtitle: 'Latest contributions from family members',
                 children: `
-                    <div class="space-y-3">
+                    <div class="w-full min-w-0 space-y-3">
                         ${d.recentPayments.map(p => `
-                            <div class="flex items-center justify-between rounded-xl border border-border p-3 sm:p-4 hover:bg-surface-soft transition-colors">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full ${p.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
-                                        ${p.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
-                                    </div>
-                                    <div>
-                                        <p class="text-sm sm:text-base font-medium text-text-primary">${p.memberName}</p>
-                                        <div class="flex items-center gap-2 mt-0.5">
-                                            <span class="text-xs text-text-muted">${formatDate(p.date)}</span>
-                                            <span class="text-text-muted">•</span>
-                                            ${PoolTag({ pool: p.pool })}
-                                        </div>
+                            <div class="flex items-center gap-3 rounded-xl border border-border p-3 active:bg-surface-soft transition-colors">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0 ${p.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
+                                    ${p.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-text-primary truncate">${p.memberName}</p>
+                                    <div class="flex items-center gap-2 mt-0.5">
+                                        <span class="text-xs text-text-muted">${formatDate(p.date)}</span>
+                                        <span class="text-text-muted">•</span>
+                                        ${PoolTag({ pool: p.pool })}
                                     </div>
                                 </div>
-                                <div class="text-right">
-                                    <p class="text-sm sm:text-base font-semibold ${p.type === 'credit' ? 'text-success' : 'text-error'}">
+                                <div class="text-right flex-shrink-0">
+                                    <p class="text-sm font-semibold whitespace-nowrap ${p.type === 'credit' ? 'text-success' : 'text-error'}">
                                         ${p.type === 'credit' ? '+' : '-'}${formatCurrency(p.amount)}
                                     </p>
                                 </div>
@@ -290,16 +281,16 @@ const pages = {
                         `).join('')}
                     </div>
                     <div class="mt-4 pt-4 border-t border-border">
-                        <a href="/member/history" class="flex items-center gap-1 text-sm font-medium text-brand hover:underline">
+                        <a href="/member/history" class="flex items-center gap-1 text-sm font-medium text-brand select-none">
                             View all payments ${Icons.chevronRight()}
                         </a>
                     </div>
                 `
             })}
+            </div>
             
-            <div class="mt-6">
-                <a href="/member/care-fund"
-                    class="flex items-center justify-center gap-2 rounded-xl bg-brand p-4 font-medium text-white shadow-sm transition-colors hover:bg-brand-hover active:bg-brand-hover">
+            <div class="w-full min-w-0 mt-6">
+                <a href="/member/care-fund" class="flex items-center justify-center gap-2 rounded-xl bg-brand p-4 font-medium text-white shadow-sm transition-colors active:bg-brand-hover select-none">
                     ${Icons.heartHandshake()}
                     <span>${t('member.requestHelp')}</span>
                 </a>
@@ -310,18 +301,19 @@ const pages = {
     memberSavings: () => {
         const myTx = mockData.transactions.filter(t => t.memberId === '1' && t.pool === 'pool1');
         return `
-            <div class="mb-6">
-                <h1 class="text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
+            <div class="w-full min-w-0 mb-6">
+                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                     ${Icons.wallet()}
                     ${t('nav.mySavings')}
                 </h1>
-                <p class="text-sm text-text-muted">Your Family Savings history</p>
+                <p class="text-xs sm:text-sm text-text-muted">Your Family Savings history</p>
             </div>
             
+            <div class="w-full min-w-0">
             ${Card({
                 children: myTx.length ? `
-                    <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-                        <table class="w-full min-w-[520px] sm:min-w-0">
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full min-w-[500px]">
                             <thead>
                                 <tr class="border-b border-border bg-table-header text-left">
                                     <th class="whitespace-nowrap px-3 py-3 text-xs font-medium uppercase tracking-wider text-text-muted">${t('table.date')}</th>
@@ -332,7 +324,7 @@ const pages = {
                             </thead>
                             <tbody class="divide-y divide-border">
                                 ${myTx.map((tx, i) => `
-                                    <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} hover:bg-surface-raised transition-colors">
+                                    <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} active:bg-surface-raised transition-colors">
                                         <td class="whitespace-nowrap px-3 py-3 text-sm text-text-secondary">${formatDate(tx.date)}</td>
                                         <td class="whitespace-nowrap px-3 py-3 text-sm font-medium ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
                                             ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()} ${tx.type === 'credit' ? t('table.moneyIn') : t('table.moneyOut')}
@@ -348,6 +340,7 @@ const pages = {
                     </div>
                 ` : EmptyState({ icon: Icons.wallet(), message: t('member.noPayments') })
             })}
+            </div>
         `;
     },
     
@@ -362,15 +355,15 @@ const pages = {
             other: Icons.helpCircle
         };
         return `
-            <div class="mb-6">
-                <h1 class="text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
+            <div class="w-full min-w-0 mb-6">
+                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                     ${Icons.heartHandshake()}
                     ${t('nav.careFund')}
                 </h1>
-                <p class="text-sm text-text-muted">Request help from your family</p>
+                <p class="text-xs sm:text-sm text-text-muted">Request help from your family</p>
             </div>
             
-            <div class="mb-6 rounded-2xl border border-border bg-brand-light p-5 sm:p-6">
+            <div class="w-full min-w-0 mb-6 rounded-2xl border border-border bg-brand-light p-5 sm:p-6">
                 <div class="mb-1 text-sm font-medium text-brand flex items-center gap-1">
                     ${Icons.heartHandshake()}
                     ${t('careFund.balance')}
@@ -378,6 +371,7 @@ const pages = {
                 <div class="text-2xl sm:text-3xl font-bold text-brand">${formatCurrency(385000)}</div>
             </div>
             
+            <div class="w-full min-w-0">
             ${Card({
                 title: t('careFund.requestHelp'),
                 children: `
@@ -387,10 +381,10 @@ const pages = {
                                 ${Icons.helpCircle()}
                                 ${t('careFund.whatFor')}
                             </label>
-                            <div class="grid grid-cols-3 gap-2 sm:grid-cols-6">
+                            <div class="grid grid-cols-3 gap-2">
                                 ${['birthday', 'wedding', 'newBaby', 'graduation', 'medical', 'other'].map(o => `
-                                    <button type="button" class="flex flex-col items-center gap-1 rounded-xl border border-border p-3 text-xs font-medium transition-colors hover:border-brand hover:bg-brand-light active:bg-brand-light">
-                                        <span class="text-2xl sm:text-3xl text-brand">${occasionIcons[o]()}</span>
+                                    <button type="button" class="flex flex-col items-center justify-center gap-1 rounded-xl border border-border p-3 aspect-square text-xs font-medium transition-colors active:border-brand active:bg-brand-light select-none">
+                                        <span class="text-2xl text-brand">${occasionIcons[o]()}</span>
                                         <span class="text-center">${t('occasions.' + o)}</span>
                                     </button>
                                 `).join('')}
@@ -404,7 +398,7 @@ const pages = {
                             </label>
                             <div class="relative">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">₦</span>
-                                <input type="number" placeholder="0" class="h-12 w-full rounded-xl border border-border bg-surface py-3 pl-8 pr-4 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                <input type="number" placeholder="0" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                             </div>
                         </div>
                         
@@ -413,35 +407,34 @@ const pages = {
                                 ${Icons.calendar()}
                                 ${t('careFund.whenOccasion')}
                             </label>
-                            <input type="date" class="h-12 w-full rounded-xl border border-border bg-surface px-4 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                            <input type="date" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                         </div>
                         
-                        <button type="submit" class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-medium text-white transition-colors hover:bg-brand-hover active:bg-brand-hover">
+                        <button type="submit" class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-medium text-white transition-colors active:bg-brand-hover select-none">
                             ${Icons.heartHandshake()}
                             ${t('careFund.sendRequest')}
                         </button>
                     </form>
                 `
             })}
+            </div>
             
-            <div class="mt-6">
+            <div class="w-full min-w-0 mt-6">
                 ${Card({
                     title: t('careFund.pastRequests'),
                     children: myRequests.length ? `
-                        <div class="space-y-3">
+                        <div class="w-full min-w-0 space-y-3">
                             ${myRequests.map(r => `
-                                <div class="flex items-center justify-between rounded-xl border border-border p-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-brand/10 text-brand">
-                                            ${occasionIcons[r.occasion]()}
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-medium">${t('occasions.' + r.occasion)}</p>
-                                            <p class="text-xs text-text-muted">${formatDate(r.createdAt)}</p>
-                                        </div>
+                                <div class="flex items-center gap-3 rounded-xl border border-border p-4">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand/10 text-brand flex-shrink-0">
+                                        ${occasionIcons[r.occasion]()}
                                     </div>
-                                    <div class="text-right">
-                                        <p class="text-sm sm:text-base font-semibold">${formatCurrency(r.amount)}</p>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium truncate">${t('occasions.' + r.occasion)}</p>
+                                        <p class="text-xs text-text-muted">${formatDate(r.createdAt)}</p>
+                                    </div>
+                                    <div class="text-right flex-shrink-0">
+                                        <p class="text-sm font-semibold whitespace-nowrap">${formatCurrency(r.amount)}</p>
                                         ${StatusBadge({ status: r.status })}
                                     </div>
                                 </div>
@@ -456,18 +449,19 @@ const pages = {
     memberHistory: () => {
         const myTx = mockData.transactions.filter(t => t.memberId === '1');
         return `
-            <div class="mb-6">
-                <h1 class="text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
+            <div class="w-full min-w-0 mb-6">
+                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                     ${Icons.history()}
                     ${t('nav.myHistory')}
                 </h1>
-                <p class="text-sm text-text-muted">All your transactions across both funds</p>
+                <p class="text-xs sm:text-sm text-text-muted">All your transactions across both funds</p>
             </div>
             
+            <div class="w-full min-w-0">
             ${Card({
                 children: myTx.length ? `
-                    <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-                        <table class="w-full min-w-[520px] sm:min-w-0">
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full min-w-[500px]">
                             <thead>
                                 <tr class="border-b border-border bg-table-header text-left">
                                     <th class="whitespace-nowrap px-3 py-3 text-xs font-medium uppercase tracking-wider text-text-muted">${t('table.date')}</th>
@@ -479,7 +473,7 @@ const pages = {
                             </thead>
                             <tbody class="divide-y divide-border">
                                 ${myTx.map((tx, i) => `
-                                    <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} hover:bg-surface-raised transition-colors">
+                                    <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} active:bg-surface-raised transition-colors">
                                         <td class="whitespace-nowrap px-3 py-3 text-sm text-text-secondary">${formatDate(tx.date)}</td>
                                         <td class="whitespace-nowrap px-3 py-3 text-sm font-medium ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
                                             ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()} ${tx.type === 'credit' ? t('table.moneyIn') : t('table.moneyOut')}
@@ -496,22 +490,23 @@ const pages = {
                     </div>
                 ` : EmptyState({ icon: Icons.history(), message: t('common.noData') })
             })}
+            </div>
         `;
     },
     
     memberSettings: () => `
-        <div class="mb-6">
-            <h1 class="text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
+        <div class="w-full min-w-0 mb-6">
+            <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                 ${Icons.settings()}
                 ${t('nav.settings')}
             </h1>
         </div>
         
-        <div class="space-y-4">
+        <div class="w-full min-w-0 space-y-4">
             ${Card({
                 title: t('settings.myDetails'),
                 children: `
-                    <div class="space-y-3">
+                    <div class="w-full min-w-0 space-y-3">
                         <div class="flex justify-between items-center py-3 border-b border-border">
                             <span class="text-sm text-text-muted flex items-center gap-2">${Icons.user()} Name</span>
                             <span class="text-sm font-medium">${store.user?.name || 'Guest'}</span>
@@ -528,7 +523,7 @@ const pages = {
             ${Card({
                 title: t('settings.language'),
                 children: `
-                    <button onclick="openLangModal()" class="flex items-center gap-3 text-brand hover:underline">
+                    <button onclick="openLangModal()" class="flex items-center gap-3 text-brand select-none">
                         ${Icons.globe()}
                         <span class="font-medium">Change language</span>
                     </button>
@@ -541,26 +536,27 @@ const pages = {
     adminDashboard: () => {
         const d = mockData.dashboard;
         return `
-            <div class="mb-6">
-                <h1 class="text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
+            <div class="w-full min-w-0 mb-6">
+                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                     ${Icons.layoutDashboard()}
                     ${t('admin.familyOverview')}
                 </h1>
-                <p class="text-sm text-text-muted">Welcome back, Family Manager</p>
+                <p class="text-xs sm:text-sm text-text-muted">Welcome back, Family Manager</p>
             </div>
             
-            <div class="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+            <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
                 ${KpiCard({ label: t('member.familySavings'), amount: d.pool1Balance, subtext: 'Total Pool 1', highlight: true })}
                 ${KpiCard({ label: t('member.careFund'), amount: d.pool2Balance, subtext: 'Total Pool 2' })}
                 ${KpiCard({ label: t('admin.totalMembers'), amount: d.totalMembers, subtext: 'Family members', isCurrency: false })}
                 ${KpiCard({ label: t('admin.pendingRequests'), amount: d.pendingRequests, subtext: 'Awaiting review', isCurrency: false })}
             </div>
             
+            <div class="w-full min-w-0">
             ${Card({
                 title: t('admin.behindOnSavings'),
                 children: `
-                    <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-                        <table class="w-full min-w-[400px] sm:min-w-0">
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full min-w-[400px]">
                             <thead>
                                 <tr class="border-b border-border bg-table-header text-left">
                                     <th class="whitespace-nowrap px-3 py-3 text-xs font-medium uppercase tracking-wider text-text-muted">Name</th>
@@ -586,17 +582,18 @@ const pages = {
                     </div>
                 `
             })}
+            </div>
             
-            <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <a href="/admin/transactions/new" class="flex items-center justify-center gap-2 rounded-xl bg-brand p-4 font-medium text-white transition-colors hover:bg-brand-hover active:bg-brand-hover">
+            <div class="w-full min-w-0 mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <a href="/admin/transactions/new" class="flex items-center justify-center gap-2 rounded-xl bg-brand p-4 font-medium text-white transition-colors active:bg-brand-hover select-none">
                     ${Icons.plusCircle()}
                     <span>${t('admin.recordPayment')}</span>
                 </a>
-                <a href="/admin/members" class="flex items-center justify-center gap-2 rounded-xl border border-border bg-surface p-4 font-medium transition-colors hover:bg-surface-soft active:bg-surface-raised">
+                <a href="/admin/members" class="flex items-center justify-center gap-2 rounded-xl border border-border bg-surface p-4 font-medium transition-colors active:bg-surface-raised select-none">
                     ${Icons.users()}
                     <span>${t('admin.addMember')}</span>
                 </a>
-                <a href="/admin/care-fund" class="flex items-center justify-center gap-2 rounded-xl border border-border bg-surface p-4 font-medium transition-colors hover:bg-surface-soft active:bg-surface-raised">
+                <a href="/admin/care-fund" class="flex items-center justify-center gap-2 rounded-xl border border-border bg-surface p-4 font-medium transition-colors active:bg-surface-raised select-none">
                     ${Icons.heartHandshake()}
                     <span>${t('admin.reviewRequests')}</span>
                 </a>
@@ -605,17 +602,18 @@ const pages = {
     },
     
     adminTransactionsNew: () => `
-        <div class="mb-6">
-            <a href="/admin/transactions" class="mb-2 inline-flex items-center gap-1 text-sm text-brand hover:underline flex items-center gap-1">
+        <div class="w-full min-w-0 mb-6">
+            <a href="/admin/transactions" class="mb-2 inline-flex items-center gap-1 text-sm text-brand flex items-center gap-1 select-none">
                 ${Icons.arrowLeft()}
                 ${t('common.back')}
             </a>
-            <h1 class="text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
+            <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                 ${Icons.plusCircle()}
                 ${t('transaction.recordPayment')}
             </h1>
         </div>
         
+        <div class="w-full min-w-0">
         ${Card({
             children: `
                 <form onsubmit="handleRecordPayment(event)" class="space-y-5">
@@ -624,7 +622,7 @@ const pages = {
                             ${Icons.user()}
                             ${t('transaction.whichMember')} <span class="text-error">*</span>
                         </label>
-                        <select class="h-12 w-full rounded-xl border border-border bg-surface px-4 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                        <select class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                             <option value="">Select a family member</option>
                             ${mockData.members.map(m => `<option value="${m.id}">${m.name}</option>`).join('')}
                         </select>
@@ -633,10 +631,10 @@ const pages = {
                     <div class="space-y-2">
                         <label class="block text-sm font-medium text-text-primary">${t('transaction.whichFund')}</label>
                         <div class="flex rounded-xl border border-border p-1">
-                            <button type="button" onclick="setFund('pool1')" id="fund-pool1" class="flex-1 rounded-lg py-3 text-sm font-medium bg-brand text-white">
+                            <button type="button" onclick="setFund('pool1')" id="fund-pool1" class="flex-1 rounded-lg py-3 text-sm font-medium bg-brand text-white select-none">
                                 ${Icons.piggyBank()} ${t('member.familySavings')}
                             </button>
-                            <button type="button" onclick="setFund('pool2')" id="fund-pool2" class="flex-1 rounded-lg py-3 text-sm font-medium text-text-secondary">
+                            <button type="button" onclick="setFund('pool2')" id="fund-pool2" class="flex-1 rounded-lg py-3 text-sm font-medium text-text-secondary select-none">
                                 ${Icons.heartHandshake()} ${t('member.careFund')}
                             </button>
                         </div>
@@ -645,10 +643,10 @@ const pages = {
                     <div class="space-y-2">
                         <label class="block text-sm font-medium text-text-primary">${t('transaction.whatType')}</label>
                         <div class="flex rounded-xl border border-border p-1">
-                            <button type="button" onclick="setTxType('credit')" id="type-credit" class="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium bg-success text-white">
+                            <button type="button" onclick="setTxType('credit')" id="type-credit" class="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium bg-success text-white select-none">
                                 ${Icons.arrowUpRight()} ${t('table.moneyIn')}
                             </button>
-                            <button type="button" onclick="setTxType('debit')" id="type-debit" class="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium text-text-secondary">
+                            <button type="button" onclick="setTxType('debit')" id="type-debit" class="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium text-text-secondary select-none">
                                 ${Icons.arrowDownRight()} ${t('table.moneyOut')}
                             </button>
                         </div>
@@ -661,7 +659,7 @@ const pages = {
                         </label>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">₦</span>
-                            <input type="number" placeholder="0" class="h-12 w-full rounded-xl border border-border bg-surface py-3 pl-8 pr-4 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                            <input type="number" placeholder="0" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                         </div>
                     </div>
                     
@@ -670,37 +668,39 @@ const pages = {
                             ${Icons.filePlus()}
                             ${t('transaction.whatFor')} <span class="text-error">*</span>
                         </label>
-                        <input type="text" placeholder="${t('transaction.whatForHelper')}" class="h-12 w-full rounded-xl border border-border bg-surface px-4 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                        <input type="text" placeholder="${t('transaction.whatForHelper')}" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                     </div>
                     
-                    <button type="submit" class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-medium text-white transition-colors hover:bg-brand-hover active:bg-brand-hover">
+                    <button type="submit" class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-medium text-white transition-colors active:bg-brand-hover select-none">
                         ${Icons.check()}
                         ${t('transaction.recordBtn')}
                     </button>
                 </form>
             `
         })}
+        </div>
     `,
     
     adminTransactions: () => `
-        <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="w-full min-w-0 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
+                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                     ${Icons.clipboardList()}
                     ${t('transaction.familyMoneyHistory')}
                 </h1>
-                <p class="text-sm text-text-muted">All family transactions</p>
+                <p class="text-xs sm:text-sm text-text-muted">All family transactions</p>
             </div>
-            <button class="flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm font-medium transition-colors hover:bg-surface-soft active:bg-surface-raised sm:w-auto">
+            <button class="flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm font-medium transition-colors active:bg-surface-raised select-none">
                 ${Icons.download()}
                 Export CSV
             </button>
         </div>
         
+        <div class="w-full min-w-0">
         ${Card({
             children: `
-                <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-                    <table class="w-full min-w-[600px] sm:min-w-0">
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full min-w-[600px]">
                         <thead>
                             <tr class="border-b border-border bg-table-header text-left">
                                 <th class="whitespace-nowrap px-3 py-3 text-xs font-medium uppercase tracking-wider text-text-muted">${t('table.member')}</th>
@@ -713,7 +713,7 @@ const pages = {
                         </thead>
                         <tbody class="divide-y divide-border">
                             ${mockData.transactions.map((tx, i) => `
-                                <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} hover:bg-surface-raised transition-colors">
+                                <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} active:bg-surface-raised transition-colors">
                                     <td class="whitespace-nowrap px-3 py-3 text-sm font-medium">${tx.memberName}</td>
                                     <td class="whitespace-nowrap px-3 py-3">${PoolTag({ pool: tx.pool })}</td>
                                     <td class="whitespace-nowrap px-3 py-3 text-sm font-medium ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
@@ -731,6 +731,7 @@ const pages = {
                 </div>
             `
         })}
+        </div>
     `,
     
     adminCareFund: () => {
@@ -744,32 +745,32 @@ const pages = {
             other: Icons.helpCircle
         };
         return `
-            <div class="mb-6">
-                <h1 class="text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
+            <div class="w-full min-w-0 mb-6">
+                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                     ${Icons.heartHandshake()}
                     ${t('nav.helpRequests')}
                 </h1>
-                <p class="text-sm text-text-muted">Review and respond to family help requests</p>
+                <p class="text-xs sm:text-sm text-text-muted">Review and respond to family help requests</p>
             </div>
             
-            <div class="mb-4 flex gap-1 rounded-xl border border-border bg-surface p-1">
-                <button class="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium bg-brand text-white">
+            <div class="w-full min-w-0 mb-4 flex gap-1 rounded-xl border border-border bg-surface p-1">
+                <button class="flex flex-1 items-center justify-center gap-1 rounded-lg py-3 text-xs sm:text-sm font-medium bg-brand text-white select-none">
                     ${t('careFund.pending')} <span class="rounded-full bg-white/20 px-2 py-0.5 text-xs">${pending.length}</span>
                 </button>
-                <button class="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium text-text-secondary">
+                <button class="flex flex-1 items-center justify-center gap-1 rounded-lg py-3 text-xs sm:text-sm font-medium text-text-secondary select-none">
                     ${t('careFund.accepted')}
                 </button>
-                <button class="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium text-text-secondary">
+                <button class="flex flex-1 items-center justify-center gap-1 rounded-lg py-3 text-xs sm:text-sm font-medium text-text-secondary select-none">
                     ${t('careFund.notApproved')}
                 </button>
             </div>
             
-            <div class="space-y-4">
+            <div class="w-full min-w-0 space-y-4">
                 ${pending.map(r => `
-                    <div class="rounded-2xl border border-border bg-surface p-4 sm:p-5 shadow-sm">
+                    <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-4 shadow-sm">
                         <div class="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                             <div class="flex items-center gap-3">
-                                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-brand/10 text-brand">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-brand/10 text-brand flex-shrink-0">
                                     ${occasionIcons[r.occasion]()}
                                 </div>
                                 <div>
@@ -793,10 +794,10 @@ const pages = {
                             </div>
                         ` : ''}
                         <div class="flex gap-3">
-                            <button onclick="acceptRequest('${r.id}')" class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-success py-3 font-medium text-white transition-colors hover:bg-success/90 active:bg-success/90">
+                            <button onclick="acceptRequest('${r.id}')" class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-success py-3 font-medium text-white transition-colors active:bg-success/90 select-none">
                                 ${Icons.check()} Accept
                             </button>
-                            <button onclick="showDeclineForm('${r.id}')" class="flex flex-1 items-center justify-center gap-2 rounded-xl border border-error py-3 font-medium text-error transition-colors hover:bg-error/5 active:bg-error/5">
+                            <button onclick="showDeclineForm('${r.id}')" class="flex flex-1 items-center justify-center gap-2 rounded-xl border border-error py-3 font-medium text-error transition-colors active:bg-error/5 select-none">
                                 ${Icons.x()} Decline
                             </button>
                         </div>
@@ -807,29 +808,29 @@ const pages = {
     },
     
     adminMembers: () => `
-        <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="w-full min-w-0 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
+                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                     ${Icons.users()}
                     ${t('nav.familyMembers')}
                 </h1>
-                <p class="text-sm text-text-muted">${mockData.members.length} family members</p>
+                <p class="text-xs sm:text-sm text-text-muted">${mockData.members.length} family members</p>
             </div>
-            <button onclick="showAddMemberModal()" class="flex h-11 items-center justify-center gap-2 rounded-xl bg-brand px-4 font-medium text-white transition-colors hover:bg-brand-hover active:bg-brand-hover sm:w-auto">
+            <button onclick="showAddMemberModal()" class="flex h-12 items-center justify-center gap-2 rounded-xl bg-brand px-4 font-medium text-white transition-colors active:bg-brand-hover select-none sm:w-auto">
                 ${Icons.plus()}
                 <span>${t('members.addMember')}</span>
             </button>
         </div>
         
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="w-full min-w-0 grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
             ${mockData.members.map(m => `
-                <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-4 shadow-sm">
                     <div class="mb-3 flex items-center gap-3">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-brand/10 text-lg font-bold text-brand">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-brand/10 text-lg font-bold text-brand flex-shrink-0">
                             ${m.name.split(' ').map(n => n[0]).join('')}
                         </div>
-                        <div>
-                            <h3 class="font-semibold">${m.name}</h3>
+                        <div class="min-w-0">
+                            <h3 class="font-semibold truncate">${m.name}</h3>
                             <p class="text-xs text-text-muted flex items-center gap-1">
                                 ${Icons.clock()} ${m.schedule === 'weekly' ? 'Weekly' : 'Monthly'} saver
                             </p>
@@ -847,7 +848,7 @@ const pages = {
                     </div>
                     <div class="flex items-center justify-between">
                         ${StatusBadge({ status: m.status })}
-                        <button class="text-sm text-brand hover:underline flex items-center gap-1">
+                        <button class="text-sm text-brand flex items-center gap-1 select-none">
                             ${Icons.refreshCw()} ${t('members.resetPassword')}
                         </button>
                     </div>
@@ -855,10 +856,10 @@ const pages = {
             `).join('')}
         </div>
         
-        <!-- Add Member Modal -->
+        <!-- Add Member Modal - Bottom Sheet -->
         <div id="add-member-modal" class="fixed inset-0 z-50 hidden">
             <div class="absolute inset-0 bg-black/50" onclick="closeAddMemberModal()"></div>
-            <div class="absolute bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-surface p-6 pb-8">
+            <div class="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-surface p-6 pb-8">
                 <div class="mb-6">
                     <h2 class="text-lg font-semibold flex items-center gap-2">
                         ${Icons.userPlus()}
@@ -868,22 +869,22 @@ const pages = {
                 <form onsubmit="handleAddMember(event)" class="space-y-4">
                     <div class="space-y-1.5">
                         <label class="block text-sm font-medium text-text-primary">${t('members.fullName')} <span class="text-error">*</span></label>
-                        <input type="text" class="h-12 w-full rounded-xl border border-border bg-surface px-4 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                        <input type="text" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                     </div>
                     <div class="space-y-1.5">
                         <label class="block text-sm font-medium text-text-primary">${t('members.password')} <span class="text-error">*</span></label>
-                        <input type="password" class="h-12 w-full rounded-xl border border-border bg-surface px-4 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                        <input type="password" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                     </div>
                     <div class="space-y-1.5">
                         <label class="block text-sm font-medium text-text-primary">${t('members.howMuchEach')}</label>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">₦</span>
-                            <input type="number" placeholder="0" class="h-12 w-full rounded-xl border border-border bg-surface py-3 pl-8 pr-4 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                            <input type="number" placeholder="0" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                         </div>
                     </div>
                     <div class="flex gap-3 pt-2">
-                        <button type="button" onclick="closeAddMemberModal()" class="flex h-12 flex-1 items-center justify-center rounded-xl border border-border font-medium">${t('common.cancel')}</button>
-                        <button type="submit" class="flex h-12 flex-1 items-center justify-center rounded-xl bg-brand font-medium text-white">${t('members.addMember')}</button>
+                        <button type="button" onclick="closeAddMemberModal()" class="flex h-12 flex-1 items-center justify-center rounded-xl border border-border font-medium select-none">${t('common.cancel')}</button>
+                        <button type="submit" class="flex h-12 flex-1 items-center justify-center rounded-xl bg-brand font-medium text-white select-none">${t('members.addMember')}</button>
                     </div>
                 </form>
             </div>
@@ -900,35 +901,35 @@ const pages = {
             error: Icons.alertCircle
         };
         return `
-            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="w-full min-w-0 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
+                    <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                         ${Icons.bell()}
                         ${t('nav.notifications')}
                     </h1>
-                    <p class="text-sm text-text-muted">${unread} unread</p>
+                    <p class="text-xs sm:text-sm text-text-muted">${unread} unread</p>
                 </div>
                 ${unread > 0 ? `
-                    <button onclick="handleMarkAllRead()" class="flex h-11 items-center justify-center gap-2 text-sm font-medium text-brand hover:underline">
+                    <button onclick="handleMarkAllRead()" class="flex h-11 items-center justify-center gap-2 text-sm font-medium text-brand select-none">
                         ${Icons.check()} ${t('common.markAllRead')}
                     </button>
                 ` : ''}
             </div>
             
             ${notifications.length === 0 ? EmptyState({ icon: Icons.bell(), message: t('common.allCaughtUp') }) : `
-                <div class="space-y-3">
+                <div class="w-full min-w-0 space-y-3">
                     ${notifications.map(n => `
-                        <div class="flex items-start gap-3 rounded-xl border p-4 ${n.read ? 'border-border bg-surface' : 'border-l-4 border-l-brand bg-brand-light/30'}">
-                            <div class="mt-0.5 ${n.type === 'success' ? 'text-success' : n.type === 'warning' ? 'text-warning' : 'text-info'}">
+                        <div class="w-full min-w-0 flex items-start gap-3 rounded-2xl border p-4 ${n.read ? 'border-border bg-surface' : 'border-l-4 border-l-brand bg-brand-light/30'}">
+                            <div class="mt-0.5 flex-shrink-0 ${n.type === 'success' ? 'text-success' : n.type === 'warning' ? 'text-warning' : 'text-info'}">
                                 ${typeIcons[n.type]()}
                             </div>
-                            <div class="flex-1">
+                            <div class="flex-1 min-w-0">
                                 <p class="text-sm">${n.message}</p>
                                 <p class="mt-1 text-xs text-text-muted flex items-center gap-1">
                                     ${Icons.clock()} ${timeAgo(n.time)}
                                 </p>
                             </div>
-                            ${!n.read ? '<span class="h-2 w-2 rounded-full bg-brand"></span>' : ''}
+                            ${!n.read ? '<span class="h-2 w-2 rounded-full bg-brand flex-shrink-0"></span>' : ''}
                         </div>
                     `).join('')}
                 </div>

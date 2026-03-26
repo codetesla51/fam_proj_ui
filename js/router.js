@@ -126,18 +126,20 @@ const router = {
         if (path.startsWith('/member') || path.startsWith('/admin')) {
             const navComponents = Nav({ currentPath: path });
             app.innerHTML = `
-                <div class="min-h-screen bg-surface-soft">
-                    ${navComponents.topNav}
-                    <div class="flex">
-                        ${navComponents.sidebar}
-                        <main class="flex-1 p-4 pb-24 sm:p-6 sm:pb-6 lg:pb-6 lg:p-8">
-                            <div class="mx-auto max-w-6xl">
+                <div class="min-h-screen bg-surface-soft flex flex-col">
+                    <header class="sticky top-0 z-40">${navComponents.topNav}</header>
+                    <div class="flex flex-1 overflow-hidden">
+                        <aside class="hidden md:flex w-56 flex-shrink-0 border-r border-border bg-surface">
+                            ${navComponents.sidebar}
+                        </aside>
+                        <main class="flex-1 overflow-y-auto overflow-x-hidden overscroll-behavior-y-contain p-4 pb-24 md:pb-8 sm:p-6 lg:p-8">
+                            <div class="mx-auto max-w-4xl w-full min-w-0">
                                 ${pageFn()}
                             </div>
                         </main>
                     </div>
+                    <nav class="fixed bottom-0 left-0 right-0 md:hidden z-40">${navComponents.bottomNav}</nav>
                     ${navComponents.mobileMenu}
-                    ${navComponents.bottomNav}
                 </div>
             `;
         } else {

@@ -187,96 +187,112 @@ function Nav({ currentPath }) {
     
     const nav = isAdmin ? adminNav : memberNav;
     
+    function isActive(href) {
+        const isExactMatch = href === '/admin/transactions';
+        return isExactMatch 
+            ? currentPath === href 
+            : currentPath === href || currentPath.startsWith(href + '/');
+    }
+    
+    function navItems() {
+        return nav.map(item => {
+            const active = isActive(item.href);
+            return `
+                <a href="${item.href}" class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium select-none active:opacity-70 ${active ? 'bg-brand-light text-brand' : 'text-text-secondary active:bg-surface-raised'}">
+                    <span class="text-lg">${item.icon()}</span>
+                    <span>${item.label}</span>
+                </a>
+            `;
+        }).join('');
+    }
+    
+    function mobileNavItems() {
+        return nav.map(item => `
+            <a href="${item.href}" onclick="toggleMobileMenu()" class="flex items-center gap-4 rounded-xl px-4 py-4 text-base font-medium select-none active:opacity-70 ${currentPath === item.href ? 'bg-brand-light text-brand' : 'text-text-primary'}">
+                <span class="text-2xl text-brand">${item.icon()}</span>
+                <span>${item.label}</span>
+            </a>
+        `).join('');
+    }
+    
+    function bottomNavItems() {
+        return nav.slice(0, 4).map(item => {
+            const active = currentPath === item.href;
+            return `
+                <a href="${item.href}" class="flex flex-1 flex-col items-center justify-center gap-1 py-2 select-none active:opacity-70 ${active ? 'text-brand' : 'text-text-muted'}">
+                    <span class="w-6 h-6">${item.icon()}</span>
+                    <span class="text-[10px] font-medium tracking-wide">${item.label}</span>
+                    ${active ? '<span class="w-8 h-1 rounded-full bg-brand mx-auto mt-1"></span>' : ''}
+                </a>
+            `;
+        }).join('');
+    }
+    
+    const settingsHref = isAdmin ? '/admin/dashboard' : '/member/settings';
+    const settingsActive = currentPath === '/member/settings';
+    
     return {
         topNav: `
-        <nav class="sticky top-0 z-40 border-b border-border bg-surface">
-            <div class="flex h-14 items-center justify-between px-4">
-                <div class="flex items-center gap-4">
-                    <button onclick="toggleMobileMenu()" class="flex h-11 w-11 items-center justify-center rounded-xl hover:bg-surface-soft active:bg-surface-raised md:hidden">
-                        ${Icons.menu()}
-                    </button>
-                    <span class="text-lg font-bold text-brand flex items-center gap-2">
-                        <span class="text-brand">${Icons.building()}</span>
-                        ${t('app.name')}
-                    </span>
-                </div>
-                <div class="flex items-center gap-1 sm:gap-2">
-                    <a href="/notifications" class="relative flex h-11 w-11 items-center justify-center rounded-xl hover:bg-surface-soft active:bg-surface-raised">
-                        ${Icons.bell()}
-                        ${unread > 0 ? `<span class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-error text-xs font-bold text-white">${unread > 9 ? '9+' : unread}</span>` : ''}
-                    </a>
-                    <button onclick="openLangModal()" class="flex h-11 items-center gap-2 rounded-xl px-3 text-text-secondary hover:bg-surface-soft active:bg-surface-raised sm:px-4">
-                        ${Icons.globe()}
-                        <span class="hidden sm:inline text-sm font-medium">${getCurrentLangName()}</span>
-                    </button>
-                    ${user ? `
-                        <button onclick="store.logout()" class="flex h-11 w-11 items-center justify-center rounded-xl text-text-secondary hover:bg-surface-soft active:bg-surface-raised hover:text-error">
-                            ${Icons.logOut()}
+            <div class="bg-surface/95 backdrop-blur-sm border-b border-border shadow-sm">
+                <div class="flex h-14 items-center justify-between px-4">
+                    <div class="flex items-center gap-4">
+                        <button onclick="toggleMobileMenu()" class="flex h-11 w-11 items-center justify-center rounded-xl select-none active:bg-surface-soft md:hidden">
+                            ${Icons.menu()}
                         </button>
-                    ` : ''}
+                        <span class="hidden sm:flex text-lg font-bold text-brand items-center gap-2">
+                            ${Icons.building()}
+                            ${t('app.name')}
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-1 sm:gap-2">
+                        <a href="/notifications" class="relative flex h-11 w-11 items-center justify-center rounded-xl active:bg-surface-soft select-none">
+                            ${Icons.bell()}
+                            ${unread > 0 ? `<span class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-error text-xs font-bold text-white">${unread > 9 ? '9+' : unread}</span>` : ''}
+                        </a>
+                        <button onclick="openLangModal()" class="flex h-11 items-center gap-2 rounded-xl px-3 text-text-secondary active:bg-surface-soft sm:px-4 select-none">
+                            ${Icons.globe()}
+                            <span class="hidden sm:inline text-sm font-medium">${getCurrentLangName()}</span>
+                        </button>
+                        ${user ? `
+                            <button onclick="store.logout()" class="flex h-11 w-11 items-center justify-center rounded-xl text-text-secondary active:bg-surface-soft active:text-error select-none">
+                                ${Icons.logOut()}
+                            </button>
+                        ` : ''}
+                    </div>
                 </div>
             </div>
-        </nav>
         `,
         sidebar: `
-        <aside class="hidden w-64 flex-shrink-0 border-r border-border bg-surface md:block lg:w-64">
-            <nav class="sticky top-14 flex flex-col gap-1 p-4">
-                ${nav.map(item => {
-                    const isExactMatch = item.href === '/admin/transactions';
-                    const isActive = isExactMatch 
-                        ? currentPath === item.href 
-                        : currentPath === item.href || currentPath.startsWith(item.href + '/');
-                    return `
-                        <a href="${item.href}" 
-                           class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${isActive ? 'bg-brand-light text-brand' : 'text-text-secondary hover:bg-surface-soft active:bg-surface-raised'}">
-                            <span class="text-lg">${item.icon()}</span>
-                            <span>${item.label}</span>
-                        </a>
-                    `;
-                }).join('')}
+            <nav class="flex flex-col gap-1 p-4 overflow-y-auto">
+                ${navItems()}
                 <div class="my-4 border-t border-border"></div>
-                <a href="${isAdmin ? '/admin/dashboard' : '/member/settings'}" 
-                   class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${currentPath === '/member/settings' ? 'bg-brand-light text-brand' : 'text-text-secondary hover:bg-surface-soft active:bg-surface-raised'}">
+                <a href="${settingsHref}" class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium select-none active:opacity-70 ${settingsActive ? 'bg-brand-light text-brand' : 'text-text-secondary active:bg-surface-raised'}">
                     <span class="text-lg">${Icons.settings()}</span>
                     <span>${t('nav.settings')}</span>
                 </a>
             </nav>
-        </aside>
         `,
         mobileMenu: `
-        <div id="mobile-menu" class="fixed inset-0 z-50 hidden md:hidden">
-            <div class="absolute inset-0 bg-black/50" onclick="toggleMobileMenu()"></div>
-            <aside class="absolute bottom-0 left-0 right-0 top-14 max-h-[calc(100vh-3.5rem)] overflow-y-auto rounded-t-3xl bg-surface">
-                <nav class="flex flex-col gap-1 p-4 pb-8">
-                    ${nav.map(item => `
-                        <a href="${item.href}" onclick="toggleMobileMenu()"
-                           class="flex items-center gap-4 rounded-xl px-4 py-4 text-base font-medium ${currentPath === item.href ? 'bg-brand-light text-brand' : 'text-text-primary'}">
-                            <span class="text-2xl text-brand">${item.icon()}</span>
-                            <span>${item.label}</span>
+            <div id="mobile-menu" class="fixed inset-0 z-50 hidden md:hidden">
+                <div class="absolute inset-0 bg-black/50" onclick="toggleMobileMenu()"></div>
+                <aside class="absolute bottom-0 left-0 right-0 top-14 max-h-[calc(100vh-3.5rem)] overflow-y-auto rounded-t-3xl bg-surface">
+                    <nav class="flex flex-col gap-1 p-4 pb-8">
+                        ${mobileNavItems()}
+                        <div class="my-4 border-t border-border"></div>
+                        <a href="${settingsHref}" onclick="toggleMobileMenu()" class="flex items-center gap-4 rounded-xl px-4 py-4 text-base font-medium text-text-primary select-none active:opacity-70">
+                            <span class="text-2xl text-brand">${Icons.settings()}</span>
+                            <span>${t('nav.settings')}</span>
                         </a>
-                    `).join('')}
-                    <div class="my-4 border-t border-border"></div>
-                    <a href="${isAdmin ? '/admin/dashboard' : '/member/settings'}" onclick="toggleMobileMenu()"
-                       class="flex items-center gap-4 rounded-xl px-4 py-4 text-base font-medium text-text-primary">
-                        <span class="text-2xl text-brand">${Icons.settings()}</span>
-                        <span>${t('nav.settings')}</span>
-                    </a>
-                </nav>
-            </aside>
-        </div>
+                    </nav>
+                </aside>
+            </div>
         `,
         bottomNav: `
-        <nav class="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-surface md:hidden">
-            <div class="flex h-16 items-center justify-around px-1">
-                ${nav.slice(0, 4).map(item => `
-                    <a href="${item.href}" 
-                       class="flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs font-medium ${currentPath === item.href ? 'text-brand' : 'text-text-muted'}">
-                        <span class="text-xl sm:text-2xl">${item.icon()}</span>
-                        <span class="hidden sm:inline">${item.label}</span>
-                    </a>
-                `).join('')}
+            <div class="bg-surface border-t border-border shadow-[0_-2px_20px_rgba(0,0,0,0.06)]">
+                <div class="flex h-16 items-center justify-around">
+                    ${bottomNavItems()}
+                </div>
             </div>
-        </nav>
         `
     };
 }
