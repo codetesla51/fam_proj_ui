@@ -225,45 +225,57 @@ const pages = {
     // Member Pages
     memberDashboard: () => {
         const d = mockData.dashboard;
+        const name = store.user?.name?.split(' ')[0] || 'Friend';
         return `
-            <div class="w-full min-w-0 mb-6">
-                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
-                    ${Icons.zap()}
-                    ${getGreeting()}, ${store.user?.name?.split(' ')[0] || 'Friend'}
-                </h1>
-                <p class="text-xs sm:text-sm text-text-muted">Here's your family savings overview</p>
-            </div>
-            
-            <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                ${KpiCard({ label: t('member.familySavings'), amount: d.pool1Balance, subtext: t('member.upToDate'), highlight: true })}
-                ${KpiCard({ label: t('member.careFund'), amount: d.pool2Balance, subtext: '5 members contributing' })}
-                ${KpiCard({ label: t('member.lastPayment'), amount: 15000, subtext: 'Folake - 2 days ago' })}
-                ${KpiCard({ label: t('member.alerts'), amount: d.pendingRequests, subtext: 'Help requests waiting', isCurrency: false })}
-            </div>
-            
-            <div class="w-full min-w-0 mb-2 h-2 overflow-hidden rounded-full bg-surface-raised">
-                <div class="h-full w-3/4 rounded-full bg-brand"></div>
-            </div>
-            <p class="w-full min-w-0 mb-6 text-xs sm:text-sm text-text-muted">Your savings progress this month</p>
-            
             <div class="w-full min-w-0">
-            ${Card({
-                title: t('member.recentPayments'),
-                subtitle: 'Latest contributions from family members',
-                children: `
-                    <div class="w-full min-w-0 space-y-3">
+                <!-- Greeting -->
+                <div class="mb-6">
+                    <div class="flex items-center gap-3 mb-1">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-white font-bold text-lg">
+                            ${name.charAt(0)}
+                        </div>
+                        <div>
+                            <p class="text-xs text-text-muted">${getGreeting()}</p>
+                            <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary">${name}</h1>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- KPI Grid -->
+                <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                    ${KpiCard({ label: 'Family Savings', amount: d.pool1Balance, subtext: 'Up to date', highlight: true })}
+                    ${KpiCard({ label: 'Care Fund', amount: d.pool2Balance, subtext: '5 contributing' })}
+                    ${KpiCard({ label: 'Last Payment', amount: 15000, subtext: 'Folake - 2 days ago' })}
+                    ${KpiCard({ label: 'Alerts', amount: d.pendingRequests, subtext: 'Requests waiting', isCurrency: false })}
+                </div>
+                
+                <!-- Progress -->
+                <div class="w-full min-w-0 mb-6 rounded-2xl border border-border bg-surface p-4">
+                    <div class="mb-3 flex items-center justify-between">
+                        <span class="text-xs font-medium text-text-muted uppercase tracking-wider">This month's savings</span>
+                        <span class="text-xs font-semibold text-brand">75%</span>
+                    </div>
+                    <div class="h-2.5 overflow-hidden rounded-full bg-surface-raised">
+                        <div class="h-full w-3/4 rounded-full bg-brand transition-all"></div>
+                    </div>
+                    <p class="mt-2 text-xs text-text-muted">₦37,500 of ₦50,000 saved</p>
+                </div>
+                
+                <!-- Recent Payments -->
+                <div class="w-full min-w-0">
+                    <div class="mb-3 flex items-center justify-between">
+                        <p class="text-xs font-medium text-text-muted uppercase tracking-wider">Recent Activity</p>
+                        <a href="/member/history" class="text-xs font-medium text-brand select-none">View all</a>
+                    </div>
+                    <div class="w-full min-w-0 space-y-2">
                         ${d.recentPayments.map(p => `
-                            <div class="flex items-center gap-3 rounded-xl border border-border p-3 active:bg-surface-soft transition-colors">
-                                <div class="flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0 ${p.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
+                            <div class="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3.5">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 ${p.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
                                     ${p.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-medium text-text-primary truncate">${p.memberName}</p>
-                                    <div class="flex items-center gap-2 mt-0.5">
-                                        <span class="text-xs text-text-muted">${formatDate(p.date)}</span>
-                                        <span class="text-text-muted">•</span>
-                                        ${PoolTag({ pool: p.pool })}
-                                    </div>
+                                    <p class="text-xs text-text-muted">${formatDate(p.date)}</p>
                                 </div>
                                 <div class="text-right flex-shrink-0">
                                     <p class="text-sm font-semibold whitespace-nowrap ${p.type === 'credit' ? 'text-success' : 'text-error'}">
@@ -273,20 +285,15 @@ const pages = {
                             </div>
                         `).join('')}
                     </div>
-                    <div class="mt-4 pt-4 border-t border-border">
-                        <a href="/member/history" class="flex items-center gap-1 text-sm font-medium text-brand select-none">
-                            View all payments ${Icons.chevronRight()}
-                        </a>
-                    </div>
-                `
-            })}
-            </div>
-            
-            <div class="w-full min-w-0 mt-6">
-                <a href="/member/care-fund" class="flex items-center justify-center gap-2 rounded-xl bg-brand p-4 font-medium text-white shadow-sm transition-colors active:bg-brand-hover select-none">
-                    ${Icons.heartHandshake()}
-                    <span>${t('member.requestHelp')}</span>
-                </a>
+                </div>
+                
+                <!-- CTA -->
+                <div class="w-full min-w-0 mt-6">
+                    <a href="/member/care-fund" class="flex items-center justify-center gap-2.5 rounded-2xl bg-brand p-4 font-medium text-white shadow-sm active:bg-brand-hover select-none">
+                        ${Icons.heartHandshake()}
+                        <span>Request Family Help</span>
+                    </a>
+                </div>
             </div>
         `;
     },
@@ -488,40 +495,66 @@ const pages = {
     },
     
     memberSettings: () => `
-        <div class="w-full min-w-0 mb-6">
-            <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
-                ${Icons.settings()}
-                ${t('nav.settings')}
-            </h1>
-        </div>
-        
-        <div class="w-full min-w-0 space-y-4">
-            ${Card({
-                title: t('settings.myDetails'),
-                children: `
-                    <div class="w-full min-w-0 space-y-3">
-                        <div class="flex justify-between items-center py-3 border-b border-border">
-                            <span class="text-sm text-text-muted flex items-center gap-2">${Icons.user()} Name</span>
-                            <span class="text-sm font-medium">${store.user?.name || 'Guest'}</span>
-                        </div>
-                        <div class="flex justify-between items-center py-3 border-b border-border">
-                            <span class="text-sm text-text-muted flex items-center gap-2">${Icons.calendar()} Savings Schedule</span>
-                            <span class="text-sm font-medium">Monthly - ₦50,000</span>
-                        </div>
-                        <p class="text-xs text-text-muted pt-2">${t('settings.contactManager')}</p>
-                    </div>
-                `
-            })}
+        <div class="w-full min-w-0">
+            <!-- Header -->
+            <div class="mb-6 flex items-center gap-3">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-light text-brand">
+                    ${Icons.settings()}
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary">${t('nav.settings')}</h1>
+                    <p class="text-xs sm:text-sm text-text-muted">Manage your account</p>
+                </div>
+            </div>
             
-            ${Card({
-                title: t('settings.language'),
-                children: `
-                    <button onclick="openLangModal()" class="flex items-center gap-3 text-brand select-none">
+            <!-- Profile Card -->
+            <div class="w-full min-w-0 mb-4 rounded-2xl border border-border bg-surface p-5">
+                <div class="flex items-center gap-4">
+                    <div class="flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white text-xl font-bold">
+                        ${(store.user?.name || 'U').charAt(0)}
+                    </div>
+                    <div>
+                        <p class="text-base font-semibold">${store.user?.name || 'Guest'}</p>
+                        <p class="text-sm text-text-muted">Member since March 2026</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Savings Info -->
+            <div class="w-full min-w-0 mb-4 rounded-2xl border border-border bg-surface p-5">
+                <p class="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">Savings Plan</p>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-text-secondary flex items-center gap-2">${Icons.calendar()} Schedule</span>
+                        <span class="text-sm font-medium">Monthly</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-text-secondary flex items-center gap-2">${Icons.dollarSign()} Amount</span>
+                        <span class="text-sm font-medium">${formatCurrency(50000)}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-text-secondary flex items-center gap-2">${Icons.target()} Status</span>
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-1 text-xs font-medium text-success">
+                            <span class="h-1.5 w-1.5 rounded-full bg-success"></span>
+                            Up to date
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Language -->
+            <div class="w-full min-w-0 mb-4 rounded-2xl border border-border bg-surface p-5">
+                <p class="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">${t('settings.language')}</p>
+                <button onclick="openLangModal()" class="flex items-center gap-3 rounded-xl bg-surface-soft p-3 w-full active:bg-surface-raised select-none">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-light text-brand">
                         ${Icons.globe()}
-                        <span class="font-medium">Change language</span>
-                    </button>
-                `
-            })}
+                    </div>
+                    <div class="text-left">
+                        <p class="text-sm font-medium">${getCurrentLangName()}</p>
+                        <p class="text-xs text-text-muted">Tap to change</p>
+                    </div>
+                </button>
+            </div>
         </div>
     `,
     
@@ -529,67 +562,66 @@ const pages = {
     adminDashboard: () => {
         const d = mockData.dashboard;
         return `
-            <div class="w-full min-w-0 mb-6">
-                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
-                    ${Icons.layoutDashboard()}
-                    ${t('admin.familyOverview')}
-                </h1>
-                <p class="text-xs sm:text-sm text-text-muted">Welcome back, Family Manager</p>
-            </div>
-            
-            <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                ${KpiCard({ label: t('member.familySavings'), amount: d.pool1Balance, subtext: 'Total Pool 1', highlight: true })}
-                ${KpiCard({ label: t('member.careFund'), amount: d.pool2Balance, subtext: 'Total Pool 2' })}
-                ${KpiCard({ label: t('admin.totalMembers'), amount: d.totalMembers, subtext: 'Family members', isCurrency: false })}
-                ${KpiCard({ label: t('admin.pendingRequests'), amount: d.pendingRequests, subtext: 'Awaiting review', isCurrency: false })}
-            </div>
-            
             <div class="w-full min-w-0">
-            ${Card({
-                title: t('admin.behindOnSavings'),
-                children: `
-                    <div class="overflow-x-auto w-full">
-                        <table class="w-full min-w-[400px]">
-                            <thead>
-                                <tr class="border-b border-border bg-table-header text-left">
-                                    <th class="whitespace-nowrap px-3 py-3 text-xs font-medium uppercase tracking-wider text-text-muted">Name</th>
-                                    <th class="whitespace-nowrap px-3 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-muted">${t('admin.shouldSave')}</th>
-                                    <th class="whitespace-nowrap px-3 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-muted">${t('admin.hasSaved')}</th>
-                                    <th class="whitespace-nowrap px-3 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-muted">${t('admin.gap')}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${d.behindMembers.map(m => `
-                                    <tr class="bg-error/5">
-                                        <td class="whitespace-nowrap px-3 py-3 text-sm font-medium flex items-center gap-2">
-                                            ${Icons.alertTriangle()}
-                                            ${m.name}
-                                        </td>
-                                        <td class="whitespace-nowrap px-3 py-3 text-right text-sm">${formatCurrency(m.committed)}</td>
-                                        <td class="whitespace-nowrap px-3 py-3 text-right text-sm">${formatCurrency(m.saved)}</td>
-                                        <td class="whitespace-nowrap px-3 py-3 text-right text-sm font-semibold text-error">${formatCurrency(m.gap)}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
+                <!-- Hero -->
+                <div class="mb-6">
+                    <div class="flex items-center gap-3 mb-1">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-white">
+                            ${Icons.layoutDashboard()}
+                        </div>
+                        <div>
+                            <p class="text-xs text-text-muted">${t('admin.familyOverview')}</p>
+                            <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary">Family Manager</h1>
+                        </div>
                     </div>
-                `
-            })}
-            </div>
-            
-            <div class="w-full min-w-0 mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <a href="/admin/transactions/new" class="flex items-center justify-center gap-2 rounded-xl bg-brand p-4 font-medium text-white transition-colors active:bg-brand-hover select-none">
-                    ${Icons.plusCircle()}
-                    <span>${t('admin.recordPayment')}</span>
-                </a>
-                <a href="/admin/members" class="flex items-center justify-center gap-2 rounded-xl border border-border bg-surface p-4 font-medium transition-colors active:bg-surface-raised select-none">
-                    ${Icons.users()}
-                    <span>${t('admin.addMember')}</span>
-                </a>
-                <a href="/admin/care-fund" class="flex items-center justify-center gap-2 rounded-xl border border-border bg-surface p-4 font-medium transition-colors active:bg-surface-raised select-none">
-                    ${Icons.heartHandshake()}
-                    <span>${t('admin.reviewRequests')}</span>
-                </a>
+                </div>
+                
+                <!-- KPI Grid -->
+                <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                    ${KpiCard({ label: 'Family Savings', amount: d.pool1Balance, subtext: 'Total Pool 1', highlight: true })}
+                    ${KpiCard({ label: 'Care Fund', amount: d.pool2Balance, subtext: 'Total Pool 2' })}
+                    ${KpiCard({ label: 'Members', amount: d.totalMembers, subtext: 'Family members', isCurrency: false })}
+                    ${KpiCard({ label: 'Pending', amount: d.pendingRequests, subtext: 'Awaiting review', isCurrency: false })}
+                </div>
+                
+                <!-- Behind on Savings -->
+                ${d.behindMembers.length > 0 ? `
+                    <div class="w-full min-w-0 mb-6 rounded-2xl border border-error/20 bg-error/5 p-4">
+                        <div class="mb-3 flex items-center gap-2">
+                            ${Icons.alertTriangle()}
+                            <p class="text-sm font-semibold text-error">Members Behind on Savings</p>
+                        </div>
+                        <div class="w-full min-w-0 space-y-2">
+                            ${d.behindMembers.map(m => `
+                                <div class="flex items-center justify-between rounded-xl bg-surface p-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-error/10 text-sm font-bold text-error">
+                                            ${m.name.split(' ')[1]?.charAt(0) || m.name.charAt(0)}
+                                        </div>
+                                        <span class="text-sm font-medium">${m.name}</span>
+                                    </div>
+                                    <span class="text-sm font-semibold text-error">${formatCurrency(m.gap)} behind</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <!-- Quick Actions -->
+                <div class="w-full min-w-0 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <a href="/admin/transactions/new" class="flex items-center justify-center gap-2.5 rounded-2xl bg-brand p-4 font-medium text-white active:bg-brand-hover select-none">
+                        ${Icons.plusCircle()}
+                        <span>Record Payment</span>
+                    </a>
+                    <a href="/admin/members" class="flex items-center justify-center gap-2.5 rounded-2xl border border-border bg-surface p-4 font-medium active:bg-surface-soft select-none">
+                        ${Icons.users()}
+                        <span>Add Member</span>
+                    </a>
+                    <a href="/admin/care-fund" class="flex items-center justify-center gap-2.5 rounded-2xl border border-border bg-surface p-4 font-medium active:bg-surface-soft select-none">
+                        ${Icons.heartHandshake()}
+                        <span>Help Requests</span>
+                    </a>
+                </div>
             </div>
         `;
     },
