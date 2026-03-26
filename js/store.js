@@ -1,24 +1,32 @@
-// Store - State management with tokens and session handling
+// Store - Sophisticated auth state management
 const store = {
     data: {
         user: null,
         accessToken: null,
         refreshToken: null,
         notifications: [],
-        lastActivity: Date.now()
+        lastActivity: Date.now(),
+        authStatus: 'idle', // idle | loading | authenticated | expired | error
+        authError: null,
+        sessionExpiry: null
     },
     
     // Property getters
     get user() { return this.data.user; },
     get notifications() { return this.data.notifications; },
+    get isAuthenticated() { return this.data.authStatus === 'authenticated'; },
+    get isLoading() { return this.data.authStatus === 'loading'; },
+    get authState() { return this.data.authStatus; },
     
     init() {
         this.data.user = JSON.parse(localStorage.getItem('user') || 'null');
         this.data.accessToken = localStorage.getItem('access_token');
         this.data.refreshToken = localStorage.getItem('refresh_token');
         this.data.notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+        this.data.authStatus = this.data.user ? 'authenticated' : 'idle';
         
         this.setupActivityTracking();
+        this.checkSessionExpiry();
     },
     
     setupActivityTracking() {
@@ -26,34 +34,36 @@ const store = {
         events.forEach(event => {
             document.addEventListener(event, () => this.updateActivity(), { passive: true });
         });
-        
-        setInterval(() => {
-            if (this.isLoggedIn() && this.data.accessToken) {
-                const inactiveTime = Date.now() - this.data.lastActivity;
-                if (inactiveTime > 30 * 60 * 1000) {
-                    console.log('Session active');
-                }
-            }
-        }, 60000);
     },
     
     updateActivity() {
         this.data.lastActivity = Date.now();
     },
     
+    checkSessionExpiry() {
+        if (!this.data.accessToken) return;
+        try {
+            const tokenData = JSON.parse(atob(this.data.accessToken));
+            this.data.sessionExpiry = tokenData.exp;
+            if (tokenData.exp < Date.now()) {
+                this.refreshSession();
+            }
+        } catch(e) {
+            this.logout();
+        }
+    },
+    
     setUser(user, accessToken = null, refreshToken = null) {
         this.data.user = user;
         this.data.accessToken = accessToken;
         this.data.refreshToken = refreshToken;
+        this.data.authStatus = user ? 'authenticated' : 'idle';
+        this.data.authError = null;
         
         if (user) {
             localStorage.setItem('user', JSON.stringify(user));
-            if (accessToken) {
-                localStorage.setItem('access_token', accessToken);
-            }
-            if (refreshToken) {
-                localStorage.setItem('refresh_token', refreshToken);
-            }
+            if (accessToken) localStorage.setItem('access_token', accessToken);
+            if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
         } else {
             localStorage.removeItem('user');
             localStorage.removeItem('access_token');
@@ -61,18 +71,13 @@ const store = {
         }
     },
     
-    getAccessToken() {
-        return this.data.accessToken;
-    },
-    
-    getRefreshToken() {
-        return this.data.refreshToken;
-    },
-    
     async login(name, password, isAdmin = false) {
-        const role = isAdmin ? 'admin' : 'member';
+        this.data.authStatus = 'loading';
+        this.data.authError = null;
         
-        // Mock authentication - in real app this would call API
+        // Simulate network delay for realistic UX
+        await new Promise(r => setTimeout(r, 300));
+        
         const mockUsers = {
             'admin': { id: 0, name: 'Family Manager', role: 'admin', password: 'admin123' },
             'Taiwo Odelade': { id: 1, name: 'Taiwo Odelade', role: 'member', schedule: 'monthly', amount: 5000, password: 'taiwo123' },
@@ -84,38 +89,49 @@ const store = {
         const user = mockUsers[name];
         
         if (!user) {
-            return { success: false, error: t('auth.userNotFound') };
+            this.data.authStatus = 'error';
+            this.data.authError = 'user_not_found';
+            return { success: false, error: 'We couldn\'t find an account with that name. Please check the spelling and try again.' };
         }
         
         if (user.password !== password) {
-            return { success: false, error: t('auth.wrongPassword') };
+            this.data.authStatus = 'error';
+            this.data.authError = 'wrong_password';
+            return { success: false, error: 'That password doesn\'t match. Please try again or ask your family manager for help.' };
         }
         
         if (isAdmin && user.role !== 'admin') {
-            return { success: false, error: t('auth.notAdmin') };
+            this.data.authStatus = 'error';
+            this.data.authError = 'not_admin';
+            return { success: false, error: 'This account is not a manager. Use the family login instead.' };
         }
         
         if (!isAdmin && user.role === 'admin') {
-            return { success: false, error: t('auth.useAdminLogin') };
+            this.data.authStatus = 'error';
+            this.data.authError = 'is_admin';
+            return { success: false, error: 'This is a manager account. Please use the manager login page.' };
         }
         
-        // Generate mock tokens
         const accessToken = btoa(JSON.stringify({ userId: user.id, role: user.role, exp: Date.now() + 900000 }));
         const refreshToken = btoa(JSON.stringify({ userId: user.id, role: user.role, exp: Date.now() + 604800000 }));
         
         this.setUser(user, accessToken, refreshToken);
+        this.addMockNotifications();
         
         return { success: true, user };
     },
     
     async register(name, password, schedule, amount, startDate) {
-        // Mock registration - in real app this would call API
+        this.data.authStatus = 'loading';
+        
+        await new Promise(r => setTimeout(r, 300));
+        
         const user = {
             id: Date.now(),
             name: name,
             role: 'member',
             schedule: schedule,
-            amount: parseInt(amount),
+            amount: parseInt(amount) || 0,
             startDate: startDate,
             createdAt: new Date().toISOString()
         };
@@ -124,31 +140,40 @@ const store = {
         const refreshToken = btoa(JSON.stringify({ userId: user.id, role: 'member', exp: Date.now() + 604800000 }));
         
         this.setUser(user, accessToken, refreshToken);
+        this.addMockNotifications();
         
         return { success: true, user };
     },
     
+    addMockNotifications() {
+        if (this.data.notifications.length === 0) {
+            this.data.notifications = [
+                { id: 1, message: 'Welcome to Odelade Family Ledger! Your account is ready.', type: 'success', read: false, time: new Date().toISOString() },
+                { id: 2, message: 'Family savings balance updated: ₦1,250,000', type: 'info', read: false, time: new Date(Date.now() - 3600000).toISOString() },
+                { id: 3, message: 'New care fund request from Emeka', type: 'warning', read: false, time: new Date(Date.now() - 7200000).toISOString() },
+                { id: 4, message: 'Monthly savings reminder: ₦50,000 due soon', type: 'info', read: true, time: new Date(Date.now() - 86400000).toISOString() },
+                { id: 5, message: 'Care fund request approved for Folake', type: 'success', read: true, time: new Date(Date.now() - 172800000).toISOString() },
+            ];
+            localStorage.setItem('notifications', JSON.stringify(this.data.notifications));
+        }
+    },
+    
     logout() {
         this.setUser(null);
+        this.data.authStatus = 'idle';
         router.navigate('/login');
     },
     
     isLoggedIn() {
         if (!this.data.user || !this.data.accessToken) return false;
-        
-        try {
-            const tokenData = JSON.parse(atob(this.data.accessToken));
-            if (tokenData.exp < Date.now()) {
-                return this.refreshSession();
-            }
-            return true;
-        } catch (e) {
-            return false;
-        }
+        return this.data.authStatus === 'authenticated';
     },
     
     refreshSession() {
-        if (!this.data.refreshToken) return false;
+        if (!this.data.refreshToken) {
+            this.logout();
+            return false;
+        }
         
         try {
             const tokenData = JSON.parse(atob(this.data.refreshToken));
@@ -159,9 +184,11 @@ const store = {
             
             const newAccessToken = btoa(JSON.stringify({ userId: tokenData.userId, role: tokenData.role, exp: Date.now() + 900000 }));
             this.data.accessToken = newAccessToken;
+            this.data.sessionExpiry = Date.now() + 900000;
             localStorage.setItem('access_token', newAccessToken);
             return true;
-        } catch (e) {
+        } catch(e) {
+            this.logout();
             return false;
         }
     },
@@ -176,6 +203,12 @@ const store = {
     
     getUser() {
         return this.data.user;
+    },
+    
+    getSessionTimeRemaining() {
+        if (!this.data.sessionExpiry) return null;
+        const remaining = this.data.sessionExpiry - Date.now();
+        return remaining > 0 ? remaining : 0;
     },
     
     addNotification(msg, type = 'info') {

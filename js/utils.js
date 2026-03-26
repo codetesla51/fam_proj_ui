@@ -59,34 +59,44 @@ function getCurrentSeason() {
     return 'evening';
 }
 
-function showToast(message, type = 'success') {
+function showToast(message, type = 'success', duration = 4000) {
     const container = document.getElementById('toasts');
     const toast = document.createElement('div');
-    const colors = {
-        success: 'border-success/20 bg-success/10 text-success',
-        error: 'border-error/20 bg-error/10 text-error',
-        warning: 'border-warning/20 bg-warning/10 text-warning',
-        info: 'border-info/20 bg-info/10 text-info'
-    };
-    const icons = {
-        success: Icons.checkCircle(),
-        error: Icons.alertCircle(),
-        warning: Icons.alertTriangle(),
-        info: Icons.info()
+    
+    const config = {
+        success: { bg: 'bg-white', border: 'border-emerald-200', icon: Icons.checkCircle, iconColor: 'text-emerald-600', title: 'Done' },
+        error: { bg: 'bg-white', border: 'border-red-200', icon: Icons.alertCircle, iconColor: 'text-red-600', title: 'Something went wrong' },
+        warning: { bg: 'bg-white', border: 'border-amber-200', icon: Icons.alertTriangle, iconColor: 'text-amber-600', title: 'Heads up' },
+        info: { bg: 'bg-white', border: 'border-sky-200', icon: Icons.info, iconColor: 'text-sky-600', title: 'FYI' }
     };
     
-    toast.className = `flex items-center gap-3 rounded-lg border p-4 shadow-lg animate-slide-up ${colors[type]}`;
+    const cfg = config[type] || config.info;
+    
+    toast.className = `flex items-start gap-3 rounded-2xl border ${cfg.border} ${cfg.bg} p-4 shadow-lg animate-slide-up pointer-events-auto`;
     toast.innerHTML = `
-        <span class="shrink-0">${icons[type]}</span>
-        <span class="text-sm font-medium">${message}</span>
+        <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg ${cfg.iconColor}">
+            ${cfg.icon()}
+        </div>
+        <div class="flex-1 min-w-0">
+            <p class="text-xs font-semibold text-text-muted uppercase tracking-wider">${cfg.title}</p>
+            <p class="text-sm font-medium text-text-primary mt-0.5 leading-snug">${message}</p>
+        </div>
+        <button onclick="this.parentElement.remove()" class="flex-shrink-0 text-text-muted hover:text-text-secondary">
+            ${Icons.x()}
+        </button>
     `;
+    
     container.appendChild(toast);
+    
+    // Initialize icons in toast
+    if (window.lucide) window.lucide.createIcons();
     
     setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.transform = 'translateY(10px)';
+        toast.style.transform = 'translateX(100%)';
+        toast.style.transition = 'all 0.3s ease';
         setTimeout(() => toast.remove(), 300);
-    }, 4000);
+    }, duration);
 }
 
 function showLoading(element) {

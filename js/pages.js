@@ -919,91 +919,106 @@ const pages = {
     notifications: () => {
         const notifications = store.notifications;
         const unread = notifications.filter(n => !n.read).length;
-        const typeColors = {
-            success: { bg: 'bg-success/10', text: 'text-success', icon: Icons.checkCircle },
-            warning: { bg: 'bg-warning/10', text: 'text-warning', icon: Icons.alertTriangle },
-            info: { bg: 'bg-info/10', text: 'text-info', icon: Icons.info },
-            error: { bg: 'bg-error/10', text: 'text-error', icon: Icons.alertCircle }
+        const read = notifications.filter(n => n.read);
+        
+        const typeConfig = {
+            success: { bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-200', icon: Icons.checkCircle },
+            warning: { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-200', icon: Icons.alertTriangle },
+            info: { bg: 'bg-sky-50', text: 'text-sky-600', border: 'border-sky-200', icon: Icons.info },
+            error: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200', icon: Icons.alertCircle }
         };
+        
+        function renderNotif(n, isUnread) {
+            const cfg = typeConfig[n.type] || typeConfig.info;
+            if (isUnread) {
+                return `
+                    <div class="w-full min-w-0 group">
+                        <div class="flex items-start gap-3 rounded-2xl bg-white p-4 shadow-sm border border-transparent hover:border-border transition-all">
+                            <div class="mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${cfg.bg} ${cfg.text}">
+                                ${cfg.icon()}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[13px] font-semibold text-text-primary leading-snug">${n.message}</p>
+                                <p class="mt-1.5 text-[11px] text-text-muted">${timeAgo(n.time)}</p>
+                            </div>
+                            <div class="flex-shrink-0 mt-1">
+                                <span class="flex h-2.5 w-2.5 rounded-full bg-brand ring-2 ring-brand/20"></span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            return `
+                <div class="w-full min-w-0">
+                    <div class="flex items-start gap-3 rounded-2xl bg-surface-soft p-4">
+                        <div class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg ${cfg.bg} ${cfg.text}">
+                            ${cfg.icon()}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[13px] text-text-secondary leading-snug">${n.message}</p>
+                            <p class="mt-1 text-[11px] text-text-muted">${timeAgo(n.time)}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
         return `
             <div class="w-full min-w-0">
-                <!-- Header -->
-                <div class="mb-6 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-light text-brand">
-                            ${Icons.bell()}
-                        </div>
-                        <div>
-                            <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary">
-                                ${t('nav.notifications')}
-                            </h1>
-                            <p class="text-xs sm:text-sm text-text-muted">
-                                ${unread > 0 ? unread + ' unread' : 'All caught up'}
-                            </p>
-                        </div>
-                    </div>
-                    ${unread > 0 ? `
-                        <button onclick="handleMarkAllRead()" class="flex h-11 items-center gap-2 rounded-xl bg-surface border border-border px-4 text-sm font-medium text-brand select-none active:bg-surface-soft">
-                            ${Icons.check()}
-                            <span class="hidden sm:inline">${t('common.markAllRead')}</span>
-                        </button>
-                    ` : ''}
-                </div>
-
-                <!-- Unread Section -->
-                ${unread > 0 ? `
-                    <div class="mb-6">
-                        <p class="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">New</p>
-                        <div class="w-full min-w-0 space-y-2">
-                            ${notifications.filter(n => !n.read).map(n => {
-                                const c = typeColors[n.type] || typeColors.info;
-                                return `
-                                    <div class="w-full min-w-0 flex items-start gap-4 rounded-2xl border-l-[3px] border-l-brand bg-brand-light/20 p-4 sm:p-5">
-                                        <div class="mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${c.bg} ${c.text}">
-                                            ${c.icon()}
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <p class="text-sm font-medium text-text-primary leading-relaxed">${n.message}</p>
-                                            <p class="mt-2 text-xs text-text-muted">${timeAgo(n.time)}</p>
-                                        </div>
-                                        <span class="mt-2 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-brand"></span>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                ` : ''}
-
-                <!-- Read Section -->
-                <div>
-                    <p class="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">Earlier</p>
-                    ${notifications.filter(n => n.read).length === 0 ? `
-                        <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border p-8 text-center">
-                            <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-surface-soft">
+                <!-- Page Header -->
+                <div class="mb-5">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand text-white">
                                 ${Icons.bell()}
                             </div>
-                            <p class="text-sm font-medium text-text-secondary">No older notifications</p>
-                            <p class="text-xs text-text-muted mt-1">When you get notifications, they'll appear here</p>
+                            <div>
+                                <h1 class="text-lg font-bold text-text-primary">${t('nav.notifications')}</h1>
+                                <p class="text-xs text-text-muted">${unread > 0 ? unread + ' new' : 'Everything read'}</p>
+                            </div>
                         </div>
-                    ` : `
-                        <div class="w-full min-w-0 space-y-2">
-                            ${notifications.filter(n => n.read).map(n => {
-                                const c = typeColors[n.type] || typeColors.info;
-                                return `
-                                    <div class="w-full min-w-0 flex items-start gap-4 rounded-2xl border border-border bg-surface p-4 sm:p-5 opacity-70">
-                                        <div class="mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${c.bg} ${c.text}">
-                                            ${c.icon()}
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <p class="text-sm text-text-secondary leading-relaxed">${n.message}</p>
-                                            <p class="mt-2 text-xs text-text-muted">${timeAgo(n.time)}</p>
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    `}
+                        ${unread > 0 ? `
+                            <button onclick="handleMarkAllRead()" class="flex h-9 items-center gap-1.5 rounded-lg bg-brand-light px-3 text-xs font-semibold text-brand select-none active:bg-brand/20">
+                                ${Icons.check()}
+                                <span>Mark all read</span>
+                            </button>
+                        ` : ''}
+                    </div>
                 </div>
+                
+                ${notifications.length === 0 ? `
+                    <!-- Empty State -->
+                    <div class="flex flex-col items-center justify-center py-16 px-6">
+                        <div class="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-surface-soft">
+                            <span class="text-4xl text-text-muted">${Icons.bell()}</span>
+                        </div>
+                        <h3 class="text-base font-semibold text-text-primary mb-1">All quiet here</h3>
+                        <p class="text-sm text-text-muted text-center max-w-xs">You don't have any notifications yet. We'll let you know when something happens.</p>
+                    </div>
+                ` : `
+                    <!-- Unread Notifications -->
+                    ${unread > 0 ? `
+                        <div class="mb-6">
+                            <div class="mb-2 flex items-center gap-2">
+                                <span class="h-2 w-2 rounded-full bg-brand"></span>
+                                <p class="text-xs font-semibold uppercase tracking-wider text-brand">New</p>
+                            </div>
+                            <div class="space-y-2">
+                                ${notifications.filter(n => !n.read).map(n => renderNotif(n, true)).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Read Notifications -->
+                    ${read.length > 0 ? `
+                        <div>
+                            <p class="mb-2 text-xs font-medium uppercase tracking-wider text-text-muted pl-1">Earlier</p>
+                            <div class="space-y-2">
+                                ${read.map(n => renderNotif(n, false)).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                `}
             </div>
         `;
     },
