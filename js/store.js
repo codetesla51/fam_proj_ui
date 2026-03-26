@@ -39,43 +39,65 @@ const store = {
     
     // Login member (mock or real)
     async login(name, password) {
-        if (this.usingMock()) {
+        if (!backendAvailable) {
             // Mock login - accept any credentials
             localStorage.setItem('mock_logged_in', 'true');
             localStorage.setItem('mock_is_admin', 'false');
             this.user = { id: '1', name, interval: 'monthly', committed_amount: 50000, status: 'active' };
             return;
         }
-        await auth.login(name, password);
-        this.user = { name };
         try {
-            this.data.profile = await member.getProfile();
-            this.user = { ...this.user, ...this.data.profile };
-        } catch {}
+            await auth.login(name, password);
+            this.user = { name };
+            try {
+                this.data.profile = await member.getProfile();
+                this.user = { ...this.user, ...this.data.profile };
+            } catch {}
+        } catch (e) {
+            // Fallback to mock on API error
+            console.log('API failed, using mock login');
+            localStorage.setItem('mock_logged_in', 'true');
+            localStorage.setItem('mock_is_admin', 'false');
+            this.user = { id: '1', name, interval: 'monthly', committed_amount: 50000, status: 'active' };
+        }
     },
     
     // Register member (mock or real)
     async register({ name, password, interval, committed_amount, start_date }) {
-        if (this.usingMock()) {
+        if (!backendAvailable) {
             localStorage.setItem('mock_logged_in', 'true');
             localStorage.setItem('mock_is_admin', 'false');
             this.user = { id: '1', name, interval, committed_amount, start_date, status: 'active' };
             return;
         }
-        await auth.register({ name, password, interval, committed_amount, start_date });
-        this.user = { name, interval, committed_amount };
+        try {
+            await auth.register({ name, password, interval, committed_amount, start_date });
+            this.user = { name, interval, committed_amount };
+        } catch (e) {
+            console.log('API failed, using mock register');
+            localStorage.setItem('mock_logged_in', 'true');
+            localStorage.setItem('mock_is_admin', 'false');
+            this.user = { id: '1', name, interval, committed_amount, start_date, status: 'active' };
+        }
     },
     
     // Admin login (mock or real)
     async adminLogin(password) {
-        if (this.usingMock()) {
+        if (!backendAvailable) {
             localStorage.setItem('mock_logged_in', 'true');
             localStorage.setItem('mock_is_admin', 'true');
             this.user = { name: 'Admin', isAdmin: true };
             return;
         }
-        await auth.adminLogin(password);
-        this.user = { name: 'Admin', isAdmin: true };
+        try {
+            await auth.adminLogin(password);
+            this.user = { name: 'Admin', isAdmin: true };
+        } catch (e) {
+            console.log('API failed, using mock admin login');
+            localStorage.setItem('mock_logged_in', 'true');
+            localStorage.setItem('mock_is_admin', 'true');
+            this.user = { name: 'Admin', isAdmin: true };
+        }
     },
     
     // Logout

@@ -50,13 +50,21 @@ const mockData = {
 let backendAvailable = false;
 async function checkBackend() {
     try {
-        const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(1000) });
-        backendAvailable = res.ok;
+        const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(500) });
+        if (res.ok) {
+            const text = await res.text();
+            // Only mark as available if response is valid JSON (not HTML)
+            if (!text.startsWith('<')) {
+                backendAvailable = true;
+                console.log('Backend available');
+            }
+        }
     } catch {
         backendAvailable = false;
     }
 }
-checkBackend();
+// Delay check to allow page to load first
+setTimeout(checkBackend, 100);
 
 // Token management
 const tokens = {
