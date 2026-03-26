@@ -872,6 +872,52 @@ const pages = {
         `;
     },
     
+    memberSettings: async () => {
+        const name = store.user?.name || 'Member';
+        return `
+            <div class="w-full min-w-0">
+                <div class="mb-6">
+                    <h1 class="text-lg sm:text-xl font-bold text-text-primary flex items-center gap-2">
+                        ${Icons.settings()}
+                        ${t('nav.settings')}
+                    </h1>
+                </div>
+                
+                <!-- Profile -->
+                <div class="w-full min-w-0 mb-4 rounded-xl border border-border bg-surface p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-brand text-white font-bold">
+                            ${name.charAt(0)}
+                        </div>
+                        <div>
+                            <p class="font-semibold">${name}</p>
+                            <p class="text-xs text-text-muted">${t('settings.contactManager')}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Install App -->
+                <div class="w-full min-w-0 mb-4 rounded-xl border border-border bg-surface p-4">
+                    <p class="mb-3 text-xs font-bold uppercase tracking-wider text-text-muted">${t('settings.installApp')}</p>
+                    <button onclick="installApp()" class="flex w-full items-center gap-3 rounded-lg bg-brand-light p-3 text-sm font-semibold text-brand active:bg-brand/20 select-none">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                        ${t('settings.install')}
+                    </button>
+                    <p class="mt-2 text-xs text-text-muted">${t('settings.installPrompt')}</p>
+                </div>
+                
+                <!-- Language -->
+                <div class="w-full min-w-0 rounded-xl border border-border bg-surface p-4">
+                    <p class="mb-3 text-xs font-bold uppercase tracking-wider text-text-muted">${t('settings.language')}</p>
+                    <button onclick="openLangModal()" class="flex w-full items-center gap-3 rounded-lg bg-surface-soft p-3 text-sm font-medium text-text-secondary active:bg-surface-raised select-none">
+                        ${Icons.globe()}
+                        ${getCurrentLangName()}
+                    </button>
+                </div>
+            </div>
+        `;
+    },
+    
     adminCareFund: async () => {
         const allRequests = await store.loadCareFundRequests();
         const requests = allRequests || store.careFundRequests;
@@ -1056,23 +1102,16 @@ const pages = {
         function renderNotif(n, isUnread) {
             if (isUnread) {
                 return `
-                    <div class="group w-full min-w-0">
-                        <div class="relative flex items-start gap-4 rounded-2xl bg-white p-5 shadow-lg border-l-[5px] border-brand hover:shadow-xl transition-all cursor-pointer">
-                            <div class="absolute -left-1.5 top-6 h-3 w-3 rounded-full bg-brand ring-4 ring-brand/20"></div>
-                            <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-hover text-white shadow-md">
+                    <div class="w-full min-w-0">
+                        <div class="flex items-start gap-3 rounded-xl bg-white p-3 sm:p-4 shadow-sm border-l-[3px] border-brand">
+                            <div class="flex h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand">
                                 ${Icons.bell()}
                             </div>
-                            <div class="flex-1 min-w-0 pr-3">
-                                <p class="text-sm font-semibold text-text-primary leading-relaxed">${n.message}</p>
-                                <div class="mt-2 flex items-center gap-2">
-                                    <span class="inline-flex items-center gap-1 rounded-full bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-brand animate-pulse"></span>
-                                        New
-                                    </span>
-                                    <span class="text-[11px] text-text-muted">${timeAgo(n.created_at)}</span>
-                                </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[13px] sm:text-sm font-semibold text-text-primary leading-snug">${n.message}</p>
+                                <p class="mt-1 text-[11px] text-text-muted">${timeAgo(n.created_at)}</p>
                             </div>
-                            <button onclick="handleMarkRead('${n.id}')" class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-surface-soft text-text-muted hover:bg-brand hover:text-white transition-all opacity-0 group-hover:opacity-100 select-none">
+                            <button onclick="handleMarkRead('${n.id}')" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand select-none">
                                 ${Icons.check()}
                             </button>
                         </div>
@@ -1081,16 +1120,13 @@ const pages = {
             }
             return `
                 <div class="w-full min-w-0">
-                    <div class="flex items-start gap-4 rounded-2xl bg-surface-soft/50 p-5 border border-transparent hover:border-border/50 hover:bg-surface-soft transition-all cursor-pointer">
-                        <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-surface-raised text-text-muted">
+                    <div class="flex items-start gap-3 rounded-xl bg-surface-soft p-3 sm:p-4">
+                        <div class="flex h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0 items-center justify-center rounded-lg bg-surface-raised text-text-muted">
                             ${Icons.bell()}
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-[13px] text-text-secondary leading-relaxed">${n.message}</p>
-                            <p class="mt-2 text-[11px] text-text-muted flex items-center gap-1.5">
-                                ${Icons.clock()}
-                                <span>${timeAgo(n.created_at)}</span>
-                            </p>
+                            <p class="text-[13px] text-text-secondary leading-snug">${n.message}</p>
+                            <p class="mt-1 text-[11px] text-text-muted">${timeAgo(n.created_at)}</p>
                         </div>
                     </div>
                 </div>
@@ -1099,69 +1135,51 @@ const pages = {
         
         return `
             <div class="w-full min-w-0">
-                <!-- Hero Header -->
-                <div class="mb-6 flex items-center justify-between">
-                    <div class="flex items-center gap-4">
+                <!-- Header -->
+                <div class="mb-5 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
                         <div class="relative">
-                            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-hover text-white shadow-lg shadow-brand/30">
+                            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand text-white">
                                 ${Icons.bell()}
                             </div>
-                            ${unread.length > 0 ? `
-                                <span class="absolute -top-1.5 -right-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-error text-[11px] font-bold text-white shadow-md ring-2 ring-white">${unread.length > 9 ? '9+' : unread.length}</span>
-                            ` : ''}
+                            ${unread.length > 0 ? `<span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-error text-[10px] font-bold text-white">${unread.length > 9 ? '9+' : unread.length}</span>` : ''}
                         </div>
                         <div>
-                            <h1 class="text-xl sm:text-2xl font-bold text-text-primary">${t('nav.notifications')}</h1>
-                            <p class="text-sm text-text-muted">${unread.length > 0 ? unread.length + ' new alert' + (unread.length > 1 ? 's' : '') : t('common.allCaughtUp')}</p>
+                            <h1 class="text-lg sm:text-xl font-bold text-text-primary">${t('nav.notifications')}</h1>
+                            <p class="text-xs text-text-muted">${unread.length > 0 ? unread.length + ' new' : t('common.allCaughtUp')}</p>
                         </div>
                     </div>
                     ${unread.length > 0 ? `
-                        <button onclick="handleMarkAllRead()" class="flex h-11 items-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-white shadow-md hover:shadow-lg hover:bg-brand-hover transition-all active:scale-95 select-none">
-                            ${Icons.check()}
-                            <span class="hidden sm:inline">${t('common.markAllRead')}</span>
+                        <button onclick="handleMarkAllRead()" class="flex h-10 items-center gap-1.5 rounded-lg bg-brand-light px-3 text-xs sm:text-sm font-semibold text-brand select-none">
+                            ${Icons.check()} <span class="hidden sm:inline">${t('common.markAllRead')}</span>
                         </button>
                     ` : ''}
                 </div>
                 
                 ${notifications.length === 0 ? `
-                    <!-- Empty State -->
-                    <div class="flex flex-col items-center justify-center py-20 px-6">
-                        <div class="relative mb-6">
-                            <div class="flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-surface-soft to-surface-raised">
-                                <span class="text-5xl">${Icons.bell()}</span>
-                            </div>
-                            <div class="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full bg-success text-white shadow-lg">
-                                ${Icons.check()}
-                            </div>
+                    <!-- Empty -->
+                    <div class="flex flex-col items-center justify-center py-16 px-4">
+                        <div class="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-surface-soft">
+                            ${Icons.bell()}
                         </div>
-                        <h3 class="text-xl font-bold text-text-primary mb-2">${t('common.alertsCaughtUp')}</h3>
-                        <p class="text-sm text-text-muted text-center max-w-xs leading-relaxed">${t('common.alertsCatchUpDesc')}</p>
+                        <h3 class="text-base font-semibold text-text-primary mb-1">${t('common.alertsCaughtUp')}</h3>
+                        <p class="text-sm text-text-muted text-center max-w-xs">${t('common.alertsCatchUpDesc')}</p>
                     </div>
                 ` : `
-                    <!-- Unread Section -->
+                    <!-- Unread -->
                     ${unread.length > 0 ? `
-                        <div class="mb-8">
-                            <div class="mb-4 flex items-center gap-3">
-                                <span class="h-2.5 w-2.5 rounded-full bg-brand animate-pulse"></span>
-                                <p class="text-xs font-bold uppercase tracking-widest text-brand">${t('common.new')}</p>
-                                <div class="flex-1 h-px bg-brand/20"></div>
-                                <span class="rounded-full bg-brand/10 px-3 py-1 text-[11px] font-bold text-brand">${unread.length}</span>
-                            </div>
-                            <div class="space-y-3">
+                        <div class="mb-5">
+                            <p class="mb-2 text-[11px] font-bold uppercase tracking-wider text-brand pl-1">${t('common.new')}</p>
+                            <div class="space-y-2">
                                 ${unread.map(n => renderNotif(n, true)).join('')}
                             </div>
                         </div>
                     ` : ''}
                     
-                    <!-- Read Section -->
+                    <!-- Read -->
                     ${read.length > 0 ? `
                         <div>
-                            <div class="mb-4 flex items-center gap-3">
-                                ${Icons.archive()}
-                                <p class="text-xs font-bold uppercase tracking-widest text-text-muted">${t('common.earlier')}</p>
-                                <div class="flex-1 h-px bg-border"></div>
-                                <span class="rounded-full bg-surface-soft px-3 py-1 text-[11px] font-medium text-text-muted">${read.length}</span>
-                            </div>
+                            <p class="mb-2 text-[11px] font-bold uppercase tracking-wider text-text-muted pl-1">${t('common.earlier')}</p>
                             <div class="space-y-2">
                                 ${read.map(n => renderNotif(n, false)).join('')}
                             </div>
