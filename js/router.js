@@ -94,7 +94,7 @@ const router = {
         }
     },
     
-    render() {
+    async render() {
         const path = window.location.pathname;
         const pageName = this.routes[path];
         const app = document.getElementById('app');
@@ -122,28 +122,55 @@ const router = {
             }
         }
         
-        // Render nav + content for protected pages (exclude login pages)
-        if ((path.startsWith('/member') || path.startsWith('/admin')) && path !== '/admin/login') {
-            const navComponents = Nav({ currentPath: path });
-            app.innerHTML = `
-                <div class="min-h-screen bg-surface-soft flex flex-col">
-                    <header class="sticky top-0 z-40">${navComponents.topNav}</header>
-                    <div class="flex flex-1 overflow-hidden">
-                        <aside class="hidden md:flex w-56 flex-shrink-0 border-r border-border bg-surface">
-                            ${navComponents.sidebar}
-                        </aside>
-                        <main class="flex-1 overflow-y-auto overflow-x-hidden overscroll-behavior-y-contain p-4 pb-24 md:pb-8 sm:p-6 lg:p-8">
-                            <div class="mx-auto max-w-4xl w-full min-w-0">
-                                ${pageFn()}
-                            </div>
-                        </main>
+        // Show loading state
+        app.innerHTML = `
+            <div class="min-h-screen flex items-center justify-center bg-surface-soft">
+                <div class="text-center">
+                    <div class="loader mx-auto mb-4"></div>
+                    <p class="text-sm text-text-muted">${t('common.loading')}</p>
+                </div>
+            </div>
+        `;
+        
+        // Load page content (async)
+        try {
+            const content = await pageFn();
+            
+            // Render nav + content for protected pages (exclude login pages)
+            if ((path.startsWith('/member') || path.startsWith('/admin')) && path !== '/admin/login') {
+                const navComponents = Nav({ currentPath: path });
+                app.innerHTML = `
+                    <div class="min-h-screen bg-surface-soft flex flex-col">
+                        <header class="sticky top-0 z-40">${navComponents.topNav}</header>
+                        <div class="flex flex-1 overflow-hidden">
+                            <aside class="hidden md:flex w-56 flex-shrink-0 border-r border-border bg-surface">
+                                ${navComponents.sidebar}
+                            </aside>
+                            <main class="flex-1 overflow-y-auto overflow-x-hidden overscroll-behavior-y-contain p-4 pb-24 md:pb-8 sm:p-6 lg:p-8">
+                                <div class="mx-auto max-w-4xl w-full min-w-0">
+                                    ${content}
+                                </div>
+                            </main>
+                        </div>
+                        <nav class="fixed bottom-0 left-0 right-0 md:hidden z-40">${navComponents.bottomNav}</nav>
+                        ${navComponents.mobileMenu}
                     </div>
-                    <nav class="fixed bottom-0 left-0 right-0 md:hidden z-40">${navComponents.bottomNav}</nav>
-                    ${navComponents.mobileMenu}
+                `;
+            } else {
+                app.innerHTML = content;
+            }
+        } catch (err) {
+            console.error('Page render error:', err);
+            app.innerHTML = `
+                <div class="min-h-screen flex items-center justify-center bg-surface-soft p-6">
+                    <div class="text-center max-w-sm">
+                        <div class="mb-4 text-error">${Icons.alertCircle()}</div>
+                        <h2 class="text-lg font-bold text-text-primary mb-2">${t('common.error')}</h2>
+                        <p class="text-sm text-text-muted mb-4">${err.message || 'Failed to load page'}</p>
+                        <button onclick="router.refresh()" class="h-11 px-6 rounded-xl bg-brand text-white font-medium select-none">${t('common.back')}</button>
+                    </div>
                 </div>
             `;
-        } else {
-            app.innerHTML = pageFn();
         }
         
         // Try to init icons

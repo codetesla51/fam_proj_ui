@@ -381,8 +381,9 @@ const pages = {
     `,
     
     // Member Pages
-    memberDashboard: () => {
-        const d = mockData.dashboard;
+    memberDashboard: async () => {
+        const dashboard = await store.loadDashboard();
+        const d = dashboard || {};
         const name = store.user?.name?.split(' ')[0] || 'Friend';
         return `
             <div class="w-full min-w-0">
@@ -401,58 +402,51 @@ const pages = {
                 
                 <!-- KPI Grid -->
                 <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                        ${KpiCard({ label: 'Family Savings', amount: d.pool1Balance, subtext: t('common.upToDate'), highlight: true })}
-                    ${KpiCard({ label: 'Care Fund', amount: d.pool2Balance, subtext: '5 contributing' })}
-                    ${KpiCard({ label: 'Last Payment', amount: 15000, subtext: 'Folake - 2 days ago' })}
-                    ${KpiCard({ label: 'Alerts', amount: d.pendingRequests, subtext: 'Requests waiting', isCurrency: false })}
+                    ${KpiCard({ label: 'Family Savings', amount: d.my_contributions || 0, subtext: t('common.upToDate'), highlight: true })}
+                    ${KpiCard({ label: 'Care Fund', amount: d.my_pool2_contributions || 0, subtext: (d.member_count || 0) + ' ' + t('common.membersContributing') })}
+                    ${KpiCard({ label: 'Pool Balance', amount: d.pool1_balance || 0, subtext: 'Family total' })}
+                    ${KpiCard({ label: 'Alerts', amount: d.overdue_count || 0, subtext: 'Overdue members', isCurrency: false })}
                 </div>
                 
-                <!-- Progress - Premium -->
+                <!-- Progress -->
                 <div class="w-full min-w-0 mb-6 rounded-2xl border border-border bg-surface p-5 shadow-lg shadow-brand/5">
                     <div class="mb-3 flex items-center justify-between">
                         <span class="text-xs font-bold uppercase tracking-wider text-text-muted">${t('common.thisMonthSavings')}</span>
-                        <span class="text-xs font-bold text-brand bg-brand-light px-2 py-1 rounded-lg">75%</span>
+                        <span class="text-xs font-bold text-brand bg-brand-light px-2 py-1 rounded-lg">${d.active_count || 0}/${d.member_count || 0}</span>
                     </div>
                     <div class="h-3 overflow-hidden rounded-full bg-surface-raised">
-                        <div class="h-full w-3/4 rounded-full bg-gradient-to-r from-brand to-brand-hover transition-all shadow-sm"></div>
+                        <div class="h-full rounded-full bg-gradient-to-r from-brand to-brand-hover transition-all shadow-sm" style="width: ${d.member_count ? Math.round((d.active_count / d.member_count) * 100) : 0}%"></div>
                     </div>
                     <p class="mt-3 text-sm text-text-secondary flex items-center gap-2">
-                        ${Icons.piggyBank()} <span class="font-bold text-text-primary">₦37,500</span> of ₦50,000 saved
+                        ${Icons.users()} <span class="font-bold text-text-primary">${d.active_count || 0}</span> of ${d.member_count || 0} members up to date
                     </p>
                 </div>
                 
-                <!-- Recent Payments - Premium -->
-                <div class="w-full min-w-0">
-                    <div class="mb-3 flex items-center justify-between">
-                        <p class="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-2">
-                            ${Icons.activity()} Recent Activity
-                        </p>
-                        <a href="/member/history" class="text-xs font-semibold text-brand hover:underline select-none">View all</a>
+                <!-- Underfunded Members -->
+                ${d.underfunded_members && d.underfunded_members.length > 0 ? `
+                <div class="w-full min-w-0 mb-6 rounded-2xl border border-error/20 bg-error/5 p-4">
+                    <div class="mb-3 flex items-center gap-2">
+                        ${Icons.alertTriangle()}
+                        <p class="text-sm font-semibold text-error">Members Behind on Savings</p>
                     </div>
                     <div class="w-full min-w-0 space-y-2">
-                        ${d.recentPayments.map(p => `
-                            <div class="flex items-center gap-4 rounded-2xl border border-border bg-surface p-4 hover:shadow-md hover:border-brand/20 transition-all cursor-pointer">
-                                <div class="flex h-12 w-12 items-center justify-center rounded-xl flex-shrink-0 ${p.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
-                                    ${p.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
+                        ${d.underfunded_members.map(m => `
+                            <div class="flex items-center justify-between rounded-xl bg-surface p-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-error/10 text-sm font-bold text-error">
+                                        ${m.name?.charAt(0) || '?'}
+                                    </div>
+                                    <span class="text-sm font-medium">${m.name}</span>
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-bold text-text-primary truncate">${p.memberName}</p>
-                                    <p class="text-xs text-text-muted flex items-center gap-1">
-                                        ${Icons.calendar()} ${formatDate(p.date)}
-                                    </p>
-                                </div>
-                                <div class="text-right flex-shrink-0">
-                                    <p class="text-base font-bold whitespace-nowrap ${p.type === 'credit' ? 'text-success' : 'text-error'}">
-                                        ${p.type === 'credit' ? '+' : '-'}${formatCurrency(p.amount)}
-                                    </p>
-                                </div>
+                                <span class="text-sm font-semibold text-error">${formatCurrency(m.committed_amount - m.current_sum)} behind</span>
                             </div>
                         `).join('')}
                     </div>
                 </div>
+                ` : ''}
                 
                 <!-- CTA -->
-                <div class="w-full min-w-0 mt-6">
+                <div class="w-full min-w-0">
                     <a href="/member/care-fund" class="flex items-center justify-center gap-2.5 rounded-2xl bg-brand p-4 font-semibold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/40 hover:-translate-y-0.5 transition-all select-none">
                         ${Icons.heartHandshake()}
                         <span>Request Family Help</span>
@@ -462,8 +456,9 @@ const pages = {
         `;
     },
     
-    memberSavings: () => {
-        const myTx = mockData.transactions.filter(t => t.memberId === '1' && t.pool === 'pool1');
+    memberSavings: async () => {
+        const txData = await store.loadTransactions({ pool: 'pool1' });
+        const transactions = txData || store.transactions;
         return `
             <div class="w-full min-w-0 mb-6">
                 <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
@@ -475,7 +470,7 @@ const pages = {
             
             <div class="w-full min-w-0">
             ${Card({
-                children: myTx.length ? `
+                children: transactions.length ? `
                     <div class="rounded-xl overflow-hidden border border-border">
                         <div class="overflow-x-auto w-full">
                             <table class="w-full min-w-[520px]">
@@ -488,9 +483,9 @@ const pages = {
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-border">
-                                    ${myTx.map((tx, i) => `
+                                    ${transactions.map((tx, i) => `
                                         <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} hover:bg-surface-raised transition-colors cursor-pointer">
-                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${formatDate(tx.date)}</td>
+                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${formatDate(tx.created_at)}</td>
                                             <td class="whitespace-nowrap px-4 py-3.5 text-sm font-medium ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
                                                 <span class="inline-flex items-center gap-1.5">
                                                     ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()} 
@@ -513,8 +508,10 @@ const pages = {
         `;
     },
     
-    memberCareFund: () => {
-        const myRequests = mockData.careFundRequests.filter(r => r.memberId === '1');
+    memberCareFund: async () => {
+        const dashboard = await store.loadDashboard();
+        const d = dashboard || {};
+        const requests = await store.loadCareFundRequests();
         const occasionIcons = {
             birthday: Icons.cake,
             wedding: Icons.ring,
@@ -532,16 +529,9 @@ const pages = {
                 <p class="text-xs sm:text-sm text-text-muted">Request help from your family</p>
             </div>
             
-            <!-- Balance Card - Premium -->
             <div class="w-full min-w-0 mb-6 rounded-2xl border-2 border-brand/20 bg-gradient-to-br from-brand-light to-white p-5 sm:p-6 shadow-lg shadow-brand/10">
-                <div class="mb-1 text-sm font-bold text-brand flex items-center gap-1.5">
-                    ${Icons.heartHandshake()}
-                    ${t('careFund.balance')}
-                </div>
-                <div class="text-3xl sm:text-4xl font-bold text-brand">${formatCurrency(385000)}</div>
-                        <div class="mt-3 flex items-center gap-2 text-xs text-brand/70">
-                            ${Icons.users()} 5 ${t('common.membersContributing')}
-                        </div>
+                <div class="mb-1 text-sm font-bold text-brand flex items-center gap-1.5">${Icons.heartHandshake()} ${t('careFund.balance')}</div>
+                <div class="text-3xl sm:text-4xl font-bold text-brand">${formatCurrency(d.my_pool2_contributions || 0)}</div>
             </div>
             
             <div class="w-full min-w-0">
@@ -550,10 +540,7 @@ const pages = {
                 children: `
                     <form onsubmit="handleCareFundRequest(event)" class="space-y-5">
                         <div class="space-y-3">
-                            <label class="block text-sm font-bold text-text-primary flex items-center gap-1.5">
-                                ${Icons.helpCircle()}
-                                ${t('careFund.whatFor')}
-                            </label>
+                            <label class="block text-sm font-bold text-text-primary">${t('careFund.whatFor')}</label>
                             <div class="grid grid-cols-3 gap-3">
                                 ${['birthday', 'wedding', 'newBaby', 'graduation', 'medical', 'other'].map(o => `
                                     <button type="button" class="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-border p-4 aspect-square text-xs font-semibold transition-all hover:border-brand hover:bg-brand-light/30 active:scale-95 select-none">
@@ -563,50 +550,37 @@ const pages = {
                                 `).join('')}
                             </div>
                         </div>
-                        
                         <div class="space-y-2">
-                            <label class="block text-sm font-bold text-text-primary flex items-center gap-1.5">
-                                ${Icons.dollarSign()}
-                                ${t('careFund.howMuchNeed')}
-                            </label>
+                            <label class="block text-sm font-bold text-text-primary">${t('careFund.howMuchNeed')}</label>
                             <div class="relative">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
-                                <input type="number" placeholder="0" class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface py-3 pl-10 pr-4 text-lg transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                <span class="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
+                                <input type="number" placeholder="0" class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface py-3 pl-12 pr-4 text-lg font-semibold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                             </div>
                         </div>
-                        
                         <div class="space-y-2">
-                            <label class="block text-sm font-bold text-text-primary flex items-center gap-1.5">
-                                ${Icons.calendar()}
-                                ${t('careFund.whenOccasion')}
-                            </label>
+                            <label class="block text-sm font-bold text-text-primary">${t('careFund.whenOccasion')}</label>
                             ${DatePicker({ id: 'care-date', placeholder: 'Select a date' })}
                         </div>
-                        
-                        <button type="submit" class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-bold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/40 hover:-translate-y-0.5 transition-all select-none">
-                            ${Icons.heartHandshake()}
-                            ${t('careFund.sendRequest')}
+                        <button type="submit" class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-bold text-white shadow-lg shadow-brand/25 transition-all select-none">
+                            ${Icons.heartHandshake()} ${t('careFund.sendRequest')}
                         </button>
                     </form>
                 `
             })}
             </div>
-            
             <div class="w-full min-w-0 mt-6">
                 ${Card({
                     title: t('careFund.pastRequests'),
-                    children: myRequests.length ? `
+                    children: requests.length > 0 ? `
                         <div class="w-full min-w-0 space-y-3">
-                            ${myRequests.map(r => `
-                                <div class="flex items-center gap-4 rounded-2xl border border-border p-4 hover:shadow-md hover:border-brand/30 transition-all">
+                            ${requests.map(r => `
+                                <div class="flex items-center gap-4 rounded-2xl border border-border p-4">
                                     <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-brand/10 text-brand flex-shrink-0">
-                                        ${occasionIcons[r.occasion]()}
+                                        ${occasionIcons[r.occasion] ? occasionIcons[r.occasion]() : Icons.helpCircle()}
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="font-bold text-text-primary">${t('occasions.' + r.occasion)}</p>
-                                        <p class="text-xs text-text-muted flex items-center gap-1">
-                                            ${Icons.calendar()} ${formatDate(r.createdAt)}
-                                        </p>
+                                        <p class="font-bold text-text-primary">${t('occasions.' + r.occasion) || r.occasion}</p>
+                                        <p class="text-xs text-text-muted">${formatDate(r.event_date)}</p>
                                     </div>
                                     <div class="text-right flex-shrink-0">
                                         <p class="font-bold text-text-primary">${formatCurrency(r.amount)}</p>
@@ -621,340 +595,12 @@ const pages = {
         `;
     },
     
-    memberHistory: () => {
-        const myTx = mockData.transactions.filter(t => t.memberId === '1');
-        return `
-            <div class="w-full min-w-0 mb-6">
-                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
-                    ${Icons.history()}
-                    ${t('nav.myHistory')}
-                </h1>
-                <p class="text-xs sm:text-sm text-text-muted">All your transactions across both funds</p>
-            </div>
-            
-            <div class="w-full min-w-0">
-            ${Card({
-                children: myTx.length ? `
-                    <div class="rounded-xl overflow-hidden border border-border">
-                        <div class="overflow-x-auto w-full">
-                            <table class="w-full min-w-[560px]">
-                                <thead>
-                                    <tr class="bg-table-header text-left border-b border-border">
-                                        <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.date')}</th>
-                                        <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.type')}</th>
-                                        <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.fund')}</th>
-                                        <th class="whitespace-nowrap px-4 py-3.5 text-right text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.amount')}</th>
-                                        <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.reason')}</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-border">
-                                    ${myTx.map((tx, i) => `
-                                        <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} hover:bg-surface-raised transition-colors cursor-pointer">
-                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${formatDate(tx.date)}</td>
-                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm font-medium ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
-                                                <span class="inline-flex items-center gap-1.5">
-                                                    ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()} 
-                                                    ${tx.type === 'credit' ? t('table.moneyIn') : t('table.moneyOut')}
-                                                </span>
-                                            </td>
-                                            <td class="whitespace-nowrap px-4 py-3.5">${PoolTag({ pool: tx.pool })}</td>
-                                            <td class="whitespace-nowrap px-4 py-3.5 text-right text-sm font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
-                                                ${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}
-                                            </td>
-                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${tx.reason}</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                ` : EmptyState({ icon: Icons.history(), message: t('common.noData') })
-            })}
-            </div>
-        `;
-    },
-    
-    memberSettings: () => `
-        <div class="w-full min-w-0">
-            <!-- Header -->
-            <div class="mb-6 flex items-center gap-3">
-                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-light text-brand shadow-lg shadow-brand/10">
-                    ${Icons.settings()}
-                </div>
-                <div>
-                    <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary">${t('nav.settings')}</h1>
-                    <p class="text-xs sm:text-sm text-text-muted">${t('common.manageAccount') || 'Manage your account'}</p>
-                </div>
-            </div>
-            
-            <!-- Profile Card - Premium -->
-            <div class="w-full min-w-0 mb-4 rounded-2xl border border-border bg-surface p-6 shadow-lg shadow-brand/5">
-                <div class="flex items-center gap-4">
-                    <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-hover text-white text-2xl font-bold shadow-lg shadow-brand/30">
-                        ${(store.user?.name || 'U').charAt(0)}
-                    </div>
-                    <div>
-                        <p class="text-lg font-bold text-text-primary">${store.user?.name || 'Guest'}</p>
-                        <p class="text-sm text-text-muted flex items-center gap-1">
-                            ${Icons.calendar()} Member since March 2026
-                        </p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Savings Info - Premium -->
-            <div class="w-full min-w-0 mb-4 rounded-2xl border border-border bg-surface p-6 shadow-sm">
-                <p class="mb-4 text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-2">
-                    ${Icons.piggyBank()} Savings Plan
-                </p>
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-surface-soft">
-                        <span class="text-sm text-text-secondary flex items-center gap-2">${Icons.calendar()} Schedule</span>
-                        <span class="text-sm font-bold text-text-primary bg-brand-light px-3 py-1 rounded-lg">Monthly</span>
-                    </div>
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-surface-soft">
-                        <span class="text-sm text-text-secondary flex items-center gap-2">${Icons.dollarSign()} Amount</span>
-                        <span class="text-sm font-bold text-text-primary">${formatCurrency(50000)}</span>
-                    </div>
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-surface-soft">
-                        <span class="text-sm text-text-secondary flex items-center gap-2">${Icons.target()} Status</span>
-                            <span class="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-xs font-bold text-success">
-                            <span class="h-2 w-2 rounded-full bg-success animate-pulse"></span>
-                            ${t('common.upToDate')}
-                        </span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Language - Premium -->
-            <div class="w-full min-w-0 mb-4 rounded-2xl border border-border bg-surface p-6 shadow-sm">
-                <p class="mb-4 text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-2">
-                    ${Icons.globe()} Language
-                </p>
-                <button onclick="openLangModal()" class="flex items-center gap-4 rounded-xl bg-surface-soft p-4 w-full hover:bg-brand-light/30 active:scale-[0.99] transition-all select-none">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-light text-brand shadow-md">
-                        ${Icons.globe()}
-                    </div>
-                    <div class="text-left flex-1">
-                        <p class="text-base font-bold text-text-primary">${getCurrentLangName()}</p>
-                        <p class="text-xs text-text-muted">Tap to change language</p>
-                    </div>
-                    ${Icons.chevronRight()}
-                </button>
-            </div>
-        </div>
-    `,
-    
-    // Admin Pages
-    adminDashboard: () => {
-        const d = mockData.dashboard;
-        return `
-            <div class="w-full min-w-0">
-                <!-- Hero -->
-                <div class="mb-6">
-                    <div class="flex items-center gap-3 mb-1">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-white">
-                            ${Icons.layoutDashboard()}
-                        </div>
-                        <div>
-                            <p class="text-xs text-text-muted">${t('admin.familyOverview')}</p>
-                            <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary">${t('common.familyManager')}</h1>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- KPI Grid -->
-                <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                    ${KpiCard({ label: 'Family Savings', amount: d.pool1Balance, subtext: 'Total Pool 1', highlight: true })}
-                    ${KpiCard({ label: 'Care Fund', amount: d.pool2Balance, subtext: 'Total Pool 2' })}
-                    ${KpiCard({ label: 'Members', amount: d.totalMembers, subtext: 'Family members', isCurrency: false })}
-                    ${KpiCard({ label: 'Pending', amount: d.pendingRequests, subtext: 'Awaiting review', isCurrency: false })}
-                </div>
-                
-                <!-- Behind on Savings -->
-                ${d.behindMembers.length > 0 ? `
-                    <div class="w-full min-w-0 mb-6 rounded-2xl border border-error/20 bg-error/5 p-4">
-                        <div class="mb-3 flex items-center gap-2">
-                            ${Icons.alertTriangle()}
-                            <p class="text-sm font-semibold text-error">Members Behind on Savings</p>
-                        </div>
-                        <div class="w-full min-w-0 space-y-2">
-                            ${d.behindMembers.map(m => `
-                                <div class="flex items-center justify-between rounded-xl bg-surface p-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-error/10 text-sm font-bold text-error">
-                                            ${m.name.split(' ')[1]?.charAt(0) || m.name.charAt(0)}
-                                        </div>
-                                        <span class="text-sm font-medium">${m.name}</span>
-                                    </div>
-                                    <span class="text-sm font-semibold text-error">${formatCurrency(m.gap)} behind</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                ` : ''}
-                
-                <!-- Quick Actions -->
-                <div class="w-full min-w-0">
-                    <p class="mb-3 text-xs font-bold uppercase tracking-wider text-text-muted">Quick Actions</p>
-                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                        <a href="/admin/transactions/new" class="flex items-center justify-center gap-2.5 rounded-2xl bg-brand p-4 font-semibold text-white shadow-lg shadow-brand/20 hover:shadow-xl hover:shadow-brand/30 hover:-translate-y-0.5 transition-all select-none">
-                            ${Icons.plusCircle()}
-                            <span>Record Payment</span>
-                        </a>
-                        <a href="/admin/members" class="flex items-center justify-center gap-2.5 rounded-2xl border-2 border-border bg-surface p-4 font-semibold hover:border-brand hover:text-brand hover:bg-brand-light/30 transition-all select-none">
-                            ${Icons.userPlus()}
-                            <span>Add Member</span>
-                        </a>
-                        <a href="/admin/care-fund" class="flex items-center justify-center gap-2.5 rounded-2xl border-2 border-border bg-surface p-4 font-semibold hover:border-brand hover:text-brand hover:bg-brand-light/30 transition-all select-none">
-                            ${Icons.heartHandshake()}
-                            <span>Help Requests</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        `;
-    },
-    
-    adminTransactionsNew: () => `
-        <div class="w-full min-w-0 mb-6">
-            <a href="/admin/transactions" class="mb-2 inline-flex items-center gap-1 text-sm text-brand flex items-center gap-1 select-none">
-                ${Icons.arrowLeft()}
-                ${t('common.back')}
-            </a>
-            <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
-                ${Icons.plusCircle()}
-                ${t('transaction.recordPayment')}
-            </h1>
-        </div>
-        
-        <div class="w-full min-w-0">
-        ${Card({
-            children: `
-                <form onsubmit="handleRecordPayment(event)" class="space-y-5">
-                    <div class="space-y-1.5">
-                        <label class="block text-sm font-medium text-text-primary flex items-center gap-1">
-                            ${Icons.user()}
-                            ${t('transaction.whichMember')} <span class="text-error">*</span>
-                        </label>
-                        <select class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                            <option value="">Select a family member</option>
-                            ${mockData.members.map(m => `<option value="${m.id}">${m.name}</option>`).join('')}
-                        </select>
-                    </div>
-                    
-                    <div class="space-y-2">
-                        <label class="block text-sm font-medium text-text-primary">${t('transaction.whichFund')}</label>
-                        <div class="flex rounded-xl border border-border p-1">
-                            <button type="button" onclick="setFund('pool1')" id="fund-pool1" class="flex-1 rounded-lg py-3 text-sm font-medium bg-brand text-white select-none">
-                                ${Icons.piggyBank()} ${t('member.familySavings')}
-                            </button>
-                            <button type="button" onclick="setFund('pool2')" id="fund-pool2" class="flex-1 rounded-lg py-3 text-sm font-medium text-text-secondary select-none">
-                                ${Icons.heartHandshake()} ${t('member.careFund')}
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-2">
-                        <label class="block text-sm font-medium text-text-primary">${t('transaction.whatType')}</label>
-                        <div class="flex rounded-xl border border-border p-1">
-                            <button type="button" onclick="setTxType('credit')" id="type-credit" class="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium bg-success text-white select-none">
-                                ${Icons.arrowUpRight()} ${t('table.moneyIn')}
-                            </button>
-                            <button type="button" onclick="setTxType('debit')" id="type-debit" class="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium text-text-secondary select-none">
-                                ${Icons.arrowDownRight()} ${t('table.moneyOut')}
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-1.5">
-                        <label class="block text-sm font-medium text-text-primary flex items-center gap-1">
-                            ${Icons.dollarSign()}
-                            ${t('transaction.howMuch')} <span class="text-error">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">₦</span>
-                            <input type="number" placeholder="0" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-1.5">
-                        <label class="block text-sm font-medium text-text-primary flex items-center gap-1">
-                            ${Icons.filePlus()}
-                            ${t('transaction.whatFor')} <span class="text-error">*</span>
-                        </label>
-                        <input type="text" placeholder="${t('transaction.whatForHelper')}" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                    </div>
-                    
-                    <button type="submit" class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-medium text-white transition-colors active:bg-brand-hover select-none">
-                        ${Icons.check()}
-                        ${t('transaction.recordBtn')}
-                    </button>
-                </form>
-            `
-        })}
-        </div>
-    `,
-    
-    adminTransactions: () => `
-        <div class="w-full min-w-0 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
-                    ${Icons.clipboardList()}
-                    ${t('transaction.familyMoneyHistory')}
-                </h1>
-                <p class="text-xs sm:text-sm text-text-muted">All family transactions</p>
-            </div>
-            <button class="flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm font-medium transition-colors hover:bg-surface-soft active:bg-surface-raised select-none">
-                ${Icons.download()}
-                Export CSV
-            </button>
-        </div>
-        
-        <div class="w-full min-w-0">
-        ${Card({
-            children: `
-                <div class="rounded-xl overflow-hidden border border-border">
-                    <div class="overflow-x-auto w-full">
-                        <table class="w-full min-w-[640px]">
-                            <thead>
-                                <tr class="bg-table-header text-left border-b border-border">
-                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.member')}</th>
-                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.fund')}</th>
-                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.type')}</th>
-                                    <th class="whitespace-nowrap px-4 py-3.5 text-right text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.amount')}</th>
-                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.reason')}</th>
-                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.date')}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-border">
-                                ${mockData.transactions.map((tx, i) => `
-                                    <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} hover:bg-surface-raised transition-colors cursor-pointer">
-                                        <td class="whitespace-nowrap px-4 py-3.5 text-sm font-medium">${tx.memberName}</td>
-                                        <td class="whitespace-nowrap px-4 py-3.5">${PoolTag({ pool: tx.pool })}</td>
-                                        <td class="whitespace-nowrap px-4 py-3.5 text-sm font-medium ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
-                                            ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
-                                        </td>
-                                        <td class="whitespace-nowrap px-4 py-3.5 text-right text-sm font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
-                                            ${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}
-                                        </td>
-                                        <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${tx.reason}</td>
-                                        <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${formatDate(tx.date)}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `
-        })}
-        </div>
-    `,
-    
-    adminCareFund: () => {
-        const pending = mockData.careFundRequests.filter(r => r.status === 'pending');
-        const accepted = mockData.careFundRequests.filter(r => r.status === 'accepted');
-        const rejected = mockData.careFundRequests.filter(r => r.status === 'rejected');
+    adminCareFund: async () => {
+        const allRequests = await store.loadCareFundRequests();
+        const requests = allRequests || store.careFundRequests;
+        const pending = requests.filter(r => r.status === 'pending');
+        const accepted = requests.filter(r => r.status === 'approved' || r.status === 'accepted');
+        const rejected = requests.filter(r => r.status === 'rejected');
         const activeTab = window.careFundTab || 'pending';
         
         const occasionIcons = {
@@ -998,12 +644,12 @@ const pages = {
                         <div class="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                             <div class="flex items-center gap-3">
                                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-brand/10 text-brand flex-shrink-0">
-                                    ${occasionIcons[r.occasion]()}
+                                    ${occasionIcons[r.occasion] ? occasionIcons[r.occasion]() : Icons.helpCircle()}
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-text-primary">${r.memberName}</h3>
+                                    <h3 class="font-bold text-text-primary">${r.member_name || 'Member'}</h3>
                                     <p class="text-sm text-text-muted flex items-center gap-1">
-                                        ${occasionIcons[r.occasion]()} ${t('occasions.' + r.occasion)} • ${formatDate(r.eventDate)}
+                                        ${t('occasions.' + r.occasion) || r.occasion} • ${formatDate(r.event_date)}
                                     </p>
                                 </div>
                             </div>
@@ -1023,10 +669,10 @@ const pages = {
                         ${activeTab === 'pending' ? `
                         <div class="flex gap-3">
                             <button onclick="acceptRequest('${r.id}')" class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-success py-3 font-medium text-white transition-colors active:bg-success/90 select-none">
-                                ${Icons.check()} Accept
+                                ${Icons.check()} ${t('careFund.accepted')}
                             </button>
-                            <button onclick="showDeclineForm('${r.id}')" class="flex flex-1 items-center justify-center gap-2 rounded-xl border border-error py-3 font-medium text-error transition-colors active:bg-error/5 select-none">
-                                ${Icons.x()} Decline
+                            <button onclick="declineRequest('${r.id}')" class="flex flex-1 items-center justify-center gap-2 rounded-xl border border-error py-3 font-medium text-error transition-colors active:bg-error/5 select-none">
+                                ${Icons.x()} ${t('careFund.notApproved')}
                             </button>
                         </div>
                         ` : ''}
@@ -1036,14 +682,20 @@ const pages = {
         `;
     },
     
-    adminMembers: () => `
+    adminMembers: async () => {
+        // Note: GET /admin/members is not in the API spec, but we can get members from dashboard
+        const dashboard = await store.loadDashboard();
+        const memberCount = dashboard?.member_count || 0;
+        const underfunded = dashboard?.underfunded_members || [];
+        
+        return `
         <div class="w-full min-w-0 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                     ${Icons.users()}
                     ${t('nav.familyMembers')}
                 </h1>
-                <p class="text-xs sm:text-sm text-text-muted">${mockData.members.length} family members</p>
+                <p class="text-xs sm:text-sm text-text-muted">${memberCount} family members</p>
             </div>
             <button onclick="showAddMemberModal()" class="flex h-12 items-center justify-center gap-2 rounded-xl bg-brand px-4 font-semibold text-white shadow-lg shadow-brand/20 hover:shadow-xl hover:shadow-brand/30 hover:-translate-y-0.5 transition-all select-none sm:w-auto">
                 ${Icons.userPlus()}
@@ -1052,37 +704,35 @@ const pages = {
         </div>
         
         <div class="w-full min-w-0 grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
-            ${mockData.members.map(m => `
+            ${underfunded.map(m => `
                 <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-5 shadow-sm hover:shadow-lg hover:shadow-brand/5 transition-all group">
                     <div class="mb-4 flex items-center gap-3">
                         <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand/10 to-brand/5 text-xl font-bold text-brand flex-shrink-0 group-hover:scale-110 transition-transform">
-                            ${m.name.split(' ').map(n => n[0]).join('')}
+                            ${m.name?.charAt(0) || '?'}
                         </div>
                         <div class="min-w-0 flex-1">
                             <h3 class="font-bold text-text-primary truncate text-base">${m.name}</h3>
                             <p class="text-xs text-text-muted flex items-center gap-1">
-                                ${Icons.clock()} ${m.schedule === 'weekly' ? 'Weekly' : 'Monthly'} saver
+                                ${Icons.target()} Committed: ${formatCurrency(m.committed_amount)}
                             </p>
                         </div>
                     </div>
                     <div class="mb-4 space-y-2.5 rounded-xl bg-surface-soft p-4">
                         <div class="flex justify-between items-center">
-                            <span class="text-xs text-text-muted flex items-center gap-1.5">${Icons.target()} Committed</span>
-                            <span class="font-bold text-text-primary">${formatCurrency(m.committedAmount)}</span>
+                            <span class="text-xs text-text-muted flex items-center gap-1.5">${Icons.piggyBank()} Current</span>
+                            <span class="font-bold text-text-primary">${formatCurrency(m.current_sum)}</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-xs text-text-muted flex items-center gap-1.5">${Icons.calendar()} Last Payment</span>
-                            <span class="font-medium text-text-secondary">${formatDate(m.lastPaymentDate, { month: 'short', year: 'numeric' })}</span>
+                            <span class="text-xs text-text-muted flex items-center gap-1.5">${Icons.alertTriangle()} Gap</span>
+                            <span class="font-medium ${m.committed_amount - m.current_sum > 0 ? 'text-error' : 'text-success'}">${formatCurrency(m.committed_amount - m.current_sum)}</span>
                         </div>
                     </div>
-                    <div class="flex items-center justify-between">
-                        ${StatusBadge({ status: m.status })}
-                        <button class="text-sm text-brand font-medium flex items-center gap-1.5 hover:bg-brand-light px-3 py-1.5 rounded-lg transition-colors select-none">
-                            ${Icons.refreshCw()} ${t('members.resetPassword')}
-                        </button>
-                    </div>
                 </div>
-            `).join('')}
+            `).join('') || `
+                <div class="col-span-full text-center py-12">
+                    <p class="text-sm text-text-muted">All members are up to date or no member data available</p>
+                </div>
+            `}
         </div>
         
         <!-- Add Member Modal - Bottom Sheet -->
@@ -1118,7 +768,8 @@ const pages = {
                 </form>
             </div>
         </div>
-    `,
+    `;
+    },
     
     notifications: () => {
         const notifications = store.notifications;
