@@ -384,70 +384,80 @@ const pages = {
     memberDashboard: async () => {
         const dashboard = await store.loadDashboard();
         const d = dashboard || {};
-        const recentTx = await store.loadTransactions();
-        const recent = (recentTx || []).slice(0, 5);
+        const txData = await store.loadTransactions();
+        const recent = (txData || []).slice(0, 5);
         const name = store.user?.name?.split(' ')[0] || 'Friend';
         return `
             <div class="w-full min-w-0">
                 <!-- Greeting -->
-                <div class="mb-6">
-                    <div class="flex items-center gap-3 mb-1">
-                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-hover text-white font-bold text-xl shadow-lg shadow-brand/30">
-                            ${name.charAt(0)}
-                        </div>
-                        <div>
-                            <p class="text-xs font-medium text-text-muted">${getGreeting()}</p>
-                            <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-text-primary">${name}</h1>
-                        </div>
-                    </div>
+                <div class="mb-5">
+                    <p class="text-xs font-medium text-text-muted">${getGreeting()}</p>
+                    <h1 class="text-xl sm:text-2xl font-bold text-text-primary">${name}</h1>
                 </div>
                 
                 <!-- KPI Grid -->
-                <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <div class="w-full min-w-0 mb-5 grid grid-cols-2 gap-3">
                     ${KpiCard({ label: 'My Savings', amount: d.my_contributions || 0, subtext: t('common.upToDate'), highlight: true })}
-                    ${KpiCard({ label: 'Care Fund', amount: d.my_pool2_contributions || 0, subtext: (d.member_count || 0) + ' ' + t('common.membersContributing') })}
-                    ${KpiCard({ label: 'Family Pool', amount: d.pool1_balance || 0, subtext: 'Total saved' })}
-                    ${KpiCard({ label: 'Members', amount: d.member_count || 0, subtext: (d.active_count || 0) + ' active', isCurrency: false })}
+                    ${KpiCard({ label: 'Care Fund', amount: d.my_pool2_contributions || 0, subtext: (d.member_count || 0) + ' members' })}
                 </div>
                 
                 <!-- Recent Activity -->
-                <div class="w-full min-w-0 mb-6">
+                <div class="w-full min-w-0 mb-5">
                     <div class="mb-3 flex items-center justify-between">
-                        <p class="text-xs font-bold uppercase tracking-wider text-text-muted">${Icons.activity()} Recent Activity</p>
-                        <a href="/member/history" class="text-xs font-semibold text-brand hover:underline select-none">View all</a>
+                        <p class="text-xs font-bold uppercase tracking-wider text-text-muted">Recent Activity</p>
+                        <a href="/member/history" class="text-xs font-semibold text-brand select-none">View all</a>
                     </div>
                     ${recent.length > 0 ? `
                         <div class="w-full min-w-0 space-y-2">
                             ${recent.map(p => `
-                                <div class="flex items-center gap-4 rounded-2xl border border-border bg-surface p-4 hover:shadow-md hover:border-brand/20 transition-all cursor-pointer">
-                                    <div class="flex h-12 w-12 items-center justify-center rounded-xl flex-shrink-0 ${p.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
+                                <div class="flex items-center gap-3 rounded-xl border border-border bg-surface p-3">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${p.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
                                         ${p.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-bold text-text-primary truncate">${PoolTag({ pool: p.pool })}</p>
-                                        <p class="text-xs text-text-muted">${p.reason}</p>
+                                        <p class="text-sm font-semibold text-text-primary truncate">${p.reason}</p>
+                                        <p class="text-xs text-text-muted">${PoolTag({ pool: p.pool })} · ${formatDate(p.created_at)}</p>
                                     </div>
-                                    <div class="text-right flex-shrink-0">
-                                        <p class="text-base font-bold whitespace-nowrap ${p.type === 'credit' ? 'text-success' : 'text-error'}">
-                                            ${p.type === 'credit' ? '+' : '-'}${formatCurrency(p.amount)}
-                                        </p>
-                                        <p class="text-xs text-text-muted">${formatDate(p.created_at)}</p>
-                                    </div>
+                                    <p class="text-sm font-bold whitespace-nowrap ${p.type === 'credit' ? 'text-success' : 'text-error'}">
+                                        ${p.type === 'credit' ? '+' : '-'}${formatCurrency(p.amount)}
+                                    </p>
                                 </div>
                             `).join('')}
                         </div>
-                    ` : EmptyState({ icon: Icons.wallet(), message: t('member.noPayments') })}
+                    ` : `
+                        <div class="rounded-xl border border-border bg-surface p-6 text-center">
+                            <p class="text-sm text-text-muted">${t('member.noPayments')}</p>
+                        </div>
+                    `}
                 </div>
+                
+                ${d.underfunded_members && d.underfunded_members.length > 0 ? `
+                <div class="w-full min-w-0 mb-5">
+                    <div class="mb-3 flex items-center gap-2">
+                        ${Icons.alertTriangle()}
+                        <p class="text-xs font-bold uppercase tracking-wider text-warning">Behind on Savings</p>
+                    </div>
+                    <div class="space-y-2">
+                        ${d.underfunded_members.map(m => `
+                            <div class="flex items-center justify-between rounded-xl border border-border bg-surface p-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-error/10 text-sm font-bold text-error">${m.name?.charAt(0) || '?'}</div>
+                                    <span class="text-sm font-medium">${m.name}</span>
+                                </div>
+                                <span class="text-xs font-semibold text-error">${formatCurrency(m.committed_amount - m.current_sum)} behind</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ` : ''}
                 
                 <!-- Quick Actions -->
                 <div class="w-full min-w-0 grid grid-cols-2 gap-3">
-                    <a href="/member/transfer" class="flex items-center justify-center gap-2.5 rounded-2xl bg-brand p-4 font-semibold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/40 hover:-translate-y-0.5 transition-all select-none">
-                        ${Icons.arrowRightLeft()}
-                        <span>Transfer</span>
+                    <a href="/member/transfer" class="flex items-center justify-center gap-2 rounded-xl bg-brand p-3.5 font-semibold text-white text-sm select-none">
+                        ${Icons.arrowRightLeft()} Transfer
                     </a>
-                    <a href="/member/care-fund" class="flex items-center justify-center gap-2.5 rounded-2xl border-2 border-border bg-surface p-4 font-semibold hover:border-brand hover:text-brand hover:bg-brand-light/30 transition-all select-none">
-                        ${Icons.heartHandshake()}
-                        <span>Request Help</span>
+                    <a href="/member/care-fund" class="flex items-center justify-center gap-2 rounded-xl border border-border bg-surface p-3.5 font-semibold text-sm select-none">
+                        ${Icons.heartHandshake()} Request Help
                     </a>
                 </div>
             </div>
