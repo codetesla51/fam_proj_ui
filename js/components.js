@@ -24,6 +24,7 @@ const Icons = {
     arrowUpRight: () => icon('arrow-up-right'),
     arrowDownRight: () => icon('arrow-down-right'),
     arrowRightLeft: () => icon('arrow-right-left'),
+    arrowRight: () => icon('arrow-right'),
     download: () => icon('download'),
     externalLink: () => icon('external-link'),
     alertCircle: () => icon('alert-circle'),

@@ -392,53 +392,59 @@ const pages = {
         return `
             <div class="w-full min-w-0">
                 <!-- Greeting -->
-                <div class="mb-5">
-                    <p class="text-xs font-medium text-text-muted">${getGreeting()}</p>
-                    <h1 class="text-xl sm:text-2xl font-bold text-text-primary">${name}</h1>
+                <div class="mb-6 flex items-center gap-4">
+                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-white text-xl font-bold shadow-lg shadow-brand/30">
+                        ${name.charAt(0)}
+                    </div>
+                    <div>
+                        <p class="text-sm text-text-muted">${getGreeting()}</p>
+                        <h1 class="text-2xl font-bold text-text-primary">${name}</h1>
+                    </div>
                 </div>
                 
                 <!-- KPI Grid -->
-                <div class="w-full min-w-0 mb-5 grid grid-cols-2 gap-3">
+                <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-4">
                     ${KpiCard({ label: 'My Savings', amount: d.my_contributions || 0, subtext: t('common.upToDate'), highlight: true })}
                     ${KpiCard({ label: 'Care Fund', amount: d.my_pool2_contributions || 0, subtext: (d.member_count || 0) + ' members' })}
                 </div>
                 
                 <!-- Recent Activity -->
-                <div class="w-full min-w-0 mb-5">
-                    <div class="mb-3 flex items-center justify-between">
-                        <p class="text-xs font-bold uppercase tracking-wider text-text-muted">Recent Activity</p>
-                        <a href="/member/history" class="text-xs font-semibold text-brand select-none">View all</a>
+                <div class="w-full min-w-0 mb-6">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h2 class="text-base font-bold text-text-primary">Recent Activity</h2>
+                        <a href="/member/history" class="flex items-center gap-1 text-sm font-semibold text-brand select-none">${Icons.arrowRight()} View all</a>
                     </div>
                     ${recent.length > 0 ? `
-                        <div class="w-full min-w-0 space-y-2">
+                        <div class="w-full min-w-0 space-y-3">
                             ${recent.map(p => `
-                                <div class="flex items-center gap-3 rounded-xl border border-border bg-surface p-3">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${p.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
+                                <div class="flex items-center gap-4 rounded-2xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
+                                    <div class="flex h-11 w-11 items-center justify-center rounded-xl flex-shrink-0 ${p.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
                                         ${p.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <p class="text-sm font-semibold text-text-primary truncate">${p.reason}</p>
-                                        <p class="text-xs text-text-muted">${PoolTag({ pool: p.pool })} · ${formatDate(p.created_at)}</p>
+                                        <p class="text-xs text-text-muted mt-0.5">${formatDate(p.created_at)}</p>
                                     </div>
-                                    <p class="text-sm font-bold whitespace-nowrap ${p.type === 'credit' ? 'text-success' : 'text-error'}">
+                                    <p class="text-base font-bold whitespace-nowrap ${p.type === 'credit' ? 'text-success' : 'text-error'}">
                                         ${p.type === 'credit' ? '+' : '-'}${formatCurrency(p.amount)}
                                     </p>
                                 </div>
                             `).join('')}
                         </div>
                     ` : `
-                        <div class="rounded-xl border border-border bg-surface p-6 text-center">
+                        <div class="rounded-2xl border border-border bg-surface p-8 text-center">
+                            <div class="mb-3 flex justify-center">${Icons.wallet()}</div>
                             <p class="text-sm text-text-muted">${t('member.noPayments')}</p>
                         </div>
                     `}
                 </div>
                 
                 <!-- Quick Actions -->
-                <div class="w-full min-w-0 grid grid-cols-2 gap-3">
-                    <a href="/member/transfer" class="flex items-center justify-center gap-2 rounded-xl bg-brand p-3.5 font-semibold text-white text-sm select-none">
+                <div class="w-full min-w-0 grid grid-cols-2 gap-4">
+                    <a href="/member/transfer" class="flex items-center justify-center gap-3 rounded-2xl bg-brand p-4 font-bold text-white shadow-lg shadow-brand/25 select-none">
                         ${Icons.arrowRightLeft()} Transfer
                     </a>
-                    <a href="/member/care-fund" class="flex items-center justify-center gap-2 rounded-xl border border-border bg-surface p-3.5 font-semibold text-sm select-none">
+                    <a href="/member/care-fund" class="flex items-center justify-center gap-3 rounded-2xl border-2 border-border bg-surface p-4 font-bold select-none">
                         ${Icons.heartHandshake()} Request Help
                     </a>
                 </div>
@@ -705,15 +711,14 @@ const pages = {
         const d = dashboard || {};
         return `
             <div class="w-full min-w-0">
+                <!-- Title -->
                 <div class="mb-6">
-                    <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
-                        ${Icons.layoutDashboard()}
-                        ${t('admin.familyOverview')}
-                    </h1>
-                    <p class="text-xs sm:text-sm text-text-muted">Family savings at a glance</p>
+                    <h1 class="text-2xl font-bold text-text-primary">${t('admin.familyOverview')}</h1>
+                    <p class="text-sm text-text-muted mt-1">Family savings at a glance</p>
                 </div>
                 
-                <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <!-- KPI Grid -->
+                <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
                     ${KpiCard({ label: 'Family Savings', amount: d.pool1_balance || 0, subtext: 'Total Pool 1', highlight: true })}
                     ${KpiCard({ label: 'Care Fund', amount: d.pool2_balance || 0, subtext: 'Total Pool 2' })}
                     ${KpiCard({ label: 'Members', amount: d.member_count || 0, subtext: (d.active_count || 0) + ' active', isCurrency: false })}
@@ -721,28 +726,35 @@ const pages = {
                 </div>
                 
                 ${d.underfunded_members && d.underfunded_members.length > 0 ? `
-                    <div class="w-full min-w-0 mb-6 rounded-2xl border border-error/20 bg-error/5 p-4">
-                        <div class="mb-3 flex items-center gap-2">${Icons.alertTriangle()}<p class="text-sm font-semibold text-error">Members Behind on Savings</p></div>
-                        <div class="w-full min-w-0 space-y-2">
+                    <div class="w-full min-w-0 mb-6 rounded-2xl border border-error/20 bg-error/5 p-5">
+                        <div class="mb-4 flex items-center gap-2">${Icons.alertTriangle()}<p class="text-sm font-bold text-error">Members Behind on Savings</p></div>
+                        <div class="w-full min-w-0 space-y-3">
                             ${d.underfunded_members.map(m => `
                                 <div class="flex items-center justify-between rounded-xl bg-surface p-3">
                                     <div class="flex items-center gap-3">
-                                        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-error/10 text-sm font-bold text-error">${m.name?.charAt(0) || '?'}</div>
-                                        <span class="text-sm font-medium">${m.name}</span>
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-error/10 text-sm font-bold text-error">${m.name?.charAt(0) || '?'}</div>
+                                        <span class="text-sm font-semibold">${m.name}</span>
                                     </div>
-                                    <span class="text-sm font-semibold text-error">${formatCurrency(m.committed_amount - m.current_sum)} behind</span>
+                                    <span class="text-sm font-bold text-error">${formatCurrency(m.committed_amount - m.current_sum)} behind</span>
                                 </div>
                             `).join('')}
                         </div>
                     </div>
-                ` : `<div class="w-full min-w-0 mb-6 rounded-2xl border border-success/20 bg-success/5 p-4 flex items-center gap-3">${Icons.checkCircle()}<p class="text-sm font-medium text-success">${t('admin.allUpToDate')}</p></div>`}
+                ` : `<div class="w-full min-w-0 mb-6 rounded-2xl border border-success/20 bg-success/5 p-5 flex items-center gap-3">${Icons.checkCircle()}<p class="text-sm font-semibold text-success">${t('admin.allUpToDate')}</p></div>`}
                 
+                <!-- Quick Actions -->
                 <div class="w-full min-w-0">
-                    <p class="mb-3 text-xs font-bold uppercase tracking-wider text-text-muted">${t('admin.quickActions')}</p>
-                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                        <a href="/admin/transactions/new" class="flex items-center justify-center gap-2.5 rounded-2xl bg-brand p-4 font-semibold text-white shadow-lg shadow-brand/20 hover:shadow-xl hover:shadow-brand/30 hover:-translate-y-0.5 transition-all select-none">${Icons.plusCircle()}<span>${t('admin.recordPayment')}</span></a>
-                        <a href="/admin/members" class="flex items-center justify-center gap-2.5 rounded-2xl border-2 border-border bg-surface p-4 font-semibold hover:border-brand hover:text-brand hover:bg-brand-light/30 transition-all select-none">${Icons.userPlus()}<span>${t('admin.addMember')}</span></a>
-                        <a href="/admin/care-fund" class="flex items-center justify-center gap-2.5 rounded-2xl border-2 border-border bg-surface p-4 font-semibold hover:border-brand hover:text-brand hover:bg-brand-light/30 transition-all select-none">${Icons.heartHandshake()}<span>${t('admin.reviewRequests')}</span></a>
+                    <h2 class="mb-4 text-base font-bold text-text-primary">${t('admin.quickActions')}</h2>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <a href="/admin/transactions/new" class="flex items-center justify-center gap-3 rounded-2xl bg-brand p-5 font-bold text-white shadow-lg shadow-brand/25 select-none">
+                            ${Icons.plusCircle()}<span>${t('admin.recordPayment')}</span>
+                        </a>
+                        <a href="/admin/members" class="flex items-center justify-center gap-3 rounded-2xl border-2 border-border bg-surface p-5 font-bold select-none">
+                            ${Icons.userPlus()}<span>${t('admin.addMember')}</span>
+                        </a>
+                        <a href="/admin/care-fund" class="flex items-center justify-center gap-3 rounded-2xl border-2 border-border bg-surface p-5 font-bold select-none">
+                            ${Icons.heartHandshake()}<span>${t('admin.reviewRequests')}</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -869,39 +881,37 @@ const pages = {
         return `
             <div class="w-full min-w-0">
                 <div class="mb-6">
-                    <h1 class="text-lg sm:text-xl font-bold text-text-primary flex items-center gap-2">
-                        ${Icons.settings()}
-                        ${t('nav.settings')}
-                    </h1>
+                    <h1 class="text-2xl font-bold text-text-primary">${t('nav.settings')}</h1>
+                    <p class="text-sm text-text-muted mt-1">Manage your account</p>
                 </div>
                 
                 <!-- Profile -->
-                <div class="w-full min-w-0 mb-4 rounded-xl border border-border bg-surface p-4">
-                    <div class="flex items-center gap-3">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-brand text-white font-bold">
+                <div class="w-full min-w-0 mb-5 rounded-2xl border border-border bg-surface p-5">
+                    <div class="flex items-center gap-4">
+                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-white text-xl font-bold shadow-lg shadow-brand/30">
                             ${name.charAt(0)}
                         </div>
                         <div>
-                            <p class="font-semibold">${name}</p>
-                            <p class="text-xs text-text-muted">${t('settings.contactManager')}</p>
+                            <p class="text-lg font-bold">${name}</p>
+                            <p class="text-sm text-text-muted">${t('settings.contactManager')}</p>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Install App -->
-                <div class="w-full min-w-0 mb-4 rounded-xl border border-border bg-surface p-4">
-                    <p class="mb-3 text-xs font-bold uppercase tracking-wider text-text-muted">${t('settings.installApp')}</p>
-                    <button onclick="installApp()" class="flex w-full items-center gap-3 rounded-lg bg-brand-light p-3 text-sm font-semibold text-brand active:bg-brand/20 select-none">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                <div class="w-full min-w-0 mb-5 rounded-2xl border border-border bg-surface p-5">
+                    <h2 class="mb-4 text-sm font-bold uppercase tracking-wider text-text-muted">${t('settings.installApp')}</h2>
+                    <button onclick="installApp()" class="flex w-full items-center gap-4 rounded-xl bg-brand-light p-4 text-base font-bold text-brand select-none">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                         ${t('settings.install')}
                     </button>
-                    <p class="mt-2 text-xs text-text-muted">${t('settings.installPrompt')}</p>
+                    <p class="mt-3 text-sm text-text-muted">${t('settings.installPrompt')}</p>
                 </div>
                 
                 <!-- Language -->
-                <div class="w-full min-w-0 rounded-xl border border-border bg-surface p-4">
-                    <p class="mb-3 text-xs font-bold uppercase tracking-wider text-text-muted">${t('settings.language')}</p>
-                    <button onclick="openLangModal()" class="flex w-full items-center gap-3 rounded-lg bg-surface-soft p-3 text-sm font-medium text-text-secondary active:bg-surface-raised select-none">
+                <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-5">
+                    <h2 class="mb-4 text-sm font-bold uppercase tracking-wider text-text-muted">${t('settings.language')}</h2>
+                    <button onclick="openLangModal()" class="flex w-full items-center gap-4 rounded-xl bg-surface-soft p-4 text-base font-semibold text-text-primary select-none">
                         ${Icons.globe()}
                         ${getCurrentLangName()}
                     </button>
