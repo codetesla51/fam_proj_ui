@@ -975,7 +975,7 @@ const pages = {
 };
 
 // Event Handlers
-async function handleLogin(e) {
+function handleLogin(e) {
     e.preventDefault();
     const name = document.getElementById('login-name').value;
     const password = document.getElementById('login-password').value;
@@ -987,14 +987,15 @@ async function handleLogin(e) {
         return;
     }
     
-    const result = await store.login(name, password, false);
-    if (result.success) {
-        store.addNotification('Welcome back, ' + name + '!', 'success');
-        router.navigate('/member/dashboard');
-    } else {
-        errorEl.querySelector('span:last-child').textContent = result.error;
-        errorEl.classList.remove('hidden');
-    }
+    store.login(name, password, false).then(result => {
+        if (result.success) {
+            store.addNotification('Welcome back, ' + name + '!', 'success');
+            router.navigate('/member/dashboard');
+        } else {
+            errorEl.querySelector('span:last-child').textContent = result.error;
+            errorEl.classList.remove('hidden');
+        }
+    });
 }
 
 function handleRegister(e) {
@@ -1013,11 +1014,12 @@ function handleRegister(e) {
         return;
     }
     
-    const result = await store.register(name, password, 'monthly', 0, '');
-    if (result.success) {
-        store.addNotification('Account created!', 'success');
-        router.navigate('/member/dashboard');
-    }
+    store.register(name, password, 'monthly', 0, '').then(result => {
+        if (result.success) {
+            store.addNotification('Account created!', 'success');
+            router.navigate('/member/dashboard');
+        }
+    });
 }
 
 function handleAdminLogin(e) {
@@ -1025,14 +1027,15 @@ function handleAdminLogin(e) {
     const password = document.getElementById('admin-password').value;
     const errorEl = document.getElementById('admin-error');
     
-    const result = await store.login('admin', password, true);
-    if (result.success) {
-        store.addNotification('Welcome, Manager!', 'success');
-        router.navigate('/admin/dashboard');
-    } else {
-        errorEl.querySelector('span:last-child').textContent = result.error;
-        errorEl.classList.remove('hidden');
-    }
+    store.login('admin', password, true).then(result => {
+        if (result.success) {
+            store.addNotification('Welcome, Manager!', 'success');
+            router.navigate('/admin/dashboard');
+        } else {
+            errorEl.querySelector('span:last-child').textContent = result.error;
+            errorEl.classList.remove('hidden');
+        }
+    });
 }
 
 function handleMarkAllRead() {
