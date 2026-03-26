@@ -144,6 +144,7 @@ async function refreshAccessToken() {
         if (res.ok) {
             const data = await res.json();
             tokens.access = data.access_token;
+            tokens.refresh = data.refresh_token;
             return true;
         }
         return false;
@@ -283,9 +284,11 @@ const member = {
         }));
     },
     
-    // Get own care fund requests (NOTE: not in router, use dashboard)
+    // Get own care fund requests (NOTE: not registered in backend, use dashboard)
     async getCareFundRequests() {
-        return handleResponse(apiFetch('/carefund/requests/mine'));
+        // Backend route /carefund/requests/mine is NOT registered
+        // Members must use dashboard data
+        return [];
     },
     
     // Get notifications
