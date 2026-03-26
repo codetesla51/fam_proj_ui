@@ -212,6 +212,3 @@ const store = {
         localStorage.removeItem('notifications');
     }
 };
-
-// Initialize store when loaded
-document.addEventListener('DOMContentLoaded', () => store.init());

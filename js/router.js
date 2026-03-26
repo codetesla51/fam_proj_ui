@@ -170,8 +170,3 @@ const router = {
         this.render();
     }
 };
-
-// Initialize router when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    router.init();
-});

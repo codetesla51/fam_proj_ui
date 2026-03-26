@@ -97,14 +97,20 @@
     <script src="js/router.js"></script>
     
     <script>
-        // Start router
-        if (typeof router !== 'undefined') {
+        // Single initialization point
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize store first
+            store.init();
+            // Then start router
             router.init();
-        }
+            // Render language options
+            renderLangOptions();
+        });
         
         // Render language options
         function renderLangOptions() {
             var container = document.getElementById('lang-options');
+            if (!container) return;
             var langs = [
                 { code: 'en', name: 'English', flag: '🇬🇧' },
                 { code: 'yo', name: 'Yorùbá', flag: '🇳🇬' },
@@ -116,22 +122,7 @@
                     '<span class="flex items-center gap-3"><span class="font-medium">' + lang.name + '</span></span>' +
                     '<span class="check hidden text-brand">✓</span></button>';
             }).join('');
-            updateLangButtons();
         }
-        
-        function updateLangButtons() {
-            var buttons = document.querySelectorAll('.lang-btn');
-            buttons.forEach(function(btn) {
-                var check = btn.querySelector('.check');
-                if (btn.dataset.lang === currentLang) {
-                    check.classList.remove('hidden');
-                } else {
-                    check.classList.add('hidden');
-                }
-            });
-        }
-        
-        renderLangOptions();
     </script>
 </body>
 </html>
