@@ -117,9 +117,6 @@ const pages = {
                 
                 <!-- Manager Link - Mobile -->
                 <div class="pb-8 text-center lg:hidden">
-                    <a href="/admin/login" class="text-sm text-text-muted hover:text-brand transition-colors select-none">
-                        Family Manager? <span class="font-semibold">Sign in here</span>
-                    </a>
                 </div>
             </div>
         </div>

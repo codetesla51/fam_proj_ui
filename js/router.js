@@ -110,8 +110,8 @@ const router = {
             return;
         }
         
-        // Check auth for protected routes
-        if (path.startsWith('/member') || path.startsWith('/admin')) {
+        // Check auth for protected routes (exclude login pages)
+        if ((path.startsWith('/member') || path.startsWith('/admin')) && path !== '/admin/login') {
             if (!store.isLoggedIn()) {
                 this.navigate('/login');
                 return;
@@ -122,8 +122,8 @@ const router = {
             }
         }
         
-        // Render nav + content for protected pages
-        if (path.startsWith('/member') || path.startsWith('/admin')) {
+        // Render nav + content for protected pages (exclude login pages)
+        if ((path.startsWith('/member') || path.startsWith('/admin')) && path !== '/admin/login') {
             const navComponents = Nav({ currentPath: path });
             app.innerHTML = `
                 <div class="min-h-screen bg-surface-soft flex flex-col">
