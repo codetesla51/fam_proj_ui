@@ -718,19 +718,22 @@ const pages = {
                 ` : ''}
                 
                 <!-- Quick Actions -->
-                <div class="w-full min-w-0 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    <a href="/admin/transactions/new" class="flex items-center justify-center gap-2.5 rounded-2xl bg-brand p-4 font-medium text-white active:bg-brand-hover select-none">
-                        ${Icons.plusCircle()}
-                        <span>Record Payment</span>
-                    </a>
-                    <a href="/admin/members" class="flex items-center justify-center gap-2.5 rounded-2xl border border-border bg-surface p-4 font-medium active:bg-surface-soft select-none">
-                        ${Icons.users()}
-                        <span>Add Member</span>
-                    </a>
-                    <a href="/admin/care-fund" class="flex items-center justify-center gap-2.5 rounded-2xl border border-border bg-surface p-4 font-medium active:bg-surface-soft select-none">
-                        ${Icons.heartHandshake()}
-                        <span>Help Requests</span>
-                    </a>
+                <div class="w-full min-w-0">
+                    <p class="mb-3 text-xs font-bold uppercase tracking-wider text-text-muted">Quick Actions</p>
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        <a href="/admin/transactions/new" class="flex items-center justify-center gap-2.5 rounded-2xl bg-brand p-4 font-semibold text-white shadow-lg shadow-brand/20 hover:shadow-xl hover:shadow-brand/30 hover:-translate-y-0.5 transition-all select-none">
+                            ${Icons.plusCircle()}
+                            <span>Record Payment</span>
+                        </a>
+                        <a href="/admin/members" class="flex items-center justify-center gap-2.5 rounded-2xl border-2 border-border bg-surface p-4 font-semibold hover:border-brand hover:text-brand hover:bg-brand-light/30 transition-all select-none">
+                            ${Icons.userPlus()}
+                            <span>Add Member</span>
+                        </a>
+                        <a href="/admin/care-fund" class="flex items-center justify-center gap-2.5 rounded-2xl border-2 border-border bg-surface p-4 font-semibold hover:border-brand hover:text-brand hover:bg-brand-light/30 transition-all select-none">
+                            ${Icons.heartHandshake()}
+                            <span>Help Requests</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         `;
