@@ -280,36 +280,6 @@ function Nav({ currentPath }) {
         `
     };
 }
-        <nav class="sticky top-0 z-40 border-b border-border bg-surface">
-            <div class="flex h-14 items-center justify-between px-4">
-                <div class="flex items-center gap-4">
-                    <button onclick="toggleMobileMenu()" class="flex h-11 w-11 items-center justify-center rounded-xl hover:bg-surface-soft active:bg-surface-raised md:hidden">
-                        ${Icons.menu()}
-                    </button>
-                    <span class="text-lg font-bold text-brand flex items-center gap-2">
-                        <span class="text-brand">${Icons.building()}</span>
-                        ${t('app.name')}
-                    </span>
-                </div>
-                <div class="flex items-center gap-1 sm:gap-2">
-                    <a href="/notifications" class="relative flex h-11 w-11 items-center justify-center rounded-xl hover:bg-surface-soft active:bg-surface-raised">
-                        ${Icons.bell()}
-                        ${unread > 0 ? `<span class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-error text-xs font-bold text-white">${unread > 9 ? '9+' : unread}</span>` : ''}
-                    </a>
-                    <button onclick="openLangModal()" class="flex h-11 items-center gap-2 rounded-xl px-3 text-text-secondary hover:bg-surface-soft active:bg-surface-raised sm:px-4">
-                        ${Icons.globe()}
-                        <span class="hidden sm:inline text-sm font-medium">${getCurrentLangName()}</span>
-                    </button>
-                    ${user ? `
-                        <button onclick="store.logout()" class="flex h-11 w-11 items-center justify-center rounded-xl text-text-secondary hover:bg-surface-soft active:bg-surface-raised hover:text-error">
-                            ${Icons.logOut()}
-                        </button>
-                    ` : ''}
-                </div>
-            </div>
-        </nav>
-    `;
-}
 
 function getCurrentLangName() {
     const langs = { en: 'English', yo: 'Yorùbá', ig: 'Igbo', ha: 'Hausa' };
