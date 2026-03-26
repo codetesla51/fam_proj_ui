@@ -431,26 +431,6 @@ const pages = {
                     `}
                 </div>
                 
-                ${d.underfunded_members && d.underfunded_members.length > 0 ? `
-                <div class="w-full min-w-0 mb-5">
-                    <div class="mb-3 flex items-center gap-2">
-                        ${Icons.alertTriangle()}
-                        <p class="text-xs font-bold uppercase tracking-wider text-warning">Behind on Savings</p>
-                    </div>
-                    <div class="space-y-2">
-                        ${d.underfunded_members.map(m => `
-                            <div class="flex items-center justify-between rounded-xl border border-border bg-surface p-3">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-error/10 text-sm font-bold text-error">${m.name?.charAt(0) || '?'}</div>
-                                    <span class="text-sm font-medium">${m.name}</span>
-                                </div>
-                                <span class="text-xs font-semibold text-error">${formatCurrency(m.committed_amount - m.current_sum)} behind</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                ` : ''}
-                
                 <!-- Quick Actions -->
                 <div class="w-full min-w-0 grid grid-cols-2 gap-3">
                     <a href="/member/transfer" class="flex items-center justify-center gap-2 rounded-xl bg-brand p-3.5 font-semibold text-white text-sm select-none">
@@ -1109,92 +1089,49 @@ const pages = {
         const unread = notifications.filter(n => !n.read);
         const read = notifications.filter(n => n.read);
         
-        function renderNotif(n, isUnread) {
-            if (isUnread) {
-                return `
-                    <div class="w-full min-w-0">
-                        <div class="flex items-start gap-3 rounded-xl bg-white p-3 sm:p-4 shadow-sm border-l-[3px] border-brand">
-                            <div class="flex h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand">
-                                ${Icons.bell()}
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-[13px] sm:text-sm font-semibold text-text-primary leading-snug">${n.message}</p>
-                                <p class="mt-1 text-[11px] text-text-muted">${timeAgo(n.created_at)}</p>
-                            </div>
-                            <button onclick="handleMarkRead('${n.id}')" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand select-none">
-                                ${Icons.check()}
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
+        function item(n, isUnread) {
             return `
-                <div class="w-full min-w-0">
-                    <div class="flex items-start gap-3 rounded-xl bg-surface-soft p-3 sm:p-4">
-                        <div class="flex h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0 items-center justify-center rounded-lg bg-surface-raised text-text-muted">
+                <div class="flex items-start gap-3 p-4 ${isUnread ? 'bg-white shadow-sm' : 'bg-surface-soft'} rounded-xl border-l-[3px] ${isUnread ? 'border-brand' : 'border-transparent'}">
+                    <div class="flex-shrink-0 mt-0.5">
+                        <div class="flex h-9 w-9 items-center justify-center rounded-full ${isUnread ? 'bg-brand text-white' : 'bg-surface-raised text-text-muted'}">
                             ${Icons.bell()}
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-[13px] text-text-secondary leading-snug">${n.message}</p>
-                            <p class="mt-1 text-[11px] text-text-muted">${timeAgo(n.created_at)}</p>
-                        </div>
                     </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm ${isUnread ? 'font-semibold text-text-primary' : 'text-text-secondary'} leading-snug">${n.message}</p>
+                        <p class="mt-1.5 text-[11px] text-text-muted">${timeAgo(n.created_at)}</p>
+                    </div>
+                    ${isUnread ? `
+                        <button onclick="handleMarkRead('${n.id}')" class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-brand/10 text-brand hover:bg-brand hover:text-white transition-colors select-none">
+                            ${Icons.check()}
+                        </button>
+                    ` : ''}
                 </div>
             `;
         }
         
         return `
             <div class="w-full min-w-0">
-                <!-- Header -->
-                <div class="mb-5 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="relative">
-                            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand text-white">
-                                ${Icons.bell()}
-                            </div>
-                            ${unread.length > 0 ? `<span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-error text-[10px] font-bold text-white">${unread.length > 9 ? '9+' : unread.length}</span>` : ''}
-                        </div>
-                        <div>
-                            <h1 class="text-lg sm:text-xl font-bold text-text-primary">${t('nav.notifications')}</h1>
-                            <p class="text-xs text-text-muted">${unread.length > 0 ? unread.length + ' new' : t('common.allCaughtUp')}</p>
-                        </div>
-                    </div>
+                <!-- Top -->
+                <div class="mb-4 flex items-center justify-between">
+                    <h1 class="text-lg font-bold text-text-primary">${t('nav.notifications')}</h1>
                     ${unread.length > 0 ? `
-                        <button onclick="handleMarkAllRead()" class="flex h-10 items-center gap-1.5 rounded-lg bg-brand-light px-3 text-xs sm:text-sm font-semibold text-brand select-none">
-                            ${Icons.check()} <span class="hidden sm:inline">${t('common.markAllRead')}</span>
-                        </button>
+                        <button onclick="handleMarkAllRead()" class="text-xs font-semibold text-brand select-none">Mark all read</button>
                     ` : ''}
                 </div>
                 
                 ${notifications.length === 0 ? `
-                    <!-- Empty -->
-                    <div class="flex flex-col items-center justify-center py-16 px-4">
-                        <div class="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-surface-soft">
+                    <div class="flex flex-col items-center py-20">
+                        <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-soft text-text-muted">
                             ${Icons.bell()}
                         </div>
-                        <h3 class="text-base font-semibold text-text-primary mb-1">${t('common.alertsCaughtUp')}</h3>
-                        <p class="text-sm text-text-muted text-center max-w-xs">${t('common.alertsCatchUpDesc')}</p>
+                        <p class="text-sm text-text-muted">${t('common.allCaughtUp')}</p>
                     </div>
                 ` : `
-                    <!-- Unread -->
-                    ${unread.length > 0 ? `
-                        <div class="mb-5">
-                            <p class="mb-2 text-[11px] font-bold uppercase tracking-wider text-brand pl-1">${t('common.new')}</p>
-                            <div class="space-y-2">
-                                ${unread.map(n => renderNotif(n, true)).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-                    
-                    <!-- Read -->
-                    ${read.length > 0 ? `
-                        <div>
-                            <p class="mb-2 text-[11px] font-bold uppercase tracking-wider text-text-muted pl-1">${t('common.earlier')}</p>
-                            <div class="space-y-2">
-                                ${read.map(n => renderNotif(n, false)).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
+                    <div class="space-y-2">
+                        ${unread.map(n => item(n, true)).join('')}
+                        ${read.map(n => item(n, false)).join('')}
+                    </div>
                 `}
             </div>
         `;
