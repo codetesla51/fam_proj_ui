@@ -1,4 +1,5 @@
 // API Service - All backend communication
+// Frontend runs on 5173, backend runs on 8080 (CORS hardcoded to 5173)
 const API_BASE = 'http://localhost:8080';
 
 // Mock data for development (when backend is not running)
@@ -151,14 +152,21 @@ async function refreshAccessToken() {
     }
 }
 
-// Parse JSON response
+// Parse response (handles both JSON and plain text errors)
 async function handleResponse(response) {
     const res = await response;
+    const contentType = res.headers.get('content-type') || '';
+    
     if (!res.ok) {
-        const error = await res.json().catch(() => ({ message: 'Something went wrong' }));
-        throw new Error(error.message || error.error || `Request failed: ${res.status}`);
+        // Backend returns plain text errors, not JSON
+        const text = await res.text();
+        throw new Error(text || `Request failed: ${res.status}`);
     }
-    return res.json();
+    
+    if (contentType.includes('application/json')) {
+        return res.json();
+    }
+    return res.text();
 }
 
 // ===== AUTH ENDPOINTS =====
@@ -180,14 +188,10 @@ const auth = {
     async register({ name, password, interval, committed_amount, start_date }) {
         const data = await handleResponse(apiFetch('/members', {
             method: 'POST',
-            body: JSON.stringify({ name, password, interval, committed_amount, start_date })
+            body: JSON.stringify({ name, password, interval, committed_amount: String(committed_amount), start_date })
         }));
-        // Auto-login after register if tokens returned
-        if (data.access_token) {
-            tokens.access = data.access_token;
-            tokens.refresh = data.refresh_token;
-            tokens.isAdmin = 'false';
-        }
+        // Backend returns { status: "created" } without tokens
+        // User must login after registering
         return data;
     },
     
@@ -261,7 +265,7 @@ const member = {
     async transferPool(amount) {
         return handleResponse(apiFetch('/pool/transfer', {
             method: 'POST',
-            body: JSON.stringify({ amount })
+            body: JSON.stringify({ amount: String(amount), reason: 'Pool 2 to Pool 1 transfer' })
         }));
     },
     
@@ -280,7 +284,9 @@ const member = {
     
     // Get notifications
     async getNotifications() {
-        return handleResponse(apiFetch('/notifications/mine'));
+        const data = await handleResponse(apiFetch('/notifications/mine'));
+        // Backend returns array directly, not wrapped in { notifications: [...] }
+        return { notifications: Array.isArray(data) ? data : [] };
     },
     
     // Mark notification as read
@@ -330,7 +336,7 @@ const admin = {
     async createTransaction({ member_id, pool, type, amount, reason, receipt_url }) {
         return handleResponse(apiFetch('/transactions', {
             method: 'POST',
-            body: JSON.stringify({ member_id, pool, type, amount, reason, receipt_url })
+            body: JSON.stringify({ member_id, pool, type, amount: String(amount), reason, receipt_url })
         }));
     },
     
@@ -346,11 +352,15 @@ const admin = {
     
     // Get general ledger
     async getGeneralLedger({ pool, from, to } = {}) {
-        const params = new URLSearchParams();
-        if (pool) params.set('pool', pool);
-        if (from) params.set('from', from);
-        if (to) params.set('to', to);
-        return handleResponse(apiFetch(`/transactions/general?${params}`));
+        // Backend uses request body, not query params
+        const body = {};
+        if (pool) body.pool = pool;
+        if (from) body.start_date = from;
+        if (to) body.end_date = to;
+        return handleResponse(apiFetch('/transactions/general', {
+            method: 'GET',
+            body: JSON.stringify(body)
+        }));
     },
     
     // Get all care fund requests
@@ -365,7 +375,7 @@ const admin = {
         if (status === 'rejected' && rejection_reason) {
             body.rejection_reason = rejection_reason;
         }
-        return handleResponse(apiFetch(`/carefund/requests/update/${id}`, {
+        return handleResponse(apiFetch(`/carefund/requests/update/${id}/`, {
             method: 'PUT',
             body: JSON.stringify(body)
         }));

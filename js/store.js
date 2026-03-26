@@ -70,15 +70,11 @@ const store = {
             this.user = { id: '1', name, interval, committed_amount, start_date, status: 'active' };
             return;
         }
-        try {
-            await auth.register({ name, password, interval, committed_amount, start_date });
-            this.user = { name, interval, committed_amount };
-        } catch (e) {
-            console.log('API failed, using mock register');
-            localStorage.setItem('mock_logged_in', 'true');
-            localStorage.setItem('mock_is_admin', 'false');
-            this.user = { id: '1', name, interval, committed_amount, start_date, status: 'active' };
-        }
+        // Register returns { status: "created" } without tokens
+        // Must login after registering
+        await auth.register({ name, password, interval, committed_amount, start_date });
+        // Auto-login
+        await this.login(name, password);
     },
     
     // Admin login (mock or real)
