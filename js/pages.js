@@ -623,80 +623,53 @@ const pages = {
         const dashboard = await store.loadDashboard();
         const d = dashboard || {};
         const requests = await store.loadCareFundRequests();
-        const occasionIcons = {
-            birthday: Icons.cake,
-            wedding: Icons.ring,
-            newBaby: Icons.baby,
-            graduation: Icons.graduationCap,
-            medical: Icons.stethoscope,
-            other: Icons.helpCircle
-        };
         return `
             <div class="w-full min-w-0 mb-6">
-                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
-                    ${Icons.heartHandshake()}
-                    ${t('nav.careFund')}
-                </h1>
-                <p class="text-xs sm:text-sm text-text-muted">Request help from your family</p>
+                <h1 class="text-2xl font-bold text-text-primary">${t('nav.careFund')}</h1>
+                <p class="text-sm text-text-muted mt-1">Request help from your family</p>
             </div>
             
-            <div class="w-full min-w-0 mb-6 rounded-2xl border-2 border-brand/20 bg-gradient-to-br from-brand-light to-white p-5 sm:p-6 shadow-lg shadow-brand/10">
-                <div class="mb-1 text-sm font-bold text-brand flex items-center gap-1.5">${Icons.heartHandshake()} ${t('careFund.balance')}</div>
-                <div class="text-3xl sm:text-4xl font-bold text-brand">${formatCurrency(d.my_pool2_contributions || 0)}</div>
+            <!-- Balance -->
+            <div class="w-full min-w-0 mb-6 rounded-2xl border-2 border-brand/20 bg-gradient-to-br from-brand-light to-white p-5 shadow-lg shadow-brand/10">
+                <p class="text-sm font-bold text-brand mb-1">${t('careFund.balance')}</p>
+                <p class="text-3xl font-bold text-brand">${formatCurrency(d.my_pool2_contributions || 0)}</p>
             </div>
             
+            <!-- Request Form -->
+            <div class="w-full min-w-0 mb-6">
+                ${Card({
+                    title: t('careFund.requestHelp'),
+                    children: `
+                        <form onsubmit="handleCareFundRequest(event)" class="space-y-5">
+                            <div class="space-y-2">
+                                <label class="block text-sm font-bold text-text-primary">${t('careFund.howMuchNeed')}</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
+                                    <input type="number" id="care-amount" placeholder="0"
+                                        class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface pl-12 pr-4 text-lg font-bold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                </div>
+                            </div>
+                            <button type="submit" id="care-btn" class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-brand text-lg font-bold text-white shadow-lg shadow-brand/25 select-none">
+                                ${Icons.heartHandshake()} ${t('careFund.sendRequest')}
+                            </button>
+                        </form>
+                    `
+                })}
+            </div>
+            
+            <!-- Past Requests -->
             <div class="w-full min-w-0">
-            ${Card({
-                title: t('careFund.requestHelp'),
-                children: `
-                    <form onsubmit="handleCareFundRequest(event)" class="space-y-5">
-                        <div class="space-y-3">
-                            <label class="block text-sm font-bold text-text-primary">${t('careFund.whatFor')}</label>
-                            <div class="grid grid-cols-3 gap-3">
-                                ${['birthday', 'wedding', 'newBaby', 'graduation', 'medical', 'other'].map(o => `
-                                    <button type="button" class="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-border p-4 aspect-square text-xs font-semibold transition-all hover:border-brand hover:bg-brand-light/30 active:scale-95 select-none">
-                                        <span class="text-3xl text-brand">${occasionIcons[o]()}</span>
-                                        <span class="text-center text-text-secondary">${t('occasions.' + o)}</span>
-                                    </button>
-                                `).join('')}
-                            </div>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="block text-sm font-bold text-text-primary">${t('careFund.howMuchNeed')}</label>
-                            <div class="relative">
-                                <span class="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
-                                <input type="number" placeholder="0" class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface py-3 pl-12 pr-4 text-lg font-semibold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                            </div>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="block text-sm font-bold text-text-primary">${t('careFund.whenOccasion')}</label>
-                            ${DatePicker({ id: 'care-date', placeholder: 'Select a date' })}
-                        </div>
-                        <button type="submit" class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-bold text-white shadow-lg shadow-brand/25 transition-all select-none">
-                            ${Icons.heartHandshake()} ${t('careFund.sendRequest')}
-                        </button>
-                    </form>
-                `
-            })}
-            </div>
-            <div class="w-full min-w-0 mt-6">
                 ${Card({
                     title: t('careFund.pastRequests'),
                     children: requests.length > 0 ? `
-                        <div class="w-full min-w-0 space-y-3">
+                        <div class="space-y-3">
                             ${requests.map(r => `
-                                <div class="flex items-center gap-4 rounded-2xl border border-border p-4">
-                                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-brand/10 text-brand flex-shrink-0">
-                                        ${occasionIcons[r.occasion] ? occasionIcons[r.occasion]() : Icons.helpCircle()}
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="font-bold text-text-primary">${t('occasions.' + r.occasion) || r.occasion}</p>
-                                        <p class="text-xs text-text-muted">${formatDate(r.event_date)}</p>
-                                    </div>
-                                    <div class="text-right flex-shrink-0">
+                                <div class="flex items-center justify-between rounded-xl border border-border bg-surface-soft p-4">
+                                    <div>
                                         <p class="font-bold text-text-primary">${formatCurrency(r.amount)}</p>
-                                        ${StatusBadge({ status: r.status })}
+                                        <p class="text-xs text-text-muted mt-0.5">${formatDate(r.event_date || r.created_at)}</p>
                                     </div>
+                                    ${StatusBadge({ status: r.status })}
                                 </div>
                             `).join('')}
                         </div>
@@ -1398,23 +1371,22 @@ async function handleAddMember(e) {
 // Member - Submit Care Fund Request
 async function handleCareFundRequest(e) {
     e.preventDefault();
-    const form = e.target;
-    const amount = form.querySelector('input[type="number"]')?.value;
-    const btn = form.querySelector('button[type="submit"]');
+    const amount = document.getElementById('care-amount')?.value;
+    const btn = document.getElementById('care-btn');
     
-    if (!amount) {
+    if (!amount || parseInt(amount) <= 0) {
         showToast(t('validation.required'), 'error');
         return;
     }
     
     btn.disabled = true;
+    btn.innerHTML = '<div class="loader !w-5 !h-5 !border-2"></div> ' + t('common.loading');
     
     try {
-        const dateInput = document.getElementById('care-date-value');
         await store.submitCareFundRequest({
             amount: parseInt(amount),
             occasion: 'other',
-            event_date: dateInput?.value || new Date().toISOString().split('T')[0],
+            event_date: new Date().toISOString().split('T')[0],
             description: ''
         });
         showToast(t('common.success'), 'success');
@@ -1423,6 +1395,7 @@ async function handleCareFundRequest(e) {
         showToast(err.message || t('common.error'), 'error');
     } finally {
         btn.disabled = false;
+        btn.innerHTML = Icons.heartHandshake() + ' ' + t('careFund.sendRequest');
     }
 }
 
@@ -1508,8 +1481,8 @@ async function handleTransferSubmit(e) {
     btn.innerHTML = '<div class="loader !w-5 !h-5 !border-2"></div> ' + t('common.loading');
     
     try {
-        await store.transferPool(parseInt(amount));
-        showToast(t('common.success'), 'success');
+        const result = await store.transferPool(parseInt(amount));
+        showToast('Transfer complete! New Care Fund balance: ' + formatCurrency(result.pool2_balance), 'success');
         router.refresh();
     } catch (err) {
         showToast(err.message || t('common.error'), 'error');
