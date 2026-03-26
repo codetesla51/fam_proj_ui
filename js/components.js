@@ -170,7 +170,7 @@ const Icons = {
 function Nav({ currentPath }) {
     const isAdmin = store.isAdmin();
     const user = store.user;
-    const unread = store.unreadCount();
+    const unread = store.unreadCount;
     
     const memberNav = [
         { href: '/member/dashboard', label: t('nav.home'), icon: Icons.home },
