@@ -253,7 +253,7 @@ const pages = {
                 ${KpiCard({ label: t('member.familySavings'), amount: d.pool1Balance, subtext: t('member.upToDate'), highlight: true })}
                 ${KpiCard({ label: t('member.careFund'), amount: d.pool2Balance, subtext: '5 members contributing' })}
                 ${KpiCard({ label: t('member.lastPayment'), amount: 15000, subtext: 'Folake - 2 days ago' })}
-                ${KpiCard({ label: t('member.alerts'), amount: d.pendingRequests, subtext: 'Help requests waiting' })}
+                ${KpiCard({ label: t('member.alerts'), amount: d.pendingRequests, subtext: 'Help requests waiting', isCurrency: false })}
             </div>
             
             <div class="mb-2 h-2 overflow-hidden rounded-full bg-surface-raised">
@@ -552,8 +552,8 @@ const pages = {
             <div class="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
                 ${KpiCard({ label: t('member.familySavings'), amount: d.pool1Balance, subtext: 'Total Pool 1', highlight: true })}
                 ${KpiCard({ label: t('member.careFund'), amount: d.pool2Balance, subtext: 'Total Pool 2' })}
-                ${KpiCard({ label: t('admin.totalMembers'), amount: d.totalMembers, subtext: 'Family members' })}
-                ${KpiCard({ label: t('admin.pendingRequests'), amount: d.pendingRequests, subtext: 'Awaiting review' })}
+                ${KpiCard({ label: t('admin.totalMembers'), amount: d.totalMembers, subtext: 'Family members', isCurrency: false })}
+                ${KpiCard({ label: t('admin.pendingRequests'), amount: d.pendingRequests, subtext: 'Awaiting review', isCurrency: false })}
             </div>
             
             ${Card({
@@ -909,7 +909,7 @@ const pages = {
                     <p class="text-sm text-text-muted">${unread} unread</p>
                 </div>
                 ${unread > 0 ? `
-                    <button onclick="store.markAllRead()" class="flex h-11 items-center justify-center gap-2 text-sm font-medium text-brand hover:underline">
+                    <button onclick="handleMarkAllRead()" class="flex h-11 items-center justify-center gap-2 text-sm font-medium text-brand hover:underline">
                         ${Icons.check()} ${t('common.markAllRead')}
                     </button>
                 ` : ''}
@@ -925,7 +925,7 @@ const pages = {
                             <div class="flex-1">
                                 <p class="text-sm">${n.message}</p>
                                 <p class="mt-1 text-xs text-text-muted flex items-center gap-1">
-                                    ${Icons.clock()} ${n.time}
+                                    ${Icons.clock()} ${timeAgo(n.time)}
                                 </p>
                             </div>
                             ${!n.read ? '<span class="h-2 w-2 rounded-full bg-brand"></span>' : ''}
@@ -975,7 +975,7 @@ const pages = {
 };
 
 // Event Handlers
-function handleLogin(e) {
+async function handleLogin(e) {
     e.preventDefault();
     const name = document.getElementById('login-name').value;
     const password = document.getElementById('login-password').value;
@@ -987,10 +987,14 @@ function handleLogin(e) {
         return;
     }
     
-    errorEl.classList.add('hidden');
-    store.setUser({ id: '1', name, role: 'member' });
-    store.addNotification('Welcome back, ' + name + '!', 'success');
-    router.navigate('/member/dashboard');
+    const result = await store.login(name, password, false);
+    if (result.success) {
+        store.addNotification('Welcome back, ' + name + '!', 'success');
+        router.navigate('/member/dashboard');
+    } else {
+        errorEl.querySelector('span:last-child').textContent = result.error;
+        errorEl.classList.remove('hidden');
+    }
 }
 
 function handleRegister(e) {
@@ -1009,9 +1013,11 @@ function handleRegister(e) {
         return;
     }
     
-    store.setUser({ id: Date.now().toString(), name, role: 'member' });
-    store.addNotification('Account created successfully!', 'success');
-    router.navigate('/member/dashboard');
+    const result = await store.register(name, password, 'monthly', 0, '');
+    if (result.success) {
+        store.addNotification('Account created!', 'success');
+        router.navigate('/member/dashboard');
+    }
 }
 
 function handleAdminLogin(e) {
@@ -1019,14 +1025,19 @@ function handleAdminLogin(e) {
     const password = document.getElementById('admin-password').value;
     const errorEl = document.getElementById('admin-error');
     
-    if (password === 'admin123') {
-        store.setUser({ id: 'admin', name: 'Family Manager', role: 'admin' });
+    const result = await store.login('admin', password, true);
+    if (result.success) {
         store.addNotification('Welcome, Manager!', 'success');
         router.navigate('/admin/dashboard');
     } else {
-        errorEl.querySelector('span:last-child').textContent = t('auth.wrongCredentials');
+        errorEl.querySelector('span:last-child').textContent = result.error;
         errorEl.classList.remove('hidden');
     }
+}
+
+function handleMarkAllRead() {
+    store.markAllRead();
+    router.refresh();
 }
 
 function togglePassword(id) {

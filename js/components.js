@@ -187,7 +187,8 @@ function Nav({ currentPath }) {
     
     const nav = isAdmin ? adminNav : memberNav;
     
-    return `
+    return {
+        topNav: `
         <nav class="sticky top-0 z-40 border-b border-border bg-surface">
             <div class="flex h-14 items-center justify-between px-4">
                 <div class="flex items-center gap-4">
@@ -216,17 +217,23 @@ function Nav({ currentPath }) {
                 </div>
             </div>
         </nav>
-        
-        <!-- Desktop Sidebar -->
+        `,
+        sidebar: `
         <aside class="hidden w-64 flex-shrink-0 border-r border-border bg-surface md:block lg:w-64">
             <nav class="sticky top-14 flex flex-col gap-1 p-4">
-                ${nav.map(item => `
-                    <a href="${item.href}" 
-                       class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${currentPath === item.href || currentPath.startsWith(item.href + '/') ? 'bg-brand-light text-brand' : 'text-text-secondary hover:bg-surface-soft active:bg-surface-raised'}">
-                        <span class="text-lg">${item.icon()}</span>
-                        <span>${item.label}</span>
-                    </a>
-                `).join('')}
+                ${nav.map(item => {
+                    const isExactMatch = item.href === '/admin/transactions';
+                    const isActive = isExactMatch 
+                        ? currentPath === item.href 
+                        : currentPath === item.href || currentPath.startsWith(item.href + '/');
+                    return `
+                        <a href="${item.href}" 
+                           class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${isActive ? 'bg-brand-light text-brand' : 'text-text-secondary hover:bg-surface-soft active:bg-surface-raised'}">
+                            <span class="text-lg">${item.icon()}</span>
+                            <span>${item.label}</span>
+                        </a>
+                    `;
+                }).join('')}
                 <div class="my-4 border-t border-border"></div>
                 <a href="${isAdmin ? '/admin/dashboard' : '/member/settings'}" 
                    class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${currentPath === '/member/settings' ? 'bg-brand-light text-brand' : 'text-text-secondary hover:bg-surface-soft active:bg-surface-raised'}">
@@ -235,8 +242,8 @@ function Nav({ currentPath }) {
                 </a>
             </nav>
         </aside>
-        
-        <!-- Mobile Menu Overlay -->
+        `,
+        mobileMenu: `
         <div id="mobile-menu" class="fixed inset-0 z-50 hidden md:hidden">
             <div class="absolute inset-0 bg-black/50" onclick="toggleMobileMenu()"></div>
             <aside class="absolute bottom-0 left-0 right-0 top-14 max-h-[calc(100vh-3.5rem)] overflow-y-auto rounded-t-3xl bg-surface">
@@ -257,8 +264,8 @@ function Nav({ currentPath }) {
                 </nav>
             </aside>
         </div>
-        
-        <!-- Mobile Bottom Nav -->
+        `,
+        bottomNav: `
         <nav class="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-surface md:hidden">
             <div class="flex h-16 items-center justify-around px-1">
                 ${nav.slice(0, 4).map(item => `
@@ -268,6 +275,37 @@ function Nav({ currentPath }) {
                         <span class="hidden sm:inline">${item.label}</span>
                     </a>
                 `).join('')}
+            </div>
+        </nav>
+        `
+    };
+}
+        <nav class="sticky top-0 z-40 border-b border-border bg-surface">
+            <div class="flex h-14 items-center justify-between px-4">
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleMobileMenu()" class="flex h-11 w-11 items-center justify-center rounded-xl hover:bg-surface-soft active:bg-surface-raised md:hidden">
+                        ${Icons.menu()}
+                    </button>
+                    <span class="text-lg font-bold text-brand flex items-center gap-2">
+                        <span class="text-brand">${Icons.building()}</span>
+                        ${t('app.name')}
+                    </span>
+                </div>
+                <div class="flex items-center gap-1 sm:gap-2">
+                    <a href="/notifications" class="relative flex h-11 w-11 items-center justify-center rounded-xl hover:bg-surface-soft active:bg-surface-raised">
+                        ${Icons.bell()}
+                        ${unread > 0 ? `<span class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-error text-xs font-bold text-white">${unread > 9 ? '9+' : unread}</span>` : ''}
+                    </a>
+                    <button onclick="openLangModal()" class="flex h-11 items-center gap-2 rounded-xl px-3 text-text-secondary hover:bg-surface-soft active:bg-surface-raised sm:px-4">
+                        ${Icons.globe()}
+                        <span class="hidden sm:inline text-sm font-medium">${getCurrentLangName()}</span>
+                    </button>
+                    ${user ? `
+                        <button onclick="store.logout()" class="flex h-11 w-11 items-center justify-center rounded-xl text-text-secondary hover:bg-surface-soft active:bg-surface-raised hover:text-error">
+                            ${Icons.logOut()}
+                        </button>
+                    ` : ''}
+                </div>
             </div>
         </nav>
     `;
@@ -303,7 +341,7 @@ function Card({ title, subtitle, children }) {
     `;
 }
 
-function KpiCard({ label, amount, subtext, highlight }) {
+function KpiCard({ label, amount, subtext, highlight, isCurrency = true }) {
     return `
         <div class="rounded-2xl border p-4 shadow-sm sm:p-5 ${highlight ? 'border-brand bg-brand-light' : 'border-border bg-surface'}">
             <div class="mb-1 text-xs font-medium uppercase tracking-wider text-text-muted flex items-center gap-1">
@@ -316,7 +354,7 @@ function KpiCard({ label, amount, subtext, highlight }) {
                 ${label === 'Family Members' ? Icons.users() : ''}
                 ${label}
             </div>
-            <div class="text-xl sm:text-2xl font-bold text-text-primary">${formatCurrency(amount)}</div>
+            <div class="text-xl sm:text-2xl font-bold text-text-primary">${isCurrency ? formatCurrency(amount) : amount}</div>
             ${subtext ? `<div class="mt-1 text-xs text-text-secondary flex items-center gap-1">${subtext.includes('up to date') ? Icons.checkCircle() : ''}${subtext.includes('behind') ? Icons.alertTriangle() : ''}${subtext}</div>` : ''}
         </div>
     `;

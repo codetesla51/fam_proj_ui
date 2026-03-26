@@ -8,6 +8,10 @@ const store = {
         lastActivity: Date.now()
     },
     
+    // Property getters
+    get user() { return this.data.user; },
+    get notifications() { return this.data.notifications; },
+    
     init() {
         this.data.user = JSON.parse(localStorage.getItem('user') || 'null');
         this.data.accessToken = localStorage.getItem('access_token');

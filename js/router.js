@@ -124,16 +124,20 @@ const router = {
         
         // Render nav + content for protected pages
         if (path.startsWith('/member') || path.startsWith('/admin')) {
+            const navComponents = Nav({ currentPath: path });
             app.innerHTML = `
                 <div class="min-h-screen bg-surface-soft">
-                    ${Nav({ currentPath: path })}
+                    ${navComponents.topNav}
                     <div class="flex">
+                        ${navComponents.sidebar}
                         <main class="flex-1 p-4 pb-24 sm:p-6 sm:pb-6 lg:pb-6 lg:p-8">
                             <div class="mx-auto max-w-6xl">
                                 ${pageFn()}
                             </div>
                         </main>
                     </div>
+                    ${navComponents.mobileMenu}
+                    ${navComponents.bottomNav}
                 </div>
             `;
         } else {
