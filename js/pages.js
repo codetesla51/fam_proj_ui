@@ -468,54 +468,58 @@ const pages = {
                 <p class="text-xs sm:text-sm text-text-muted">Request help from your family</p>
             </div>
             
-            <div class="w-full min-w-0 mb-6 rounded-2xl border border-border bg-brand-light p-5 sm:p-6">
-                <div class="mb-1 text-sm font-medium text-brand flex items-center gap-1">
+            <!-- Balance Card - Premium -->
+            <div class="w-full min-w-0 mb-6 rounded-2xl border-2 border-brand/20 bg-gradient-to-br from-brand-light to-white p-5 sm:p-6 shadow-lg shadow-brand/10">
+                <div class="mb-1 text-sm font-bold text-brand flex items-center gap-1.5">
                     ${Icons.heartHandshake()}
                     ${t('careFund.balance')}
                 </div>
-                <div class="text-2xl sm:text-3xl font-bold text-brand">${formatCurrency(385000)}</div>
+                <div class="text-3xl sm:text-4xl font-bold text-brand">${formatCurrency(385000)}</div>
+                <div class="mt-3 flex items-center gap-2 text-xs text-brand/70">
+                    ${Icons.users()} 5 family members contributing
+                </div>
             </div>
             
             <div class="w-full min-w-0">
             ${Card({
                 title: t('careFund.requestHelp'),
                 children: `
-                    <form onsubmit="handleCareFundRequest(event)" class="space-y-4">
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-text-primary flex items-center gap-1">
+                    <form onsubmit="handleCareFundRequest(event)" class="space-y-5">
+                        <div class="space-y-3">
+                            <label class="block text-sm font-bold text-text-primary flex items-center gap-1.5">
                                 ${Icons.helpCircle()}
                                 ${t('careFund.whatFor')}
                             </label>
-                            <div class="grid grid-cols-3 gap-2">
+                            <div class="grid grid-cols-3 gap-3">
                                 ${['birthday', 'wedding', 'newBaby', 'graduation', 'medical', 'other'].map(o => `
-                                    <button type="button" class="flex flex-col items-center justify-center gap-1 rounded-xl border border-border p-3 aspect-square text-xs font-medium transition-colors active:border-brand active:bg-brand-light select-none">
-                                        <span class="text-2xl text-brand">${occasionIcons[o]()}</span>
-                                        <span class="text-center">${t('occasions.' + o)}</span>
+                                    <button type="button" class="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-border p-4 aspect-square text-xs font-semibold transition-all hover:border-brand hover:bg-brand-light/30 active:scale-95 select-none">
+                                        <span class="text-3xl text-brand">${occasionIcons[o]()}</span>
+                                        <span class="text-center text-text-secondary">${t('occasions.' + o)}</span>
                                     </button>
                                 `).join('')}
                             </div>
                         </div>
                         
-                        <div class="space-y-1.5">
-                            <label class="block text-sm font-medium text-text-primary flex items-center gap-1">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-bold text-text-primary flex items-center gap-1.5">
                                 ${Icons.dollarSign()}
                                 ${t('careFund.howMuchNeed')}
                             </label>
                             <div class="relative">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">₦</span>
-                                <input type="number" placeholder="0" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
+                                <input type="number" placeholder="0" class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface py-3 pl-10 pr-4 text-lg transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                             </div>
                         </div>
                         
-                        <div class="space-y-1.5">
-                            <label class="block text-sm font-medium text-text-primary flex items-center gap-1">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-bold text-text-primary flex items-center gap-1.5">
                                 ${Icons.calendar()}
                                 ${t('careFund.whenOccasion')}
                             </label>
-                            <input type="date" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                            <input type="date" class="h-12 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 text-base sm:text-sm transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                         </div>
                         
-                        <button type="submit" class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-medium text-white transition-colors active:bg-brand-hover select-none">
+                        <button type="submit" class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-bold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/40 hover:-translate-y-0.5 transition-all select-none">
                             ${Icons.heartHandshake()}
                             ${t('careFund.sendRequest')}
                         </button>
@@ -530,8 +534,28 @@ const pages = {
                     children: myRequests.length ? `
                         <div class="w-full min-w-0 space-y-3">
                             ${myRequests.map(r => `
-                                <div class="flex items-center gap-3 rounded-xl border border-border p-4">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand/10 text-brand flex-shrink-0">
+                                <div class="flex items-center gap-4 rounded-2xl border border-border p-4 hover:shadow-md hover:border-brand/30 transition-all">
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-brand/10 text-brand flex-shrink-0">
+                                        ${occasionIcons[r.occasion]()}
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-bold text-text-primary">${t('occasions.' + r.occasion)}</p>
+                                        <p class="text-xs text-text-muted flex items-center gap-1">
+                                            ${Icons.calendar()} ${formatDate(r.createdAt)}
+                                        </p>
+                                    </div>
+                                    <div class="text-right flex-shrink-0">
+                                        <p class="font-bold text-text-primary">${formatCurrency(r.amount)}</p>
+                                        ${StatusBadge({ status: r.status })}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : EmptyState({ icon: Icons.heartHandshake(), message: t('careFund.noRequests') })
+                })}
+            </div>
+        `;
+    },
                                         ${occasionIcons[r.occasion]()}
                                     </div>
                                     <div class="flex-1 min-w-0">
@@ -1134,19 +1158,6 @@ const pages = {
                         </div>
                     </div>
                 ` : `
-                    <!-- Filter Tabs -->
-                    <div class="mb-4 flex gap-1 rounded-xl border border-border bg-surface p-1">
-                        <button class="flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2.5 text-sm font-semibold bg-brand text-white select-none">
-                            ${Icons.bell()} All
-                        </button>
-                        <button class="flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2.5 text-sm font-medium text-text-secondary hover:bg-surface-soft select-none">
-                            ${Icons.megaphone()} Announcements
-                        </button>
-                        <button class="flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2.5 text-sm font-medium text-text-secondary hover:bg-surface-soft select-none">
-                            ${Icons.alertCircle()} Alerts
-                        </button>
-                    </div>
-                    
                     <!-- Unread Notifications -->
                     ${unread > 0 ? `
                         <div class="mb-6">
