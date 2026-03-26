@@ -19,7 +19,7 @@ const pages = {
                 </div>
                 <div class="relative z-10 text-center max-w-lg">
                     <h1 class="text-5xl lg:text-6xl font-extrabold text-white mb-5 tracking-tight">${t('app.name')}</h1>
-                    <p class="text-xl text-white/70 leading-relaxed">Your family savings, all in one place. Simple, secure, together.</p>
+                    <p class="text-xl text-white/90 leading-relaxed">Your family savings, all in one place. Simple, secure, together.</p>
                     <div class="mt-14 grid grid-cols-3 gap-8">
                         <div class="flex flex-col items-center gap-3">
                             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
@@ -79,6 +79,7 @@ const pages = {
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.yourName')}</label>
                                 <input type="text" id="login-name" placeholder="${t('auth.yourNamePlaceholder')}"
+                                    onblur="this.classList.toggle('border-error', !this.value.trim())"
                                     class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                             </div>
                             
@@ -86,6 +87,7 @@ const pages = {
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.password')}</label>
                                 <div class="relative">
                                     <input type="password" id="login-password" 
+                                        onblur="this.classList.toggle('border-error', !this.value.trim())"
                                         class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                                     <button type="button" onclick="togglePassword('login-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
                                         ${Icons.eye()}

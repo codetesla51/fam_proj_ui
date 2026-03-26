@@ -225,7 +225,7 @@ function Nav({ currentPath }) {
             return `
                 <a href="${item.href}" class="flex flex-1 flex-col items-center justify-center gap-1 py-2 select-none active:opacity-70 ${active ? 'text-brand' : 'text-text-muted'}">
                     <span class="w-6 h-6">${item.icon()}</span>
-                    <span class="text-[10px] font-medium tracking-wide">${item.label}</span>
+                    <span class="text-[11px] font-medium">${item.label}</span>
                     ${active ? '<span class="w-8 h-1 rounded-full bg-brand mx-auto mt-1"></span>' : ''}
                 </a>
             `;
@@ -258,7 +258,7 @@ function Nav({ currentPath }) {
                             <span class="hidden sm:inline text-xs font-medium">${getCurrentLangName()}</span>
                         </button>
                         ${user ? `
-                            <button onclick="store.logout()" class="flex h-10 w-10 items-center justify-center rounded-xl text-text-muted active:bg-surface-soft active:text-error select-none">
+                            <button onclick="store.logout()" class="flex h-11 w-11 items-center justify-center rounded-xl text-text-muted hover:bg-surface-soft hover:text-error transition-colors select-none">
                                 ${Icons.logOut()}
                             </button>
                         ` : ''}
@@ -302,7 +302,7 @@ function Nav({ currentPath }) {
 }
 
 function getCurrentLangName() {
-    const langs = { en: 'English', yo: 'Yorùbá', ig: 'Igbo', ha: 'Hausa' };
+    const langs = { en: 'English', yo: 'Yorùbá', ig: 'Igbo', ha: 'Hausa', ar: 'العربية' };
     return langs[currentLang] || 'English';
 }
 
@@ -333,7 +333,7 @@ function Card({ title, subtitle, children }) {
 
 function KpiCard({ label, amount, subtext, highlight, isCurrency = true }) {
     return `
-        <div class="group rounded-2xl border p-4 sm:p-5 transition-all hover:shadow-md ${highlight ? 'border-brand/30 bg-gradient-to-br from-brand-light via-white to-white shadow-lg shadow-brand/15' : 'border-border bg-surface shadow-sm'}">
+        <div class="group rounded-2xl border border-border p-4 sm:p-5 transition-all hover:shadow-md ${highlight ? 'border-brand/30 bg-gradient-to-br from-brand-light via-white to-white shadow-lg shadow-brand/15' : 'bg-surface shadow-sm'}">
             <div class="mb-2 flex items-center gap-2">
                 ${label === 'Family Savings' || label === 'My Savings' ? `<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.piggyBank()}</span>` : ''}
                 ${label === 'Care Fund' ? `<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.heartHandshake()}</span>` : ''}
