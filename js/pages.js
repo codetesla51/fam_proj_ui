@@ -1091,46 +1091,50 @@ const pages = {
         
         function item(n, isUnread) {
             return `
-                <div class="flex items-start gap-3 p-4 ${isUnread ? 'bg-white shadow-sm' : 'bg-surface-soft'} rounded-xl border-l-[3px] ${isUnread ? 'border-brand' : 'border-transparent'}">
-                    <div class="flex-shrink-0 mt-0.5">
-                        <div class="flex h-9 w-9 items-center justify-center rounded-full ${isUnread ? 'bg-brand text-white' : 'bg-surface-raised text-text-muted'}">
+                <button onclick="${isUnread ? `handleMarkRead('${n.id}')` : ''}" class="w-full text-left flex items-start gap-4 p-4 rounded-2xl ${isUnread ? 'bg-brand-light/50 border border-brand/30' : 'bg-surface-soft border border-transparent'} hover:shadow-md transition-all select-none">
+                    <div class="flex-shrink-0 mt-1">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl ${isUnread ? 'bg-brand text-white shadow-md shadow-brand/30' : 'bg-surface-raised text-text-muted'}">
                             ${Icons.bell()}
                         </div>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm ${isUnread ? 'font-semibold text-text-primary' : 'text-text-secondary'} leading-snug">${n.message}</p>
-                        <p class="mt-1.5 text-[11px] text-text-muted">${timeAgo(n.created_at)}</p>
+                        <p class="text-[15px] ${isUnread ? 'font-semibold text-text-primary' : 'text-text-secondary'} leading-relaxed">${n.message}</p>
+                        <p class="mt-2 text-xs text-text-muted">${timeAgo(n.created_at)}</p>
                     </div>
                     ${isUnread ? `
-                        <button onclick="handleMarkRead('${n.id}')" class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-brand/10 text-brand hover:bg-brand hover:text-white transition-colors select-none">
-                            ${Icons.check()}
-                        </button>
+                        <div class="flex-shrink-0 mt-1">
+                            <span class="flex h-3 w-3 rounded-full bg-brand"></span>
+                        </div>
                     ` : ''}
-                </div>
+                </button>
             `;
         }
         
         return `
-            <div class="w-full min-w-0">
-                <!-- Top -->
-                <div class="mb-4 flex items-center justify-between">
-                    <h1 class="text-lg font-bold text-text-primary">${t('nav.notifications')}</h1>
+            <div class="w-full min-w-0 px-1">
+                <div class="mb-6 flex items-center justify-between">
+                    <div>
+                        <h1 class="text-xl font-bold text-text-primary">${t('nav.notifications')}</h1>
+                        <p class="text-sm text-text-muted mt-0.5">${unread.length > 0 ? unread.length + ' unread' : t('common.allCaughtUp')}</p>
+                    </div>
                     ${unread.length > 0 ? `
-                        <button onclick="handleMarkAllRead()" class="text-xs font-semibold text-brand select-none">Mark all read</button>
+                        <button onclick="handleMarkAllRead()" class="h-10 px-4 rounded-xl bg-brand text-white text-sm font-semibold shadow-md shadow-brand/25 select-none">
+                            ${t('common.markAllRead')}
+                        </button>
                     ` : ''}
                 </div>
                 
                 ${notifications.length === 0 ? `
-                    <div class="flex flex-col items-center py-20">
-                        <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-soft text-text-muted">
+                    <div class="flex flex-col items-center justify-center py-20">
+                        <div class="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-surface-soft text-3xl">
                             ${Icons.bell()}
                         </div>
-                        <p class="text-sm text-text-muted">${t('common.allCaughtUp')}</p>
+                        <h3 class="text-lg font-semibold text-text-primary mb-1">${t('common.allCaughtUp')}</h3>
+                        <p class="text-sm text-text-muted">${t('common.noNewNotifications')}</p>
                     </div>
                 ` : `
-                    <div class="space-y-2">
-                        ${unread.map(n => item(n, true)).join('')}
-                        ${read.map(n => item(n, false)).join('')}
+                    <div class="space-y-3">
+                        ${notifications.map(n => item(n, !n.read)).join('')}
                     </div>
                 `}
             </div>
