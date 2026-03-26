@@ -312,10 +312,10 @@ function toggleMobileMenu() {
 
 function Card({ title, subtitle, children }) {
     return `
-        <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm sm:p-6">
+        <div class="rounded-2xl border border-border bg-surface p-5 shadow-sm sm:p-6 hover:shadow-md transition-shadow">
             ${title ? `
-                <div class="mb-4">
-                    <h2 class="text-lg font-semibold text-text-primary flex items-center gap-2">
+                <div class="mb-5">
+                    <h2 class="text-lg font-bold text-text-primary flex items-center gap-2">
                         ${title === t('member.recentPayments') ? Icons.history() : ''}
                         ${title === t('admin.behindOnSavings') ? Icons.alertCircle() : ''}
                         ${title === t('transaction.familyMoneyHistory') ? Icons.clipboardList() : ''}
@@ -331,8 +331,8 @@ function Card({ title, subtitle, children }) {
 
 function KpiCard({ label, amount, subtext, highlight, isCurrency = true }) {
     return `
-        <div class="rounded-2xl border p-4 shadow-sm sm:p-5 ${highlight ? 'border-brand bg-brand-light' : 'border-border bg-surface'}">
-            <div class="mb-1 text-xs font-medium uppercase tracking-wider text-text-muted flex items-center gap-1">
+        <div class="rounded-2xl border p-5 shadow-sm sm:p-6 transition-all hover:shadow-lg hover:shadow-brand/5 group ${highlight ? 'border-brand/30 bg-gradient-to-br from-brand-light to-white shadow-lg shadow-brand/10' : 'border-border bg-surface'}">
+            <div class="mb-2 text-[11px] font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
                 ${highlight ? `<span class="text-brand">${Icons.piggyBank()}</span>` : ''}
                 ${label === 'Family Savings' ? Icons.piggyBank() : ''}
                 ${label === 'Care Fund' ? Icons.heartHandshake() : ''}
@@ -342,8 +342,8 @@ function KpiCard({ label, amount, subtext, highlight, isCurrency = true }) {
                 ${label === 'Family Members' ? Icons.users() : ''}
                 ${label}
             </div>
-            <div class="text-xl sm:text-2xl font-bold text-text-primary">${isCurrency ? formatCurrency(amount) : amount}</div>
-            ${subtext ? `<div class="mt-1 text-xs text-text-secondary flex items-center gap-1">${subtext.includes('up to date') ? Icons.checkCircle() : ''}${subtext.includes('behind') ? Icons.alertTriangle() : ''}${subtext}</div>` : ''}
+            <div class="text-2xl sm:text-3xl font-extrabold text-text-primary group-hover:scale-105 transition-transform origin-left">${isCurrency ? formatCurrency(amount) : amount}</div>
+            ${subtext ? `<div class="mt-2 text-xs text-text-secondary flex items-center gap-1.5 font-medium">${subtext.includes('up to date') ? Icons.checkCircle() : ''}${subtext.includes('behind') ? Icons.alertTriangle() : ''}${subtext}</div>` : ''}
         </div>
     `;
 }
@@ -357,35 +357,41 @@ function StatusBadge({ status }) {
         behind: { bg: 'bg-error/10', text: 'text-error', dot: 'bg-error', icon: Icons.alertTriangle, label: 'Behind' }
     };
     const cfg = configs[status] || configs.pending;
-    return `<span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${cfg.bg} ${cfg.text}"><span class="h-1.5 w-1.5 rounded-full ${cfg.dot}"></span>${cfg.label}</span>`;
+    return `<span class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold ${cfg.bg} ${cfg.text}"><span class="h-2 w-2 rounded-full ${cfg.dot} animate-pulse"></span>${cfg.label}</span>`;
 }
 
 function PoolTag({ pool }) {
     return pool === 'pool1' 
-        ? `<span class="inline-flex items-center gap-1 rounded-full bg-pool1/10 px-2.5 py-1 text-xs font-medium text-pool1">${Icons.piggyBank()} ${t('member.familySavings')}</span>`
-        : `<span class="inline-flex items-center gap-1 rounded-full bg-pool2/10 px-2.5 py-1 text-xs font-medium text-pool2">${Icons.heartHandshake()} ${t('member.careFund')}</span>`;
+        ? `<span class="inline-flex items-center gap-1.5 rounded-full bg-pool1/10 px-3 py-1.5 text-xs font-bold text-pool1">${Icons.piggyBank()} ${t('member.familySavings')}</span>`
+        : `<span class="inline-flex items-center gap-1.5 rounded-full bg-pool2/10 px-3 py-1.5 text-xs font-bold text-pool2">${Icons.heartHandshake()} ${t('member.careFund')}</span>`;
 }
 
 function EmptyState({ icon, message }) {
     return `
-        <div class="flex flex-col items-center justify-center py-12 px-4">
-            <span class="text-5xl text-text-muted mb-4">${icon}</span>
-            <p class="text-center text-sm text-text-muted">${message}</p>
+        <div class="flex flex-col items-center justify-center py-16 px-6">
+            <div class="relative mb-5">
+                <div class="flex h-20 w-20 items-center justify-center rounded-full bg-surface-soft">
+                    <span class="text-4xl text-text-muted">${icon}</span>
+                </div>
+                <div class="absolute inset-0 rounded-full bg-brand/5 animate-pulse"></div>
+            </div>
+            <p class="text-center text-sm text-text-secondary font-medium">${message}</p>
+            <p class="mt-2 text-xs text-text-muted">Check back later for updates</p>
         </div>
     `;
 }
 
 function Button({ text, onclick, variant = 'primary', className = '', icon }) {
     const variants = {
-        primary: 'bg-brand text-white hover:bg-brand-hover active:bg-brand-hover',
-        secondary: 'bg-surface border border-border text-text-primary hover:bg-surface-soft active:bg-surface-raised',
-        danger: 'bg-error text-white hover:bg-error/90 active:bg-error/90',
-        success: 'bg-success text-white hover:bg-success/90 active:bg-success/90',
-        ghost: 'text-text-secondary hover:bg-surface-soft active:bg-surface-raised'
+        primary: 'bg-brand text-white hover:bg-brand-hover hover:shadow-lg hover:shadow-brand/25',
+        secondary: 'bg-surface border-2 border-border text-text-primary hover:border-brand hover:text-brand hover:bg-brand-light/30',
+        danger: 'bg-error text-white hover:bg-error/90 hover:shadow-lg hover:shadow-error/25',
+        success: 'bg-success text-white hover:bg-success/90 hover:shadow-lg hover:shadow-success/25',
+        ghost: 'text-text-secondary hover:bg-surface-soft hover:text-text-primary'
     };
     
     return `
-        <button onclick="${onclick}" class="flex h-12 items-center justify-center gap-2 rounded-xl px-6 font-medium transition-colors active:scale-98 disabled:opacity-50 ${variants[variant]} ${className}">
+        <button onclick="${onclick}" class="flex h-12 items-center justify-center gap-2 rounded-xl px-6 font-semibold transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 select-none ${variants[variant]} ${className}">
             ${icon ? `<span class="text-lg">${icon}</span>` : ''}
             ${text}
         </button>
