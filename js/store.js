@@ -159,13 +159,14 @@ const store = {
     
     // Load notifications
     async loadNotifications() {
-        if (this.usingMock()) {
+        if (!backendAvailable) {
             this.data.notifications = mockData.notifications;
             return this.data.notifications;
         }
         try {
-            const result = await member.getNotifications();
-            this.data.notifications = result.notifications || [];
+            const data = await member.getNotifications();
+            // Backend returns array directly
+            this.data.notifications = Array.isArray(data.notifications) ? data.notifications : (Array.isArray(data) ? data : []);
             return this.data.notifications;
         } catch (e) {
             return mockData.notifications;
@@ -200,7 +201,7 @@ const store = {
     
     // Load care fund requests
     async loadCareFundRequests(status) {
-        if (this.usingMock()) {
+        if (!backendAvailable) {
             let reqs = mockData.careFundRequests;
             if (status) reqs = reqs.filter(r => r.status === status);
             this.data.careFundRequests = reqs;
@@ -210,10 +211,11 @@ const store = {
             let result;
             if (this.isAdmin()) {
                 result = await admin.getCareFundRequests(status);
-                this.data.careFundRequests = result.requests || [];
+                // Backend returns direct array
+                this.data.careFundRequests = Array.isArray(result) ? result : (result.requests || []);
             } else {
-                result = await member.getCareFundRequests();
-                this.data.careFundRequests = result.requests || [];
+                // Members don't have a direct endpoint, use mock for now
+                this.data.careFundRequests = mockData.careFundRequests.filter(r => r.member_id === '1');
             }
             return this.data.careFundRequests;
         } catch (e) {

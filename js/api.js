@@ -255,10 +255,16 @@ const member = {
     // Get own transactions
     async getTransactions({ pool, page = 1, limit = 20 } = {}) {
         const params = new URLSearchParams();
-        if (pool) params.set('pool', pool);
-        params.set('page', page);
         params.set('limit', limit);
-        return handleResponse(apiFetch(`/transactions/mine?${params}`));
+        params.set('offset', (page - 1) * limit);
+        const data = await handleResponse(apiFetch(`/transactions/mine?${params}`));
+        // Backend returns { data: [...], total, limit, offset }
+        // We filter by pool on frontend if needed
+        let transactions = data.data || data || [];
+        if (pool) {
+            transactions = transactions.filter(t => t.pool === pool);
+        }
+        return { transactions, total: data.total || transactions.length };
     },
     
     // Transfer pool2 to pool1
@@ -325,11 +331,13 @@ const admin = {
     async uploadReceipt(file) {
         const formData = new FormData();
         formData.append('file', file);
-        return handleResponse(apiFetch('/upload/receipt', {
+        const data = await handleResponse(apiFetch('/upload/receipt', {
             method: 'POST',
             headers: {}, // Let browser set Content-Type for FormData
             body: formData
         }));
+        // Backend returns { url: "..." }
+        return { receipt_url: data.url };
     },
     
     // Log transaction
@@ -343,11 +351,14 @@ const admin = {
     // Get all transactions
     async getTransactions({ page = 1, limit = 20, member_id, pool } = {}) {
         const params = new URLSearchParams();
-        params.set('page', page);
         params.set('limit', limit);
-        if (member_id) params.set('member_id', member_id);
-        if (pool) params.set('pool', pool);
-        return handleResponse(apiFetch(`/transactions?${params}`));
+        params.set('offset', (page - 1) * limit);
+        const data = await handleResponse(apiFetch(`/transactions?${params}`));
+        // Backend returns { data: [...], total, limit, offset }
+        let transactions = data.data || data || [];
+        if (member_id) transactions = transactions.filter(t => t.member_id === member_id);
+        if (pool) transactions = transactions.filter(t => t.pool === pool);
+        return { transactions, total: data.total || transactions.length };
     },
     
     // Get general ledger
@@ -365,8 +376,11 @@ const admin = {
     
     // Get all care fund requests
     async getCareFundRequests(status) {
-        const params = status ? `?status=${status}` : '';
-        return handleResponse(apiFetch(`/carefund/requests${params}`));
+        const data = await handleResponse(apiFetch('/carefund/requests'));
+        // Backend returns direct array
+        const requests = Array.isArray(data) ? data : [];
+        if (status) return requests.filter(r => r.status === status);
+        return requests;
     },
     
     // Approve or reject care fund request

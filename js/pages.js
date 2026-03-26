@@ -595,6 +595,170 @@ const pages = {
         `;
     },
     
+    adminDashboard: async () => {
+        const dashboard = await store.loadDashboard();
+        const d = dashboard || {};
+        return `
+            <div class="w-full min-w-0">
+                <div class="mb-6">
+                    <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
+                        ${Icons.layoutDashboard()}
+                        ${t('admin.familyOverview')}
+                    </h1>
+                    <p class="text-xs sm:text-sm text-text-muted">Family savings at a glance</p>
+                </div>
+                
+                <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                    ${KpiCard({ label: 'Family Savings', amount: d.pool1_balance || 0, subtext: 'Total Pool 1', highlight: true })}
+                    ${KpiCard({ label: 'Care Fund', amount: d.pool2_balance || 0, subtext: 'Total Pool 2' })}
+                    ${KpiCard({ label: 'Members', amount: d.member_count || 0, subtext: (d.active_count || 0) + ' active', isCurrency: false })}
+                    ${KpiCard({ label: 'Overdue', amount: d.overdue_count || 0, subtext: 'Behind on savings', isCurrency: false })}
+                </div>
+                
+                ${d.underfunded_members && d.underfunded_members.length > 0 ? `
+                    <div class="w-full min-w-0 mb-6 rounded-2xl border border-error/20 bg-error/5 p-4">
+                        <div class="mb-3 flex items-center gap-2">${Icons.alertTriangle()}<p class="text-sm font-semibold text-error">Members Behind on Savings</p></div>
+                        <div class="w-full min-w-0 space-y-2">
+                            ${d.underfunded_members.map(m => `
+                                <div class="flex items-center justify-between rounded-xl bg-surface p-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-error/10 text-sm font-bold text-error">${m.name?.charAt(0) || '?'}</div>
+                                        <span class="text-sm font-medium">${m.name}</span>
+                                    </div>
+                                    <span class="text-sm font-semibold text-error">${formatCurrency(m.committed_amount - m.current_sum)} behind</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : `<div class="w-full min-w-0 mb-6 rounded-2xl border border-success/20 bg-success/5 p-4 flex items-center gap-3">${Icons.checkCircle()}<p class="text-sm font-medium text-success">${t('admin.allUpToDate')}</p></div>`}
+                
+                <div class="w-full min-w-0">
+                    <p class="mb-3 text-xs font-bold uppercase tracking-wider text-text-muted">${t('admin.quickActions')}</p>
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        <a href="/admin/transactions/new" class="flex items-center justify-center gap-2.5 rounded-2xl bg-brand p-4 font-semibold text-white shadow-lg shadow-brand/20 hover:shadow-xl hover:shadow-brand/30 hover:-translate-y-0.5 transition-all select-none">${Icons.plusCircle()}<span>${t('admin.recordPayment')}</span></a>
+                        <a href="/admin/members" class="flex items-center justify-center gap-2.5 rounded-2xl border-2 border-border bg-surface p-4 font-semibold hover:border-brand hover:text-brand hover:bg-brand-light/30 transition-all select-none">${Icons.userPlus()}<span>${t('admin.addMember')}</span></a>
+                        <a href="/admin/care-fund" class="flex items-center justify-center gap-2.5 rounded-2xl border-2 border-border bg-surface p-4 font-semibold hover:border-brand hover:text-brand hover:bg-brand-light/30 transition-all select-none">${Icons.heartHandshake()}<span>${t('admin.reviewRequests')}</span></a>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+    
+    adminTransactions: async () => {
+        const txData = await store.loadTransactions();
+        const transactions = txData || store.transactions;
+        return `
+            <div class="w-full min-w-0 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">${Icons.clipboardList()}${t('transaction.familyMoneyHistory')}</h1>
+                    <p class="text-xs sm:text-sm text-text-muted">All family transactions</p>
+                </div>
+                <a href="/admin/transactions/new" class="flex h-11 items-center justify-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all select-none">${Icons.plus()} Record Payment</a>
+            </div>
+            <div class="w-full min-w-0">
+                ${Card({ children: transactions.length > 0 ? `
+                    <div class="rounded-xl overflow-hidden border border-border">
+                        <div class="overflow-x-auto w-full">
+                            <table class="w-full min-w-[640px]">
+                                <thead><tr class="bg-table-header text-left border-b border-border">
+                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.member')}</th>
+                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.fund')}</th>
+                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.type')}</th>
+                                    <th class="whitespace-nowrap px-4 py-3.5 text-right text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.amount')}</th>
+                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.reason')}</th>
+                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.date')}</th>
+                                </tr></thead>
+                                <tbody class="divide-y divide-border">
+                                    ${transactions.map((tx, i) => `
+                                        <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} hover:bg-surface-raised transition-colors cursor-pointer">
+                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm font-medium">${tx.member_name || tx.memberName || ''}</td>
+                                            <td class="whitespace-nowrap px-4 py-3.5">${PoolTag({ pool: tx.pool })}</td>
+                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm font-medium ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}</td>
+                                            <td class="whitespace-nowrap px-4 py-3.5 text-right text-sm font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}</td>
+                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${tx.reason}</td>
+                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${formatDate(tx.created_at)}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                ` : EmptyState({ icon: Icons.clipboardList(), message: t('common.noData') }) })}
+            </div>
+        `;
+    },
+    
+    adminTransactionsNew: async () => {
+        const dashboard = await store.loadDashboard();
+        const members = dashboard?.underfunded_members || [];
+        return `
+            <div class="w-full min-w-0 mb-6">
+                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">${Icons.plusCircle()} Record a Payment</h1>
+                <p class="text-xs sm:text-sm text-text-muted">Log a new transaction for a family member</p>
+            </div>
+            <div class="w-full min-w-0">
+                ${Card({ children: `
+                    <form onsubmit="handleRecordPayment(event)" class="space-y-5">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-text-primary">${t('transaction.whichMember')} <span class="text-error">*</span></label>
+                            <select id="txn-member" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                <option value="">Select a member</option>
+                                ${members.map(m => `<option value="${m.id}">${m.name}</option>`).join('')}
+                                <option value="other">Other member...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-text-primary">${t('transaction.whichFund')} <span class="text-error">*</span></label>
+                            <div class="flex rounded-xl border border-border p-1 gap-2">
+                                <button type="button" onclick="setFund('pool1')" id="fund-pool1" class="flex-1 rounded-lg py-3 text-sm font-medium bg-brand text-white select-none">${t('member.familySavings')}</button>
+                                <button type="button" onclick="setFund('pool2')" id="fund-pool2" class="flex-1 rounded-lg py-3 text-sm font-medium text-text-secondary select-none">${t('member.careFund')}</button>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-text-primary">${t('transaction.whatType')} <span class="text-error">*</span></label>
+                            <div class="flex rounded-xl border border-border p-1 gap-2">
+                                <button type="button" onclick="setTxType('credit')" id="type-credit" class="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium bg-success text-white select-none">${Icons.arrowUpRight()} ${t('table.moneyIn')}</button>
+                                <button type="button" onclick="setTxType('debit')" id="type-debit" class="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium text-text-secondary select-none">${Icons.arrowDownRight()} ${t('table.moneyOut')}</button>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-text-primary">${t('transaction.howMuch')} <span class="text-error">*</span></label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
+                                <input type="number" id="txn-amount" placeholder="0" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-text-primary">${t('transaction.whatFor')} <span class="text-error">*</span></label>
+                            <input type="text" id="txn-reason" placeholder="${t('transaction.whatForHelper')}" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                            <p class="text-xs text-text-muted">${t('transaction.whatForHelper')}</p>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-text-primary">${t('transaction.attachProof')}</label>
+                            <div class="flex items-center gap-3">
+                                <label class="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-surface-soft px-4 text-sm font-medium text-text-secondary hover:border-brand hover:text-brand transition-all select-none">
+                                    ${Icons.paperclip()}
+                                    <span id="receipt-label">Choose file</span>
+                                    <input type="file" id="txn-receipt" accept="image/*,.pdf" class="hidden" onchange="document.getElementById('receipt-label').textContent = this.files[0]?.name || 'Choose file'">
+                                </label>
+                                <span class="text-xs text-text-muted">Photo or PDF</span>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" id="txn-btn" class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-semibold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/35 active:scale-[0.98] transition-all select-none">
+                            ${Icons.check()} ${t('transaction.recordBtn')}
+                        </button>
+                    </form>
+                ` })}
+            </div>
+        `;
+    },
+    
     adminCareFund: async () => {
         const allRequests = await store.loadCareFundRequests();
         const requests = allRequests || store.careFundRequests;
@@ -771,20 +935,13 @@ const pages = {
     `;
     },
     
-    notifications: () => {
-        const notifications = store.notifications;
+    notifications: async () => {
+        const notifications = await store.loadNotifications();
         const unread = notifications.filter(n => !n.read).length;
         const read = notifications.filter(n => n.read);
         
-        const typeConfig = {
-            success: { bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-200', icon: Icons.checkCircle },
-            warning: { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-200', icon: Icons.alertTriangle },
-            info: { bg: 'bg-sky-50', text: 'text-sky-600', border: 'border-sky-200', icon: Icons.info },
-            error: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200', icon: Icons.alertCircle }
-        };
-        
         function renderNotif(n, isUnread) {
-            const cfg = typeConfig[n.type] || typeConfig.info;
+            const cfg = { bg: 'bg-sky-50', text: 'text-sky-600', icon: Icons.info };
             if (isUnread) {
                 return `
                     <div class="group w-full min-w-0">
@@ -795,7 +952,7 @@ const pages = {
                             <div class="flex-1 min-w-0 pr-2">
                                 <p class="text-[13px] font-semibold text-text-primary leading-snug line-clamp-2">${n.message}</p>
                                 <p class="mt-1.5 text-[11px] text-text-muted flex items-center gap-1">
-                                    ${Icons.clock()} ${timeAgo(n.time)}
+                                    ${Icons.clock()} ${timeAgo(n.created_at)}
                                 </p>
                             </div>
                             <button onclick="handleMarkRead('${n.id}')" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand opacity-0 group-hover:opacity-100 transition-opacity">
@@ -814,7 +971,7 @@ const pages = {
                         <div class="flex-1 min-w-0">
                             <p class="text-[13px] text-text-secondary leading-snug line-clamp-2">${n.message}</p>
                             <p class="mt-1 text-[11px] text-text-muted flex items-center gap-1">
-                                ${Icons.clock()} ${timeAgo(n.time)}
+                                ${Icons.clock()} ${timeAgo(n.created_at)}
                             </p>
                         </div>
                     </div>
@@ -1062,12 +1219,13 @@ function setTxType(type) {
 async function handleRecordPayment(e) {
     e.preventDefault();
     const form = e.target;
-    const btn = form.querySelector('button[type="submit"]');
-    const memberId = form.querySelector('select')?.value;
+    const btn = document.getElementById('txn-btn');
+    const memberId = document.getElementById('txn-member')?.value;
     const fund = document.getElementById('fund-pool1')?.classList.contains('bg-brand') ? 'pool1' : 'pool2';
     const type = document.getElementById('type-credit')?.classList.contains('bg-success') ? 'credit' : 'debit';
-    const amount = form.querySelector('input[type="number"]')?.value;
-    const reason = form.querySelector('input[type="text"]')?.value;
+    const amount = document.getElementById('txn-amount')?.value;
+    const reason = document.getElementById('txn-reason')?.value;
+    const receiptFile = document.getElementById('txn-receipt')?.files[0];
     
     if (!memberId || !amount || !reason) {
         showToast(t('validation.required'), 'error');
@@ -1075,24 +1233,33 @@ async function handleRecordPayment(e) {
     }
     
     btn.disabled = true;
+    btn.innerHTML = '<div class="loader !w-5 !h-5 !border-2"></div> ' + t('common.loading');
     
     try {
-        // Note: receipt_url required by backend - using empty for now
-        // In production, upload receipt first via admin.uploadReceipt(file)
+        let receipt_url = '';
+        
+        // Upload receipt first if provided
+        if (receiptFile) {
+            const uploadResult = await store.uploadReceipt(receiptFile);
+            receipt_url = uploadResult.receipt_url || '';
+        }
+        
         await store.createTransaction({
             member_id: memberId,
             pool: fund,
             type,
             amount: parseInt(amount),
             reason,
-            receipt_url: ''
+            receipt_url
         });
+        
         showToast(t('common.success'), 'success');
         router.navigate('/admin/transactions');
     } catch (err) {
         showToast(err.message || t('common.error'), 'error');
     } finally {
         btn.disabled = false;
+        btn.innerHTML = Icons.check() + ' ' + t('transaction.recordBtn');
     }
 }
 
