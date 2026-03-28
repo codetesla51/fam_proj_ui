@@ -4,6 +4,7 @@
   "description": "Odelade Family Ledger - Family Savings & Contributions",
   "main": "server.js",
   "scripts": {
+    "build": "node -e \"fs=require('fs');fs.writeFileSync('public/env.js','window.ENV={BACKEND_URL:\\\"'+(process.env.BACKEND_URL||'http://localhost:8080')+'\\\"}; ')\"",
     "start": "node server.js",
     "dev": "node server.js"
   },
