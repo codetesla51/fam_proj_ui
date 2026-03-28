@@ -1,24 +1,6 @@
 // API Service - All backend communication
 const API_BASE = window.ENV?.BACKEND_URL || 'http://localhost:8080';
 
-// Check if backend is available
-let backendAvailable = false;
-async function checkBackend() {
-    try {
-        const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(1000) });
-        if (res.ok) {
-            const text = await res.text();
-            if (!text.startsWith('<')) {
-                backendAvailable = true;
-                console.log('Backend available');
-            }
-        }
-    } catch {
-        backendAvailable = false;
-    }
-}
-checkBackend();
-
 // Token management
 const tokens = {
     get access() { return localStorage.getItem('access_token'); },
@@ -26,7 +8,7 @@ const tokens = {
     get refresh() { return localStorage.getItem('refresh_token'); },
     set refresh(v) { localStorage.setItem('refresh_token', v); },
     get isAdmin() { return localStorage.getItem('is_admin') === 'true'; },
-    set isAdmin(v) { localStorage.setItem('is_admin', v); },
+    set isAdmin(v) { localStorage.setItem('is_admin', v === true || v === 'true' ? 'true' : 'false'); },
     clear() {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
@@ -61,7 +43,7 @@ async function apiFetch(endpoint, options = {}) {
         });
         
         // Handle 401 - token expired
-        if (response.status === 401 && tokens.refresh && endpoint !== '/refresh') {
+        if (response.status === 401 && endpoint !== '/auth/admin/login') {
             // Admin tokens cannot be refreshed - just logout
             if (tokens.isAdmin) {
                 tokens.clear();
@@ -69,17 +51,18 @@ async function apiFetch(endpoint, options = {}) {
                 throw new Error('Session expired. Please login again.');
             }
             // Member tokens can be refreshed
-            const refreshed = await refreshAccessToken();
-            if (refreshed) {
-                // Retry with new token
-                headers['Authorization'] = `Bearer ${tokens.access}`;
-                return fetch(url, { ...options, headers });
-            } else {
-                // Refresh failed, logout
-                tokens.clear();
-                window.location.href = '/login';
-                throw new Error('Session expired. Please login again.');
+            if (tokens.refresh) {
+                const refreshed = await refreshAccessToken();
+                if (refreshed) {
+                    // Retry with new token
+                    headers['Authorization'] = `Bearer ${tokens.access}`;
+                    return fetch(url, { ...options, headers });
+                }
             }
+            // Refresh failed or no refresh token, logout
+            tokens.clear();
+            window.location.href = '/login';
+            throw new Error('Session expired. Please login again.');
         }
         
         return response;
@@ -219,7 +202,9 @@ const auth = {
     async logout() {
         try {
             await apiFetch('/logout', { method: 'POST' });
-        } catch {}
+        } catch (e) {
+            console.warn('Logout API call failed:', e);
+        }
         tokens.clear();
     },
     
@@ -227,7 +212,9 @@ const auth = {
     async adminLogout() {
         try {
             await apiFetch('/auth/admin/logout', { method: 'POST' });
-        } catch {}
+        } catch (e) {
+            console.warn('Admin logout API call failed:', e);
+        }
         tokens.clear();
     },
     
@@ -354,7 +341,7 @@ const admin = {
     async createMember({ name, password, interval, committed_amount, start_date }) {
         return handleResponse(apiFetch('/admin/members', {
             method: 'POST',
-            body: JSON.stringify({ name, password, interval, committed_amount, start_date })
+            body: JSON.stringify({ name, password, interval, committed_amount: String(committed_amount), start_date })
         }));
     },
     
@@ -406,11 +393,11 @@ const admin = {
         const params = new URLSearchParams();
         params.set('limit', limit);
         params.set('offset', (page - 1) * limit);
+        if (member_id) params.set('member_id', member_id);
+        if (pool) params.set('pool', pool);
         const data = await handleResponse(apiFetch(`/transactions?${params}`));
         // Backend returns { data: [...], total, limit, offset }
-        let transactions = data.data || data || [];
-        if (member_id) transactions = transactions.filter(t => t.MemberID === member_id || t.member_id === member_id);
-        if (pool) transactions = transactions.filter(t => t.Pool === pool || t.pool === pool);
+        const transactions = data.data || data || [];
         return { transactions, total: data.total || transactions.length };
     },
     
