@@ -62,6 +62,13 @@ async function apiFetch(endpoint, options = {}) {
         
         // Handle 401 - token expired
         if (response.status === 401 && tokens.refresh && endpoint !== '/refresh') {
+            // Admin tokens cannot be refreshed - just logout
+            if (tokens.isAdmin) {
+                tokens.clear();
+                window.location.href = '/admin/login';
+                throw new Error('Session expired. Please login again.');
+            }
+            // Member tokens can be refreshed
             const refreshed = await refreshAccessToken();
             if (refreshed) {
                 // Retry with new token
