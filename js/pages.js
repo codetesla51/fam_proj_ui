@@ -1421,17 +1421,25 @@ const pages = {
                 <form onsubmit="handleAddMember(event)" class="space-y-4">
                     <div class="space-y-1.5">
                         <label class="block text-sm font-medium text-text-primary">${t('members.fullName')} <span class="text-error">*</span></label>
-                        <input type="text" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                        <input type="text" id="new-member-name" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                     </div>
                     <div class="space-y-1.5">
                         <label class="block text-sm font-medium text-text-primary">${t('members.password')} <span class="text-error">*</span></label>
-                        <input type="password" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                        <input type="password" id="new-member-password" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-medium text-text-primary">How often will they save?</label>
+                        <div class="flex rounded-xl border border-border p-1 gap-1">
+                            <button type="button" onclick="setNewMemberInterval('weekly')" id="interval-weekly-btn" class="flex-1 rounded-lg py-2 text-sm font-medium select-none">Every Week</button>
+                            <button type="button" onclick="setNewMemberInterval('monthly')" id="interval-monthly-btn" class="flex-1 rounded-lg py-2 text-sm font-medium select-none bg-brand text-white">Every Month</button>
+                        </div>
+                        <input type="hidden" id="new-member-interval" value="monthly">
                     </div>
                     <div class="space-y-1.5">
                         <label class="block text-sm font-medium text-text-primary">${t('members.howMuchEach')}</label>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">₦</span>
-                            <input type="number" placeholder="0" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                            <input type="number" id="new-member-amount" placeholder="0" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                         </div>
                     </div>
                     <div class="flex gap-3 pt-2">
@@ -1743,14 +1751,19 @@ async function handleRecordPayment(e) {
 }
 
 // Admin - Add Member
+function setNewMemberInterval(interval) {
+    document.getElementById('new-member-interval').value = interval;
+    document.getElementById('interval-weekly-btn').className = interval === 'weekly' ? 'flex-1 rounded-lg py-2 text-sm font-medium select-none bg-brand text-white' : 'flex-1 rounded-lg py-2 text-sm font-medium select-none';
+    document.getElementById('interval-monthly-btn').className = interval === 'monthly' ? 'flex-1 rounded-lg py-2 text-sm font-medium select-none bg-brand text-white' : 'flex-1 rounded-lg py-2 text-sm font-medium select-none';
+}
+
 async function handleAddMember(e) {
     e.preventDefault();
-    const form = e.target;
-    const inputs = form.querySelectorAll('input');
-    const name = inputs[0]?.value;
-    const password = inputs[1]?.value;
-    const amount = inputs[2]?.value;
-    const btn = form.querySelector('button[type="submit"]');
+    const name = document.getElementById('new-member-name')?.value;
+    const password = document.getElementById('new-member-password')?.value;
+    const amount = document.getElementById('new-member-amount')?.value;
+    const interval = document.getElementById('new-member-interval')?.value || 'monthly';
+    const btn = e.target.querySelector('button[type="submit"]');
     
     if (!name || !password) {
         showToast(t('validation.required'), 'error');
@@ -1769,7 +1782,7 @@ async function handleAddMember(e) {
         await store.createMember({
             name,
             password,
-            interval: 'monthly',
+            interval: interval,
             committed_amount: parseInt(amount),
             start_date: new Date().toISOString().split('T')[0]
         });
