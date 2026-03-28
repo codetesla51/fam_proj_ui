@@ -9,7 +9,10 @@ function cleanReason(reason, type) {
     if (r === 'pool2') return 'Personal Savings Deposit';
     if (r === 'pool1') return 'Family Savings Deposit';
     if (r.includes('care fund approved') || r.includes('care fund')) return 'Care Fund Withdrawal';
-    return reason;
+    if (r.includes('contribution')) return 'Contribution';
+    if (r.includes('withdrawal')) return 'Withdrawal';
+    // Remove amount suffix like ": 50" from transfer reasons
+    return reason.replace(/:\s*\d+(\.\d+)?$/, '').trim() || reason;
 }
 
 const pages = {
@@ -782,19 +785,31 @@ const pages = {
     
     // Family Activity - All Pool 1 transactions from all members
     memberActivity: async () => {
-        const dashboard = await store.loadDashboard();
-        const allTx = dashboard?.recent_transactions || [];
-        let transactions = allTx;
+        // Fetch all pool1 transactions from API
+        let transactions = [];
         try {
             const memberApi = window.member;
+            const result = await memberApi.getTransactions({ limit: 50 });
+            let rawTx = result?.transactions || result?.data || [];
+            // Normalize PascalCase fields
+            transactions = rawTx.map(tx => ({
+                id: tx.ID || tx.id,
+                member_name: tx.MemberName || tx.member_name,
+                type: tx.Type || tx.type,
+                amount: tx.Amount || tx.amount,
+                reason: tx.Reason || tx.reason,
+                created_at: tx.CreatedAt || tx.created_at,
+                pool: tx.Pool || tx.pool
+            }));
+            // Attach receipts
             const receipts = await memberApi.getReceipts();
             const receiptMap = {};
             receipts.forEach(r => { receiptMap[r.TransactionID] = r; });
-            transactions = allTx.map(p => ({
+            transactions = transactions.map(p => ({
                 ...p,
                 receiptData: receiptMap[p.id]?.ReceiptData
             }));
-        } catch (e) { console.error('Failed to load receipts:', e); }
+        } catch (e) { console.error('Failed to load transactions:', e); }
         
         return `
             <div class="w-full min-w-0 mb-6">
