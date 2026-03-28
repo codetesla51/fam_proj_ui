@@ -6,10 +6,30 @@
     <meta name="theme-color" content="#0D9488">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Family Ledger">
+    <meta name="apple-mobile-web-app-title" content="Odelade Ledger">
+    
+    <!-- SEO Meta Tags -->
+    <title>Odelade Family Ledger — Family Savings & Contributions</title>
+    <meta name="description" content="The Odelade Family savings and contributions ledger. Manage family funds, track contributions, and stay connected with your family finances.">
+    <meta name="keywords" content="Odelade family, Odelade family ledger, Odelade family savings, Odelade savings, family contributions, Olomolekondo, Ikire, Osun, family finance, Nigerian family savings">
+    <meta name="author" content="Odelade Family">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://odelade-family-ledger.vercel.app/">
+    
+    <!-- Open Graph / WhatsApp -->
+    <meta property="og:title" content="Odelade Family Ledger">
+    <meta property="og:description" content="Manage and track the Odelade family savings and contributions from anywhere.">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="en_NG">
+    <meta property="og:site_name" content="Odelade Family Ledger">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Odelade Family Ledger">
+    <meta name="twitter:description" content="Manage and track the Odelade family savings and contributions from anywhere.">
+    
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
-    <title>Odelade Family Ledger</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -80,12 +100,53 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+        .animate-slideUp { animation: slideUp 0.4s ease-out; }
         a, button { transition: all 0.15s ease; }
         .icon { display: inline-flex; width: 1em; height: 1em; }
         .icon-sm { width: 16px; height: 16px; }
         .icon-md { width: 20px; height: 20px; }
         .icon-lg { width: 24px; height: 24px; }
         .touch-target { min-height: 48px; min-width: 48px; }
+        
+        /* Premium card styles */
+        .card-premium {
+            background: white;
+            border: 1px solid #CCFBF1;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(13,148,136,0.08);
+            transition: all 0.2s ease;
+        }
+        .card-premium:hover {
+            box-shadow: 0 4px 12px rgba(13,148,136,0.12), 0 8px 24px rgba(13,148,136,0.08);
+            transform: translateY(-2px);
+        }
+        
+        /* Gradient accent */
+        .gradient-accent {
+            background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        }
+        
+        /* Glow effect */
+        .glow-teal {
+            box-shadow: 0 0 20px rgba(13,148,136,0.2);
+        }
+        
+        /* Status colors */
+        .status-active { color: #059669; background: #ECFDF5; }
+        .status-overdue { color: #DC2626; background: #FEF2F2; }
+        .status-pending { color: #D97706; background: #FFFBEB; }
+        
+        /* Smooth transitions */
+        .transition-smooth { transition: all 0.2s ease-out; }
         
         /* DEV ERROR OVERLAY - remove for production */
         #error-overlay { position: fixed; inset: 0; background: #0F172A; color: #fff; z-index: 99999; padding: 20px; overflow: auto; font-family: monospace; font-size: 13px; display: none; }
@@ -146,6 +207,22 @@
             <div id="notif-content"></div>
         </div>
     </div>
+    
+    <!-- Receipt Modal -->
+    <div id="receipt-modal" class="fixed inset-0 z-50 hidden transition-opacity duration-200 opacity-0">
+        <div class="absolute inset-0 bg-black/80" onclick="closeReceiptModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="relative max-w-full max-h-full transform transition-transform duration-200 scale-95">
+                <button onclick="closeReceiptModal()" class="absolute -top-12 right-0 flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+                <img id="receipt-image" src="" alt="Receipt" class="max-h-[80vh] max-w-full rounded-xl shadow-2xl">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Transfer Receipt Modal -->
+    <div id="transfer-receipt-modal" class="fixed inset-0 z-50 hidden"></div>
     
     <script src="/js/i18n.js"></script>
     <script src="/js/api.js"></script>

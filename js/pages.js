@@ -1,5 +1,17 @@
 // Pages with Lucide Icons
 
+// Helper to clean reason text
+function cleanReason(reason, type) {
+    if (!reason) return type === 'credit' ? 'Money In' : 'Money Out';
+    const r = reason.toLowerCase();
+    if (r.includes('transfer from pool2 to pool1') || r.includes('transfer from pool2')) return 'Transfer to Family Savings';
+    if (r.includes('transfer from pool1 to pool2') || r.includes('transfer from pool1')) return 'Transfer to Personal Savings';
+    if (r === 'pool2') return 'Personal Savings Deposit';
+    if (r === 'pool1') return 'Family Savings Deposit';
+    if (r.includes('care fund approved') || r.includes('care fund')) return 'Care Fund Withdrawal';
+    return reason;
+}
+
 const pages = {
     // Auth Pages
     login: () => `
@@ -31,7 +43,7 @@ const pages = {
                             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
                                 ${Icons.heartHandshake()}
                             </div>
-                            <span class="text-sm font-medium text-white/80">Care Fund</span>
+                            <span class="text-sm font-medium text-white/80">Personal Savings</span>
                         </div>
                         <div class="flex flex-col items-center gap-3">
                             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
@@ -294,7 +306,7 @@ const pages = {
                         </div>
                     </div>
                     <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">${t('common.familyManager')}</h1>
-                    <p class="text-xl text-white/80 max-w-md">Manage your family savings and care fund</p>
+                    <p class="text-xl text-white/80 max-w-md">Manage your family savings and personal savings</p>
                     <div class="mt-12 flex items-center justify-center gap-8 text-white/60 text-sm">
                         <div class="flex flex-col items-center gap-2">
                             ${Icons.users()}
@@ -306,7 +318,7 @@ const pages = {
                         </div>
                         <div class="flex flex-col items-center gap-2">
                             ${Icons.heartHandshake()}
-                            <span>Care Fund</span>
+                            <span>Personal Savings</span>
                         </div>
                     </div>
                 </div>
@@ -386,8 +398,31 @@ const pages = {
     memberDashboard: async () => {
         const dashboard = await store.loadDashboard();
         const d = dashboard || {};
-        const txData = await store.loadTransactions();
-        const recent = (txData || []).slice(0, 5);
+        
+        // Get pool2 balance from transactions if not in dashboard
+        let pool2Balance = d.my_pool2_contributions;
+        if (!pool2Balance || pool2Balance === '0') {
+            const txns = await store.loadTransactions({ pool: 'pool2' });
+            const txArray = Array.isArray(txns) ? txns : (txns?.data || []);
+            // Calculate pool2: credits - debits
+            const credits = txArray.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+            const debits = txArray.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+            pool2Balance = String(credits - debits);
+        }
+        
+        const recentData = d.recent_transactions || [];
+        // Attach receipts to recent transactions
+        let recent = recentData.slice(0, 5);
+        try {
+            const memberApi = window.member;
+            const receipts = await memberApi.getReceipts();
+            const receiptMap = {};
+            receipts.forEach(r => { receiptMap[r.TransactionID] = r; });
+            recent = recent.map(p => ({
+                ...p,
+                receiptData: receiptMap[p.id]?.ReceiptData
+            }));
+        } catch (e) { console.error('Failed to load receipts:', e); }
         const name = store.user?.name?.split(' ')[0] || 'Friend';
         return `
             <div class="w-full min-w-0">
@@ -404,30 +439,35 @@ const pages = {
                 
                 <!-- KPI Grid -->
                 <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-4">
-                    ${KpiCard({ label: 'My Savings', amount: d.my_contributions || 0, subtext: t('common.upToDate'), highlight: true })}
-                    ${KpiCard({ label: 'Care Fund', amount: d.my_pool2_contributions || 0, subtext: (d.member_count || 0) + ' members' })}
+                    ${KpiCard({ label: 'Family Savings', amount: d.pool1_balance || 0, subtext: t('common.totalPool1'), highlight: true })}
+                    ${KpiCard({ label: 'My Savings', amount: d.my_contributions || 0, subtext: t('common.yourContributions') })}
+                    ${KpiCard({ label: 'Personal Savings', amount: pool2Balance || 0, subtext: t('common.yourBalance') })}
+                    ${KpiCard({ label: 'Alerts', amount: store.unreadCount || 0, subtext: 'Unread', isCurrency: false })}
                 </div>
                 
                 <!-- Recent Activity -->
                 <div class="w-full min-w-0 mb-6">
                     <div class="mb-4 flex items-center justify-between">
-                        <h2 class="text-base font-bold text-text-primary">Recent Activity</h2>
-                        <a href="/member/history" class="flex items-center gap-1 text-sm font-semibold text-brand select-none">${Icons.arrowRight()} View all</a>
+                        <h2 class="text-base font-bold text-text-primary">${t('common.recentActivity')}</h2>
+                        <a href="/member/activity" class="flex items-center gap-1 text-sm font-semibold text-brand select-none">${Icons.arrowRight()} ${t('common.viewAll')}</a>
                     </div>
                     ${recent.length > 0 ? `
                         <div class="w-full min-w-0 space-y-3">
                             ${recent.map(p => `
-                                <div class="flex items-center gap-4 rounded-2xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
-                                    <div class="flex h-11 w-11 items-center justify-center rounded-xl flex-shrink-0 ${p.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
-                                        ${p.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
+                                <div class="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3 hover:shadow-md transition-shadow">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
+                                        ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? Icons.arrowUpRight() : Icons.arrowDownRight()}
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-semibold text-text-primary truncate">${p.reason}</p>
-                                        <p class="text-xs text-text-muted mt-0.5">${formatDate(p.created_at)}</p>
+                                        <p class="text-sm font-semibold text-text-primary truncate">${p.reason || 'Transaction'}</p>
+                                        <p class="text-xs text-text-muted">${p.member_name || 'Family member'} • ${formatDate(p.created_at)}</p>
                                     </div>
-                                    <p class="text-base font-bold whitespace-nowrap ${p.type === 'credit' ? 'text-success' : 'text-error'}">
-                                        ${p.type === 'credit' ? '+' : '-'}${formatCurrency(p.amount)}
-                                    </p>
+                                    <div class="flex items-center gap-2">
+                                        ${p.receiptData ? `<button onclick="showTransferReceiptData('${p.id}', '${encodeURIComponent(p.receiptData || '')}')" class="p-2 text-brand hover:text-brand-hover" title="View Receipt">${Icons.fileText()}</button>` : ''}
+                                        <p class="text-sm font-bold whitespace-nowrap ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? 'text-success' : 'text-error'}">
+                                            ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? '+' : '-'}${formatCurrency(p.amount)}
+                                        </p>
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
@@ -442,10 +482,10 @@ const pages = {
                 <!-- Quick Actions -->
                 <div class="w-full min-w-0 grid grid-cols-2 gap-4">
                     <a href="/member/transfer" class="flex items-center justify-center gap-3 rounded-2xl bg-brand p-4 font-bold text-white shadow-lg shadow-brand/25 select-none">
-                        ${Icons.arrowRightLeft()} Transfer
+                        ${Icons.arrowRightLeft()} ${t('common.transfer')}
                     </a>
                     <a href="/member/care-fund" class="flex items-center justify-center gap-3 rounded-2xl border-2 border-border bg-surface p-4 font-bold select-none">
-                        ${Icons.heartHandshake()} Request Help
+                        ${Icons.heartHandshake()} ${t('common.requestWithdraw')}
                     </a>
                 </div>
             </div>
@@ -453,53 +493,89 @@ const pages = {
     },
     
     memberSavings: async () => {
-        const txData = await store.loadTransactions({ pool: 'pool1' });
-        const transactions = txData || store.transactions;
+        const memberApi = window.member;
+        let transactions = [];
+        try {
+            const result = await memberApi.getTransactions({ pool: 'pool1', limit: 50 });
+            let rawTx = result?.transactions || result?.data || [];
+            // Normalize field names from API (Pool, Type, Amount, CreatedAt)
+            transactions = rawTx.map(tx => ({
+                id: tx.ID,
+                pool: tx.Pool,
+                type: tx.Type,
+                amount: tx.Amount,
+                reason: tx.Reason,
+                created_at: tx.CreatedAt,
+                receipt_url: tx.ReceiptURL
+            }));
+            const receipts = await memberApi.getReceipts();
+            const receiptMap = {};
+            receipts.forEach(r => { receiptMap[r.TransactionID] = r; });
+            transactions.forEach(tx => {
+                if (receiptMap[tx.id]) {
+                    tx.receiptData = receiptMap[tx.id].ReceiptData;
+                    tx.receiptType = receiptMap[tx.id].ReceiptType;
+                }
+            });
+        } catch (e) {
+            console.error('Failed to load savings:', e);
+        }
+        
+        // Calculate summary
+        const totalIn = transactions.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        const totalOut = transactions.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        
         return `
-            <div class="w-full min-w-0 mb-6">
+            <div class="w-full min-w-0 mb-4">
                 <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                     ${Icons.wallet()}
-                    ${t('nav.mySavings')}
+                    My Family Savings
                 </h1>
-                <p class="text-xs sm:text-sm text-text-muted">Your Family Savings history</p>
+                <p class="text-xs sm:text-sm text-text-muted">Your contributions to the family savings pool</p>
             </div>
             
+            <!-- Summary -->
+            <div class="w-full min-w-0 mb-4 grid grid-cols-2 gap-3">
+                <div class="rounded-xl bg-success/10 p-3 border border-success/20">
+                    <p class="text-xs text-success font-medium">Total Saved</p>
+                    <p class="text-lg font-bold text-success">+${formatCurrency(totalIn)}</p>
+                </div>
+                <div class="rounded-xl bg-error/10 p-3 border border-error/20">
+                    <p class="text-xs text-error font-medium">Total Withdrawn</p>
+                    <p class="text-lg font-bold text-error">-${formatCurrency(totalOut)}</p>
+                </div>
+            </div>
+            
+            <!-- Transactions -->
             <div class="w-full min-w-0">
-            ${Card({
-                children: transactions.length ? `
-                    <div class="rounded-xl overflow-hidden border border-border">
-                        <div class="overflow-x-auto w-full">
-                            <table class="w-full min-w-[520px]">
-                                <thead>
-                                    <tr class="bg-table-header text-left border-b border-border">
-                                        <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.date')}</th>
-                                        <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.type')}</th>
-                                        <th class="whitespace-nowrap px-4 py-3.5 text-right text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.amount')}</th>
-                                        <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.reason')}</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-border">
-                                    ${transactions.map((tx, i) => `
-                                        <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} hover:bg-surface-raised transition-colors cursor-pointer">
-                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${formatDate(tx.created_at)}</td>
-                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm font-medium ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
-                                                <span class="inline-flex items-center gap-1.5">
-                                                    ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()} 
-                                                    ${tx.type === 'credit' ? t('table.moneyIn') : t('table.moneyOut')}
-                                                </span>
-                                            </td>
-                                            <td class="whitespace-nowrap px-4 py-3.5 text-right text-sm font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
-                                                ${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}
-                                            </td>
-                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${tx.reason}</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
+            ${transactions.length > 0 ? `
+                <div class="w-full min-w-0 space-y-2">
+                    ${transactions.map((tx, i) => `
+                        <div class="rounded-xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-start gap-3">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${tx.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
+                                    ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-text-primary">${cleanReason(tx.reason, tx.type)}</p>
+                                    <p class="text-xs text-text-muted mt-1">${formatDate(tx.created_at)}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-lg font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}</p>
+                                    ${tx.receiptData ? `<button onclick="showTransferReceiptData('${tx.id}', '${encodeURIComponent(tx.receiptData)}')" class="text-xs text-brand font-medium mt-1 block">View Receipt</button>` : ''}
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                ` : EmptyState({ icon: Icons.wallet(), message: t('member.noPayments') })
-            })}
+                    `).join('')}
+                </div>
+                <p class="text-center text-sm text-text-muted mt-4">${transactions.length} payment${transactions.length !== 1 ? 's' : ''} recorded</p>
+            ` : `
+                <div class="rounded-2xl border border-border bg-surface p-8 text-center">
+                    <div class="mb-3 flex justify-center">${Icons.wallet()}</div>
+                    <p class="text-sm font-medium text-text-primary">No payments recorded yet</p>
+                    <p class="text-xs text-text-muted mt-1">Your family manager will record your first payment</p>
+                </div>
+            `}
             </div>
         `;
     },
@@ -507,56 +583,70 @@ const pages = {
     memberTransfer: async () => {
         const dashboard = await store.loadDashboard();
         const d = dashboard || {};
+        
+        // Get pool2 balance (personal savings available to transfer FROM)
+        let pool2Balance = d.my_pool2_contributions;
+        if (!pool2Balance || pool2Balance === '0') {
+            const txns = await store.loadTransactions({ pool: 'pool2' });
+            const txArray = Array.isArray(txns) ? txns : (txns?.data || []);
+            const credits = txArray.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+            const debits = txArray.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+            pool2Balance = String(credits - debits);
+        }
+        
+        // Get pool1 total balance (family savings) - this is the TOTAL pool1, not member's contributions
+        const pool1Balance = d.pool1_balance || '0';
+        
         return `
             <div class="w-full min-w-0 mb-6">
                 <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                     ${Icons.arrowRightLeft()}
-                    Transfer Funds
+                    ${t('common.transfer')}
                 </h1>
-                <p class="text-xs sm:text-sm text-text-muted">Move money from Care Fund to Family Savings</p>
+                <p class="text-xs sm:text-sm text-text-muted">${t('transfer.description')}</p>
             </div>
             
             <!-- Balances -->
             <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-3">
                 <div class="rounded-2xl border border-border bg-surface p-4">
-                    <p class="text-xs font-bold uppercase tracking-wider text-text-muted mb-1">${t('member.careFund')}</p>
-                    <p class="text-2xl font-bold text-brand">${formatCurrency(d.my_pool2_contributions || 0)}</p>
-                    <p class="text-xs text-text-muted mt-1">Available to transfer</p>
+                    <p class="text-xs font-bold uppercase tracking-wider text-text-muted mb-1">${t('member.personalSavings')}</p>
+                    <p class="text-2xl font-bold text-brand">${formatCurrency(pool2Balance || 0)}</p>
+                    <p class="text-xs text-text-muted mt-1">${t('transfer.available')}</p>
                 </div>
                 <div class="rounded-2xl border border-border bg-surface p-4">
                     <p class="text-xs font-bold uppercase tracking-wider text-text-muted mb-1">${t('member.familySavings')}</p>
-                    <p class="text-2xl font-bold text-text-primary">${formatCurrency(d.my_contributions || 0)}</p>
-                    <p class="text-xs text-text-muted mt-1">Current balance</p>
+                    <p class="text-2xl font-bold text-text-primary">${formatCurrency(pool1Balance)}</p>
+                    <p class="text-xs text-text-muted mt-1">${t('transfer.currentBalance')}</p>
                 </div>
             </div>
             
             <!-- Transfer Form -->
             <div class="w-full min-w-0">
                 ${Card({
-                    title: 'Transfer from Care Fund to Savings',
+                    title: t('transfer.title'),
                     children: `
                         <form onsubmit="handleTransferSubmit(event)" class="space-y-5">
                             <div class="space-y-2">
-                                <label class="block text-sm font-semibold text-text-primary">How much to transfer? <span class="text-error">*</span></label>
+                                <label class="block text-sm font-semibold text-text-primary">${t('transfer.howMuch')} <span class="text-error">*</span></label>
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
-                                    <input type="number" id="transfer-amount" placeholder="0" max="${d.my_pool2_contributions || 0}"
+                                    <input type="number" id="transfer-amount" placeholder="0" max="${pool2Balance || 0}"
                                         class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface py-3 pl-12 pr-4 text-lg font-semibold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                                 </div>
-                                <p class="text-xs text-text-muted">Maximum: ${formatCurrency(d.my_pool2_contributions || 0)}</p>
+                                <p class="text-xs text-text-muted">${t('transfer.maximum')}: ${formatCurrency(pool2Balance || 0)}</p>
                             </div>
                             
                             <button type="submit" id="transfer-btn" class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-bold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/40 hover:-translate-y-0.5 transition-all select-none">
-                                ${Icons.arrowRightLeft()} Transfer Now
+                                ${Icons.arrowRightLeft()} ${t('common.transferNow')}
                             </button>
                         </form>
                         
                         <div class="mt-6 rounded-xl bg-surface-soft p-4">
-                            <p class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">How it works</p>
+                            <p class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">${t('transfer.howItWorks')}</p>
                             <ul class="space-y-2 text-sm text-text-secondary">
-                                <li class="flex items-start gap-2">${Icons.checkCircle()} Money moves from your Care Fund to your Family Savings</li>
-                                <li class="flex items-start gap-2">${Icons.checkCircle()} This is one-way only - you cannot transfer back</li>
-                                <li class="flex items-start gap-2">${Icons.checkCircle()} Transfer is instant and cannot be undone</li>
+                                <li class="flex items-start gap-2">${Icons.checkCircle()} ${t('transfer.step1')}</li>
+                                <li class="flex items-start gap-2">${Icons.checkCircle()} ${t('transfer.step2')}</li>
+                                <li class="flex items-start gap-2">${Icons.checkCircle()} ${t('transfer.step3')}</li>
                             </ul>
                         </div>
                     `
@@ -566,55 +656,179 @@ const pages = {
     },
     
     memberHistory: async () => {
-        const txData = await store.loadTransactions();
-        const transactions = txData || store.transactions;
+        // Load transactions and receipts
+        let transactions = [];
+        let receipts = {};
+        try {
+            const memberApi = window.member;
+            const result = await memberApi.getTransactions({ limit: 100 });
+            transactions = result?.transactions || result?.data || [];
+            // Normalize field names from API (Pool, Type, Amount, CreatedAt)
+            transactions = transactions.map(tx => ({
+                id: tx.ID,
+                pool: tx.Pool,
+                type: tx.Type,
+                amount: tx.Amount,
+                reason: tx.Reason,
+                created_at: tx.CreatedAt,
+                receipt_url: tx.ReceiptURL
+            }));
+            const rpts = await memberApi.getReceipts();
+            rpts.forEach(r => { receipts[r.TransactionID] = r; });
+            // Attach receipt to both sides of transfer
+            transactions.forEach(tx => {
+                if (receipts[tx.id]) {
+                    tx.receiptData = receipts[tx.id].ReceiptData;
+                }
+            });
+        } catch (e) {
+            console.error('Failed to load:', e);
+        }
+        
+        // State for filters
+        window.historyFilters = window.historyFilters || { fund: 'all', type: 'all' };
+        const filters = window.historyFilters;
+        
+        // Calculate summary
+        const totalIn = transactions.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        const totalOut = transactions.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        
+        // Apply filters
+        let filtered = transactions.filter(tx => {
+            if (filters.fund !== 'all' && tx.pool !== filters.fund) return false;
+            if (filters.type !== 'all' && tx.type !== filters.type) return false;
+            return true;
+        });
+        
+        return `
+            <div class="w-full min-w-0 mb-4">
+                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
+                    ${Icons.history()}
+                    My Transaction History
+                </h1>
+                <p class="text-xs sm:text-sm text-text-muted">A complete record of your activity across Family Savings and Personal Savings</p>
+            </div>
+            
+            <!-- Summary Bar -->
+            <div class="w-full min-w-0 mb-4 grid grid-cols-2 gap-3">
+                <div class="rounded-xl bg-success/10 p-3 border border-success/20">
+                    <p class="text-xs text-success font-medium">Total Money In</p>
+                    <p class="text-lg font-bold text-success">+${formatCurrency(totalIn)}</p>
+                </div>
+                <div class="rounded-xl bg-error/10 p-3 border border-error/20">
+                    <p class="text-xs text-error font-medium">Total Money Out</p>
+                    <p class="text-lg font-bold text-error">-${formatCurrency(totalOut)}</p>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="w-full min-w-0 mb-4 flex flex-wrap gap-2">
+                <div class="flex rounded-lg border border-border overflow-hidden">
+                    <button onclick="window.historyFilters.fund='all';window.historyFilters.type='all';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='all' && filters.type==='all' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">All</button>
+                </div>
+                <div class="flex rounded-lg border border-border overflow-hidden">
+                    <button onclick="window.historyFilters.fund='pool1';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='pool1' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">Family Savings</button>
+                    <button onclick="window.historyFilters.fund='pool2';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='pool2' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">Personal Savings</button>
+                </div>
+                <div class="flex rounded-lg border border-border overflow-hidden">
+                    <button onclick="window.historyFilters.type='credit';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.type==='credit' ? 'bg-success text-white' : 'bg-surface text-text-secondary'}">Money In</button>
+                    <button onclick="window.historyFilters.type='debit';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.type==='debit' ? 'bg-error text-white' : 'bg-surface text-text-secondary'}">Money Out</button>
+                </div>
+                ${(filters.fund !== 'all' || filters.type !== 'all') ? `<button onclick="window.historyFilters={fund:'all',type:'all'};router.refresh()" class="px-3 py-2 text-xs font-medium text-brand">Clear</button>` : ''}
+            </div>
+            
+            <!-- Transactions -->
+            <div class="w-full min-w-0">
+                ${filtered.length > 0 ? `
+                    <div class="w-full min-w-0 space-y-2">
+                        ${filtered.map((tx, i) => `
+                            <div class="rounded-xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
+                                <div class="flex items-start gap-3">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${tx.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
+                                        ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-xs font-medium px-2 py-0.5 rounded-full ${tx.pool === 'pool1' ? 'bg-brand/10 text-brand' : 'bg-pool2/10 text-pool2'}">${tx.pool === 'pool1' ? 'Family Savings' : 'Personal Savings'}</span>
+                                        </div>
+                                        <p class="text-sm font-semibold text-text-primary">${cleanReason(tx.reason, tx.type)}</p>
+                                        <p class="text-xs text-text-muted mt-1">${formatDate(tx.created_at)}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-lg font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}</p>
+                                        ${tx.receiptData ? `<button onclick="showTransferReceiptData('${tx.id}', '${encodeURIComponent(tx.receiptData)}')" class="text-xs text-brand font-medium mt-1 block">View Receipt</button>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${filtered.length >= 20 ? `<p class="text-center text-sm text-text-muted mt-4">You have reached the end of your history</p>` : ''}
+                ` : `
+                    <div class="rounded-2xl border border-border bg-surface p-8 text-center">
+                        <div class="mb-3 flex justify-center">${Icons.history()}</div>
+                        <p class="text-sm font-medium text-text-primary">${transactions.length === 0 ? 'No transactions yet' : 'No transactions match your filter'}</p>
+                        <p class="text-xs text-text-muted mt-1">${transactions.length === 0 ? 'Your transactions will appear here once your family manager records your first payment' : 'Clear filters to see all transactions'}</p>
+                    </div>
+                `}
+            </div>
+        `;
+    },
+    
+    // Family Activity - All Pool 1 transactions from all members
+    memberActivity: async () => {
+        const dashboard = await store.loadDashboard();
+        const allTx = dashboard?.recent_transactions || [];
+        let transactions = allTx;
+        try {
+            const memberApi = window.member;
+            const receipts = await memberApi.getReceipts();
+            const receiptMap = {};
+            receipts.forEach(r => { receiptMap[r.TransactionID] = r; });
+            transactions = allTx.map(p => ({
+                ...p,
+                receiptData: receiptMap[p.id]?.ReceiptData
+            }));
+        } catch (e) { console.error('Failed to load receipts:', e); }
+        
         return `
             <div class="w-full min-w-0 mb-6">
                 <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
-                    ${Icons.history()}
-                    ${t('nav.myHistory')}
+                    ${Icons.users()}
+                    Family Activity
                 </h1>
-                <p class="text-xs sm:text-sm text-text-muted">All your transactions across both funds</p>
+                <p class="text-xs sm:text-sm text-text-muted">All family savings activity across Pool 1</p>
             </div>
             
             <div class="w-full min-w-0">
-                ${Card({
-                    children: transactions.length > 0 ? `
-                        <div class="rounded-xl overflow-hidden border border-border">
-                            <div class="overflow-x-auto w-full">
-                                <table class="w-full min-w-[560px]">
-                                    <thead>
-                                        <tr class="bg-table-header text-left border-b border-border">
-                                            <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.date')}</th>
-                                            <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.type')}</th>
-                                            <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.fund')}</th>
-                                            <th class="whitespace-nowrap px-4 py-3.5 text-right text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.amount')}</th>
-                                            <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.reason')}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-border">
-                                        ${transactions.map((tx, i) => `
-                                            <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} hover:bg-surface-raised transition-colors cursor-pointer">
-                                                <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${formatDate(tx.created_at)}</td>
-                                                <td class="whitespace-nowrap px-4 py-3.5 text-sm font-medium ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
-                                                    <span class="inline-flex items-center gap-1.5">
-                                                        ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()} 
-                                                        ${tx.type === 'credit' ? t('table.moneyIn') : t('table.moneyOut')}
-                                                    </span>
-                                                </td>
-                                                <td class="whitespace-nowrap px-4 py-3.5">${PoolTag({ pool: tx.pool })}</td>
-                                                <td class="whitespace-nowrap px-4 py-3.5 text-right text-sm font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">
-                                                    ${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}
-                                                </td>
-                                                <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${tx.reason}</td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
+                ${transactions.length > 0 ? `
+                    <div class="w-full min-w-0 space-y-3">
+                        ${transactions.map(p => `
+                            <div class="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
+                                    ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? Icons.arrowUpRight() : Icons.arrowDownRight()}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-text-primary truncate">${p.reason || 'Transaction'}</p>
+                                    <p class="text-xs text-text-muted">${p.member_name || 'Family member'} • ${formatDate(p.created_at)}</p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    ${p.receiptData ? `<button onclick="showTransferReceiptData('${p.id}', '${encodeURIComponent(p.receiptData || '')}')" class="p-2 text-brand hover:text-brand-hover" title="View Receipt">${Icons.fileText()}</button>` : ''}
+                                    <p class="text-sm font-bold whitespace-nowrap ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? 'text-success' : 'text-error'}">
+                                        ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? '+' : '-'}${formatCurrency(p.amount)}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    ` : EmptyState({ icon: Icons.history(), message: t('member.noPayments') })
-                })}
+                        `).join('')}
+                    </div>
+                    ${transactions.length >= 20 ? `
+                        <p class="text-center text-sm text-text-muted mt-4">You have reached the end of the family activity</p>
+                    ` : ''}
+                ` : `
+                    <div class="rounded-2xl border border-border bg-surface p-8 text-center">
+                        <div class="mb-3 flex justify-center">${Icons.users()}</div>
+                        <p class="text-sm text-text-muted">No family activity yet. Transactions will appear here.</p>
+                    </div>
+                `}
             </div>
         `;
     },
@@ -623,16 +837,27 @@ const pages = {
         const dashboard = await store.loadDashboard();
         const d = dashboard || {};
         const requests = await store.loadCareFundRequests();
+        
+        // Get pool2 balance from transactions if not in dashboard
+        let pool2Balance = d.my_pool2_contributions;
+        if (!pool2Balance || pool2Balance === '0') {
+            const txns = await store.loadTransactions({ pool: 'pool2' });
+            const txArray = Array.isArray(txns) ? txns : (txns?.data || []);
+            const credits = txArray.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+            const debits = txArray.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+            pool2Balance = String(credits - debits);
+        }
+        
         return `
             <div class="w-full min-w-0 mb-6">
-                <h1 class="text-2xl font-bold text-text-primary">${t('nav.careFund')}</h1>
+                <h1 class="text-2xl font-bold text-text-primary">${t('nav.personalSavings')}</h1>
                 <p class="text-sm text-text-muted mt-1">Request help from your family</p>
             </div>
             
             <!-- Balance -->
             <div class="w-full min-w-0 mb-6 rounded-2xl border-2 border-brand/20 bg-gradient-to-br from-brand-light to-white p-5 shadow-lg shadow-brand/10">
-                <p class="text-sm font-bold text-brand mb-1">${t('careFund.balance')}</p>
-                <p class="text-3xl font-bold text-brand">${formatCurrency(d.my_pool2_contributions || 0)}</p>
+                <p class="text-sm font-bold text-brand mb-1">Personal Savings Balance</p>
+                <p class="text-3xl font-bold text-brand">${formatCurrency(pool2Balance || 0)}</p>
             </div>
             
             <!-- Request Form -->
@@ -645,9 +870,10 @@ const pages = {
                                 <label class="block text-sm font-bold text-text-primary">${t('careFund.howMuchNeed')}</label>
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
-                                    <input type="number" id="care-amount" placeholder="0"
+                                    <input type="number" id="care-amount" placeholder="0" max="${pool2Balance || 0}"
                                         class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface pl-12 pr-4 text-lg font-bold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                                 </div>
+                                <p class="text-xs text-text-muted">Available: ${formatCurrency(pool2Balance || 0)}</p>
                             </div>
                             <button type="submit" id="care-btn" class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-brand text-lg font-bold text-white shadow-lg shadow-brand/25 select-none">
                                 ${Icons.heartHandshake()} ${t('careFund.sendRequest')}
@@ -664,12 +890,16 @@ const pages = {
                     children: requests.length > 0 ? `
                         <div class="space-y-3">
                             ${requests.map(r => `
-                                <div class="flex items-center justify-between rounded-xl border border-border bg-surface-soft p-4">
-                                    <div>
-                                        <p class="font-bold text-text-primary">${formatCurrency(r.amount)}</p>
-                                        <p class="text-xs text-text-muted mt-0.5">${formatDate(r.event_date || r.created_at)}</p>
+                                <div class="rounded-xl border border-border bg-surface-soft p-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div>
+                                            <p class="font-bold text-text-primary">${formatCurrency(r.amount)}</p>
+                                            ${r.occasion ? `<p class="text-xs font-medium text-brand mt-1">${r.occasion}</p>` : ''}
+                                        </div>
+                                        ${StatusBadge({ status: r.status })}
                                     </div>
-                                    ${StatusBadge({ status: r.status })}
+                                    ${r.description ? `<p class="text-xs text-text-secondary mt-2 italic">"${r.description}"</p>` : ''}
+                                    <p class="text-xs text-text-muted mt-2">${r.event_date ? formatDate(r.event_date) : formatDate(r.created_at)}</p>
                                 </div>
                             `).join('')}
                         </div>
@@ -687,28 +917,28 @@ const pages = {
                 <!-- Title -->
                 <div class="mb-6">
                     <h1 class="text-2xl font-bold text-text-primary">${t('admin.familyOverview')}</h1>
-                    <p class="text-sm text-text-muted mt-1">Family savings at a glance</p>
+                    <p class="text-sm text-text-muted mt-1">${t('admin.dashboardDesc')}</p>
                 </div>
                 
                 <!-- KPI Grid -->
                 <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-                    ${KpiCard({ label: 'Family Savings', amount: d.pool1_balance || 0, subtext: 'Total Pool 1', highlight: true })}
-                    ${KpiCard({ label: 'Care Fund', amount: d.pool2_balance || 0, subtext: 'Total Pool 2' })}
-                    ${KpiCard({ label: 'Members', amount: d.member_count || 0, subtext: (d.active_count || 0) + ' active', isCurrency: false })}
-                    ${KpiCard({ label: 'Overdue', amount: d.overdue_count || 0, subtext: 'Behind on savings', isCurrency: false })}
+                    ${KpiCard({ label: 'Family Savings', amount: d.pool1_balance || 0, subtext: t('common.totalPool1'), highlight: true })}
+                    ${KpiCard({ label: 'Personal Savings', amount: d.pool2_balance || 0, subtext: 'Total Pool 2' })}
+                    ${KpiCard({ label: t('admin.members'), amount: d.member_count || 0, subtext: (d.active_count || 0) + ' ' + t('common.active'), isCurrency: false })}
+                    ${KpiCard({ label: 'Overdue', amount: d.overdue_count || 0, subtext: t('member.behind'), isCurrency: false })}
                 </div>
                 
                 ${d.underfunded_members && d.underfunded_members.length > 0 ? `
                     <div class="w-full min-w-0 mb-6 rounded-2xl border border-error/20 bg-error/5 p-5">
-                        <div class="mb-4 flex items-center gap-2">${Icons.alertTriangle()}<p class="text-sm font-bold text-error">Members Behind on Savings</p></div>
+                        <div class="mb-4 flex items-center gap-2">${Icons.alertTriangle()}<p class="text-sm font-bold text-error">${t('admin.behindTitle')}</p></div>
                         <div class="w-full min-w-0 space-y-3">
                             ${d.underfunded_members.map(m => `
                                 <div class="flex items-center justify-between rounded-xl bg-surface p-3">
                                     <div class="flex items-center gap-3">
                                         <div class="flex h-10 w-10 items-center justify-center rounded-full bg-error/10 text-sm font-bold text-error">${m.name?.charAt(0) || '?'}</div>
-                                        <span class="text-sm font-semibold">${m.name}</span>
+                                        <span class="text-sm font-semibold truncate">${m.name}</span>
                                     </div>
-                                    <span class="text-sm font-bold text-error">${formatCurrency(m.committed_amount - m.current_sum)} behind</span>
+                                    <span class="text-sm font-bold text-error whitespace-nowrap">${formatCurrency(m.committed_amount - m.current_sum)} ${t('member.behind')}</span>
                                 </div>
                             `).join('')}
                         </div>
@@ -736,7 +966,7 @@ const pages = {
     
     adminTransactions: async () => {
         const txData = await store.loadTransactions();
-        const transactions = txData || store.transactions;
+        const transactions = Array.isArray(txData) ? txData : (txData?.transactions || []);
         return `
             <div class="w-full min-w-0 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -749,7 +979,7 @@ const pages = {
                 ${Card({ children: transactions.length > 0 ? `
                     <div class="rounded-xl overflow-hidden border border-border">
                         <div class="overflow-x-auto w-full">
-                            <table class="w-full min-w-[640px]">
+                            <table class="w-full min-w-[760px]">
                                 <thead><tr class="bg-table-header text-left border-b border-border">
                                     <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.member')}</th>
                                     <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.fund')}</th>
@@ -757,6 +987,7 @@ const pages = {
                                     <th class="whitespace-nowrap px-4 py-3.5 text-right text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.amount')}</th>
                                     <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.reason')}</th>
                                     <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.date')}</th>
+                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.proof')}</th>
                                 </tr></thead>
                                 <tbody class="divide-y divide-border">
                                     ${transactions.map((tx, i) => `
@@ -765,8 +996,11 @@ const pages = {
                                             <td class="whitespace-nowrap px-4 py-3.5">${PoolTag({ pool: tx.pool })}</td>
                                             <td class="whitespace-nowrap px-4 py-3.5 text-sm font-medium ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}</td>
                                             <td class="whitespace-nowrap px-4 py-3.5 text-right text-sm font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}</td>
-                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${tx.reason}</td>
-                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${formatDate(tx.created_at)}</td>
+                                                <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${tx.reason}</td>
+                                                <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${formatDate(tx.created_at)}</td>
+                                                <td class="whitespace-nowrap px-4 py-3.5">
+                                                    ${(tx.receiptData || tx.receipt_url || tx.ReceiptURL || tx.ReceiptData) ? `<button onclick="showTransferReceiptData('${tx.ID}', '${encodeURIComponent(tx.receiptData || tx.receipt_url || tx.ReceiptURL || tx.ReceiptData || '')}')" class="text-brand hover:text-brand-hover font-medium text-sm flex items-center gap-1">${Icons.fileText()} Receipt</button>` : ''}
+                                                </td>
                                         </tr>
                                     `).join('')}
                                 </tbody>
@@ -780,7 +1014,8 @@ const pages = {
     
     adminTransactionsNew: async () => {
         const dashboard = await store.loadDashboard();
-        const members = dashboard?.underfunded_members || [];
+        // all_members has all family members (excluding admin)
+        const members = dashboard?.all_members || dashboard?.underfunded_members || [];
         return `
             <div class="w-full min-w-0 mb-6">
                 <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">${Icons.plusCircle()} Record a Payment</h1>
@@ -802,7 +1037,7 @@ const pages = {
                             <label class="block text-sm font-semibold text-text-primary">${t('transaction.whichFund')} <span class="text-error">*</span></label>
                             <div class="flex rounded-xl border border-border p-1 gap-2">
                                 <button type="button" onclick="setFund('pool1')" id="fund-pool1" class="flex-1 rounded-lg py-3 text-sm font-medium bg-brand text-white select-none">${t('member.familySavings')}</button>
-                                <button type="button" onclick="setFund('pool2')" id="fund-pool2" class="flex-1 rounded-lg py-3 text-sm font-medium text-text-secondary select-none">${t('member.careFund')}</button>
+                                <button type="button" onclick="setFund('pool2')" id="fund-pool2" class="flex-1 rounded-lg py-3 text-sm font-medium text-text-secondary select-none">${t('member.personalSavings')}</button>
                             </div>
                         </div>
                         
@@ -851,6 +1086,8 @@ const pages = {
     
     memberSettings: async () => {
         const name = store.user?.name || 'Member';
+        const profile = await store.loadProfile();
+        const p = profile || store.user || {};
         return `
             <div class="w-full min-w-0">
                 <div class="mb-6">
@@ -866,9 +1103,67 @@ const pages = {
                         </div>
                         <div>
                             <p class="text-lg font-bold">${name}</p>
-                            <p class="text-sm text-text-muted">${t('settings.contactManager')}</p>
+                            <p class="text-sm text-text-muted">${p.start_date ? 'Started: ' + formatDate(p.start_date) : t('settings.contactManager')}</p>
                         </div>
                     </div>
+                </div>
+                
+                <!-- Savings Settings -->
+                <div class="w-full min-w-0 mb-5 rounded-2xl border border-border bg-surface p-5">
+                    <h2 class="mb-4 text-sm font-bold uppercase tracking-wider text-text-muted">${t('settings.savingsSettings')}</h2>
+                    <form onsubmit="handleUpdateSettings(event)" class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-text-primary">${t('settings.savingsInterval')}</label>
+                            <div class="flex rounded-xl border border-border p-1 gap-2">
+                                <button type="button" onclick="setSettingsInterval('weekly')" id="interval-weekly" class="flex-1 rounded-lg py-3 text-sm font-medium ${p.interval === 'weekly' ? 'bg-brand text-white' : 'text-text-secondary'} select-none">
+                                    ${t('register.everyWeek')}
+                                </button>
+                                <button type="button" onclick="setSettingsInterval('monthly')" id="interval-monthly" class="flex-1 rounded-lg py-3 text-sm font-medium ${p.interval === 'monthly' ? 'bg-brand text-white' : 'text-text-secondary'} select-none">
+                                    ${t('register.everyMonth')}
+                                </button>
+                            </div>
+                            <input type="hidden" id="settings-interval" value="${p.interval || 'monthly'}">
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-text-primary">${t('settings.committedAmount')}</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">₦</span>
+                                <input type="number" id="settings-amount" value="${p.committed_amount || ''}" placeholder="0"
+                                    class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface pl-10 pr-4 text-base font-medium focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                            </div>
+                            <p class="text-xs text-text-muted">${t('settings.committedAmountHelper')}</p>
+                        </div>
+                        
+                        <button type="submit" id="settings-btn" class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand text-base font-semibold text-white shadow-lg shadow-brand/25 select-none">
+                            ${Icons.save()} ${t('common.save')}
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Change Password -->
+                <div class="w-full min-w-0 mb-5 rounded-2xl border border-border bg-surface p-5">
+                    <h2 class="mb-4 text-sm font-bold uppercase tracking-wider text-text-muted">${t('settings.changePassword')}</h2>
+                    <form onsubmit="handleChangePassword(event)" class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-text-primary">${t('settings.currentPassword')}</label>
+                            <input type="password" id="settings-current-pw" placeholder="${t('settings.currentPassword')}"
+                                class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-text-primary">${t('settings.newPassword')}</label>
+                            <input type="password" id="settings-new-pw" placeholder="${t('settings.newPassword')}"
+                                class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-text-primary">${t('settings.confirmNew')}</label>
+                            <input type="password" id="settings-confirm-pw" placeholder="${t('settings.confirmNew')}"
+                                class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                        </div>
+                        <button type="submit" id="password-btn" class="flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-brand text-base font-semibold text-brand select-none">
+                            ${Icons.lock()} ${t('settings.changePassword')}
+                        </button>
+                    </form>
                 </div>
                 
                 <!-- Install App -->
@@ -927,7 +1222,7 @@ const pages = {
                     ${Icons.heartHandshake()}
                     ${t('nav.helpRequests')}
                 </h1>
-                <p class="text-xs sm:text-sm text-text-muted">Review and respond to family help requests</p>
+                <p class="text-xs sm:text-sm text-text-muted">Review and respond to withdrawal requests</p>
             </div>
             
             <div class="w-full min-w-0 mb-4 flex gap-1 rounded-xl border border-border bg-surface p-1">
@@ -947,7 +1242,7 @@ const pages = {
                                 <div>
                                     <h3 class="font-bold text-text-primary">${r.member_name || 'Member'}</h3>
                                     <p class="text-sm text-text-muted flex items-center gap-1">
-                                        ${t('occasions.' + r.occasion) || r.occasion} • ${formatDate(r.event_date)}
+                                        ${r.occasion ? (t('occasions.' + r.occasion) || r.occasion) : 'Request'} • ${r.event_date ? formatDate(r.event_date) : 'No date'}
                                     </p>
                                 </div>
                             </div>
@@ -981,10 +1276,9 @@ const pages = {
     },
     
     adminMembers: async () => {
-        // Note: GET /admin/members is not in the API spec, but we can get members from dashboard
         const dashboard = await store.loadDashboard();
         const memberCount = dashboard?.member_count || 0;
-        const underfunded = dashboard?.underfunded_members || [];
+        const allMembers = await store.loadAllMembers();
         
         return `
         <div class="w-full min-w-0 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -1002,7 +1296,7 @@ const pages = {
         </div>
         
         <div class="w-full min-w-0 grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
-            ${underfunded.map(m => `
+            ${allMembers.map(m => `
                 <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-5 shadow-sm hover:shadow-lg hover:shadow-brand/5 transition-all group">
                     <div class="mb-4 flex items-center gap-3">
                         <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand/10 to-brand/5 text-xl font-bold text-brand flex-shrink-0 group-hover:scale-110 transition-transform">
@@ -1011,24 +1305,24 @@ const pages = {
                         <div class="min-w-0 flex-1">
                             <h3 class="font-bold text-text-primary truncate text-base">${m.name}</h3>
                             <p class="text-xs text-text-muted flex items-center gap-1">
-                                ${Icons.target()} Committed: ${formatCurrency(m.committed_amount)}
+                                ${m.interval === 'weekly' ? 'Weekly' : 'Monthly'} • ${formatCurrency(m.committed_amount)}
                             </p>
                         </div>
                     </div>
-                    <div class="mb-4 space-y-2.5 rounded-xl bg-surface-soft p-4">
+                    <div class="mb-4 space-y-2 rounded-xl bg-surface-soft p-4">
                         <div class="flex justify-between items-center">
-                            <span class="text-xs text-text-muted flex items-center gap-1.5">${Icons.piggyBank()} Current</span>
-                            <span class="font-bold text-text-primary">${formatCurrency(m.current_sum)}</span>
+                            <span class="text-xs text-text-muted">Status</span>
+                            <span class="font-bold ${m.status === 'active' ? 'text-success' : 'text-error'}">${m.status === 'active' ? 'Up to date' : 'Behind'}</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-xs text-text-muted flex items-center gap-1.5">${Icons.alertTriangle()} Gap</span>
-                            <span class="font-medium ${m.committed_amount - m.current_sum > 0 ? 'text-error' : 'text-success'}">${formatCurrency(m.committed_amount - m.current_sum)}</span>
+                            <span class="text-xs text-text-muted">Started</span>
+                            <span class="text-xs font-medium">${m.start_date ? formatDate(m.start_date) : 'N/A'}</span>
                         </div>
                     </div>
                 </div>
             `).join('') || `
                 <div class="col-span-full text-center py-12">
-                    <p class="text-sm text-text-muted">All members are up to date or no member data available</p>
+                    <p class="text-sm text-text-muted">No members found</p>
                 </div>
             `}
         </div>
@@ -1185,7 +1479,17 @@ function handleLogin(e) {
         showToast(t('common.success'), 'success');
         router.navigate('/member/dashboard');
     }).catch(err => {
-        errorEl.querySelector('span:last-child').textContent = err.message || t('auth.wrongCredentials');
+        let msg = err.message || 'errors.wrongPassword';
+        // Check if it's a translation key
+        if (msg.includes('.')) {
+            msg = t(msg) || t('errors.tryAgain');
+        } else {
+            msg = msg.replace(/[{}"\[\]]/g, '').trim();
+            if (!msg || msg === 'Request failed') {
+                msg = t('errors.wrongPassword');
+            }
+        }
+        errorEl.querySelector('span:last-child').textContent = msg;
         errorEl.classList.remove('hidden');
     }).finally(() => {
         btn.disabled = false;
@@ -1227,7 +1531,13 @@ function handleRegister(e) {
         showToast(t('common.success'), 'success');
         router.navigate('/member/dashboard');
     }).catch(err => {
-        showToast(err.message || t('common.error'), 'error');
+        let msg = err.message || 'errors.tryAgain';
+        if (msg.includes('.')) {
+            msg = t(msg) || t('errors.tryAgain');
+        } else {
+            msg = msg.replace(/[{}"\[\]]/g, '').trim();
+        }
+        showToast(msg, 'error');
     }).finally(() => {
         btn.disabled = false;
         btn.innerHTML = Icons.userPlus() + ' ' + t('auth.createAccount');
@@ -1248,7 +1558,16 @@ function handleAdminLogin(e) {
         showToast(t('common.success'), 'success');
         router.navigate('/admin/dashboard');
     }).catch(err => {
-        errorEl.querySelector('span:last-child').textContent = err.message || t('auth.wrongCredentials');
+        let msg = err.message || 'errors.wrongPassword';
+        if (msg.includes('.')) {
+            msg = t(msg) || t('errors.tryAgain');
+        } else {
+            msg = msg.replace(/[{}"\[\]]/g, '').trim();
+            if (!msg || msg === 'Request failed') {
+                msg = t('errors.wrongPassword');
+            }
+        }
+        errorEl.querySelector('span:last-child').textContent = msg;
         errorEl.classList.remove('hidden');
     }).finally(() => {
         if (btn) btn.disabled = false;
@@ -1256,11 +1575,15 @@ function handleAdminLogin(e) {
 }
 
 function handleMarkAllRead() {
-    store.markAllRead().then(() => router.refresh());
+    store.markAllRead();
+    // Update UI immediately - no waiting
+    router.refresh();
 }
 
 function handleMarkRead(id) {
-    store.markRead(id).then(() => router.refresh());
+    store.markRead(id);
+    // Update UI immediately - no waiting
+    router.refresh();
 }
 
 function togglePassword(id) {
@@ -1299,6 +1622,11 @@ async function handleRecordPayment(e) {
     
     if (!memberId || !amount || !reason) {
         showToast(t('validation.required'), 'error');
+        return;
+    }
+    
+    if (!receiptFile) {
+        showToast('Receipt is required before recording a payment', 'error');
         return;
     }
     
@@ -1348,28 +1676,41 @@ async function handleAddMember(e) {
         return;
     }
     
+    if (!amount || parseInt(amount) <= 0) {
+        showToast('Please enter a valid amount', 'error');
+        return;
+    }
+    
     btn.disabled = true;
+    btn.innerHTML = '<div class="loader !w-5 !h-5 !border-2"></div> ';
     
     try {
         await store.createMember({
             name,
             password,
             interval: 'monthly',
-            committed_amount: parseInt(amount) || 0,
+            committed_amount: parseInt(amount),
             start_date: new Date().toISOString().split('T')[0]
         });
         showToast(t('common.success'), 'success');
         closeAddMemberModal();
         router.refresh();
     } catch (err) {
-        showToast(err.message || t('common.error'), 'error');
+        let msg = err.message || t('common.error');
+        if (msg.includes('.')) {
+            msg = t(msg) || t('common.error');
+        } else {
+            msg = msg.replace(/[{}"\[\]]/g, '').trim();
+        }
+        showToast(msg, 'error');
     } finally {
         btn.disabled = false;
+        btn.innerHTML = t('members.addMember');
     }
 }
 
 // Member - Submit Care Fund Request
-async function handleCareFundRequest(e) {
+ async function handleCareFundRequest(e) {
     e.preventDefault();
     const amount = document.getElementById('care-amount')?.value;
     const btn = document.getElementById('care-btn');
@@ -1379,12 +1720,31 @@ async function handleCareFundRequest(e) {
         return;
     }
     
+    // Check if member has enough balance in personal savings - calculate from transactions if needed
+    let balance = 0;
+    const dashboard = await store.loadDashboard();
+    if (dashboard?.my_pool2_contributions && dashboard.my_pool2_contributions !== '0') {
+        balance = parseFloat(dashboard.my_pool2_contributions);
+    } else {
+        const txns = await store.loadTransactions({ pool: 'pool2' });
+        const txArray = Array.isArray(txns) ? txns : (txns?.data || []);
+        const credits = txArray.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        const debits = txArray.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        balance = credits - debits;
+    }
+    const requested = parseInt(amount);
+    
+    if (requested > balance) {
+        showToast('Not enough money in your personal savings. You have ' + formatCurrency(balance), 'error');
+        return;
+    }
+    
     btn.disabled = true;
     btn.innerHTML = '<div class="loader !w-5 !h-5 !border-2"></div> ' + t('common.loading');
     
     try {
         await store.submitCareFundRequest({
-            amount: parseInt(amount),
+            amount: String(parseInt(amount)),
             occasion: 'other',
             event_date: new Date().toISOString().split('T')[0],
             description: ''
@@ -1392,7 +1752,13 @@ async function handleCareFundRequest(e) {
         showToast(t('common.success'), 'success');
         router.refresh();
     } catch (err) {
-        showToast(err.message || t('common.error'), 'error');
+        let msg = err.message || 'errors.tryAgain';
+        if (msg.includes('.')) {
+            msg = t(msg) || t('errors.tryAgain');
+        } else {
+            msg = msg.replace(/[{}"\[\]]/g, '').trim();
+        }
+        showToast(msg, 'error');
     } finally {
         btn.disabled = false;
         btn.innerHTML = Icons.heartHandshake() + ' ' + t('careFund.sendRequest');
@@ -1406,13 +1772,19 @@ async function acceptRequest(id) {
         showToast(t('careFund.accepted'), 'success');
         router.refresh();
     } catch (err) {
-        showToast(err.message || t('common.error'), 'error');
+        let msg = err.message || 'errors.tryAgain';
+        if (msg.includes('.')) {
+            msg = t(msg) || t('errors.tryAgain');
+        } else {
+            msg = msg.replace(/[{}"\[\]]/g, '').trim();
+        }
+        showToast(msg, 'error');
     }
 }
 
 // Admin - Decline Care Fund Request
 async function declineRequest(id) {
-    const reason = prompt('Reason for declining:');
+    const reason = prompt(t('careFund.declineReason') || 'Reason for declining:');
     if (!reason) return;
     
     try {
@@ -1420,7 +1792,13 @@ async function declineRequest(id) {
         showToast(t('careFund.notApproved'), 'info');
         router.refresh();
     } catch (err) {
-        showToast(err.message || t('common.error'), 'error');
+        let msg = err.message || 'errors.tryAgain';
+        if (msg.includes('.')) {
+            msg = t(msg) || t('errors.tryAgain');
+        } else {
+            msg = msg.replace(/[{}"\[\]]/g, '').trim();
+        }
+        showToast(msg, 'error');
     }
 }
 
@@ -1448,13 +1826,19 @@ async function handleChangePassword(e) {
         showToast(t('common.success'), 'success');
         form.reset();
     } catch (err) {
-        showToast(err.message || t('common.error'), 'error');
+        let msg = err.message || 'errors.tryAgain';
+        if (msg.includes('.')) {
+            msg = t(msg) || t('errors.tryAgain');
+        } else {
+            msg = msg.replace(/[{}"\[\]]/g, '').trim();
+        }
+        showToast(msg, 'error');
     }
 }
 
 // Member - Pool Transfer
 async function handlePoolTransfer() {
-    const amount = prompt('How much to transfer from Care Fund to Savings?');
+    const amount = prompt(t('transaction.howMuch') || 'How much to transfer?');
     if (!amount || isNaN(amount)) return;
     
     try {
@@ -1462,12 +1846,18 @@ async function handlePoolTransfer() {
         showToast(t('common.success'), 'success');
         router.refresh();
     } catch (err) {
-        showToast(err.message || t('common.error'), 'error');
+        let msg = err.message || 'errors.tryAgain';
+        if (msg.includes('.')) {
+            msg = t(msg) || t('errors.tryAgain');
+        } else {
+            msg = msg.replace(/[{}"\[\]]/g, '').trim();
+        }
+        showToast(msg, 'error');
     }
 }
 
 // Member - Transfer Form Submit
-async function handleTransferSubmit(e) {
+ async function handleTransferSubmit(e) {
     e.preventDefault();
     const amount = document.getElementById('transfer-amount')?.value;
     const btn = document.getElementById('transfer-btn');
@@ -1477,15 +1867,53 @@ async function handleTransferSubmit(e) {
         return;
     }
     
+    // Check if member has enough balance - calculate from transactions if needed
+    let balance = 0;
+    const dashboard = await store.loadDashboard();
+    if (dashboard?.my_pool2_contributions && dashboard.my_pool2_contributions !== '0') {
+        balance = parseFloat(dashboard.my_pool2_contributions);
+    } else {
+        const txns = await store.loadTransactions({ pool: 'pool2' });
+        const txArray = Array.isArray(txns) ? txns : (txns?.data || []);
+        const credits = txArray.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        const debits = txArray.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        balance = credits - debits;
+    }
+    const requested = parseInt(amount);
+    
+    if (requested > balance) {
+        showToast('Not enough money. You have ' + formatCurrency(balance) + ' available', 'error');
+        return;
+    }
+    
     btn.disabled = true;
     btn.innerHTML = '<div class="loader !w-5 !h-5 !border-2"></div> ' + t('common.loading');
     
     try {
         const result = await store.transferPool(parseInt(amount));
-        showToast('Transfer complete! New Care Fund balance: ' + formatCurrency(result.pool2_balance), 'success');
-        router.refresh();
+        
+        if (result.transaction_id) {
+            try {
+                const receipt = await store.getReceipt(result.transaction_id);
+                localStorage.setItem('last_receipt_data', JSON.stringify(receipt));
+                showTransferReceiptModal(receipt, result.pool2_balance, result.pool1_contribution);
+            } catch (receiptErr) {
+                console.error('Failed to fetch receipt:', receiptErr);
+                showToast(t('common.success') + ' (Receipt unavailable)', 'success');
+                router.refresh();
+            }
+        } else {
+            showToast(t('common.success'), 'success');
+            router.refresh();
+        }
     } catch (err) {
-        showToast(err.message || t('common.error'), 'error');
+        let msg = err.message || 'errors.tryAgain';
+        if (msg.includes('.')) {
+            msg = t(msg) || t('errors.tryAgain');
+        } else {
+            msg = msg.replace(/[{}"\[\]]/g, '').trim();
+        }
+        showToast(msg, 'error');
     } finally {
         btn.disabled = false;
         btn.innerHTML = Icons.arrowRightLeft() + ' Transfer Now';
@@ -1501,4 +1929,310 @@ function showAddMemberModal() {
 function closeAddMemberModal() {
     document.getElementById('add-member-modal').classList.add('hidden');
     document.body.classList.remove('overflow-hidden');
+}
+
+// Settings - Set interval
+function setSettingsInterval(interval) {
+    document.getElementById('settings-interval').value = interval;
+    const weeklyBtn = document.getElementById('interval-weekly');
+    const monthlyBtn = document.getElementById('interval-monthly');
+    if (interval === 'weekly') {
+        weeklyBtn.classList.add('bg-brand', 'text-white');
+        weeklyBtn.classList.remove('text-text-secondary');
+        monthlyBtn.classList.remove('bg-brand', 'text-white');
+        monthlyBtn.classList.add('text-text-secondary');
+    } else {
+        monthlyBtn.classList.add('bg-brand', 'text-white');
+        monthlyBtn.classList.remove('text-text-secondary');
+        weeklyBtn.classList.remove('bg-brand', 'text-white');
+        weeklyBtn.classList.add('text-text-secondary');
+    }
+}
+
+// Settings - Update savings settings
+async function handleUpdateSettings(e) {
+    e.preventDefault();
+    const interval = document.getElementById('settings-interval')?.value;
+    const amount = document.getElementById('settings-amount')?.value;
+    const btn = document.getElementById('settings-btn');
+    
+    if (!interval) {
+        showToast(t('validation.required'), 'error');
+        return;
+    }
+    
+    if (!amount || parseInt(amount) <= 0) {
+        showToast(t('validation.required'), 'error');
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.innerHTML = '<div class="loader !w-5 !h-5 !border-2"></div> ' + t('common.loading');
+    
+    try {
+        await store.updateProfile({ interval, committed_amount: parseInt(amount) });
+        showToast(t('common.success'), 'success');
+    } catch (err) {
+        let msg = err.message || 'errors.tryAgain';
+        if (msg.includes('.')) {
+            msg = t(msg) || t('errors.tryAgain');
+        } else {
+            msg = msg.replace(/[{}"\[\]]/g, '').trim();
+        }
+        showToast(msg, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = Icons.save() + ' ' + t('common.save');
+    }
+}
+
+// Receipt Modal
+function showReceiptModal(url) {
+    const modal = document.getElementById('receipt-modal');
+    const img = document.getElementById('receipt-image');
+    if (modal && img) {
+        img.src = url;
+        modal.classList.remove('hidden');
+        // Trigger animation
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            modal.querySelector('.transform')?.classList.remove('scale-95');
+        }, 10);
+        document.body.classList.add('overflow-hidden');
+        lucide.createIcons();
+    }
+}
+
+function closeReceiptModal() {
+    const modal = document.getElementById('receipt-modal');
+    if (modal) {
+        modal.classList.add('opacity-0');
+        modal.querySelector('.transform')?.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 200);
+    }
+}
+
+// Transfer Receipt Modal
+async function showTransferReceiptModal(receipt, newPool2Balance, newPool1Balance) {
+    const modal = document.getElementById('transfer-receipt-modal');
+    if (!modal) return;
+    
+    const user = store.user;
+    const memberName = user?.name || 'Member';
+    const amount = receipt?.Amount || '0';
+    const date = receipt?.CreatedAt ? new Date(receipt.CreatedAt).toLocaleString() : new Date().toLocaleString();
+    const transactionId = receipt?.TransactionID || '';
+    
+    modal.innerHTML = `
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/50" onclick="closeTransferReceiptModal()"></div>
+            <div class="relative w-full max-w-md rounded-2xl bg-surface shadow-2xl transform transition-all scale-95 opacity-0" id="transfer-receipt-content">
+                <div class="flex items-center justify-between border-b border-border p-5">
+                    <h2 class="text-xl font-bold text-text-primary">Transfer Receipt</h2>
+                    <button onclick="closeTransferReceiptModal()" class="rounded-lg p-2 hover:bg-surface-soft">
+                        ${Icons.x()}
+                    </button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="text-center pb-4 border-b border-border">
+                        <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-success/10 mb-3">
+                            ${Icons.checkCircle()}
+                        </div>
+                        <p class="text-success font-bold text-lg">Transfer Successful!</p>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-text-muted">Member</span>
+                            <span class="font-semibold text-text-primary">${memberName}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-text-muted">Amount</span>
+                            <span class="font-bold text-brand">₦${parseFloat(amount).toLocaleString()}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-text-muted">From</span>
+                            <span class="text-text-primary">Personal Savings (Pool 2)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-text-muted">To</span>
+                            <span class="text-text-primary">Family Savings (Pool 1)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-text-muted">Date</span>
+                            <span class="text-text-primary">${date}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-text-muted">Reference</span>
+                            <span class="text-text-primary text-sm font-mono">${transactionId.slice(0, 8)}...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-surface-soft rounded-xl p-4 space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-text-muted">New Personal Savings</span>
+                            <span class="font-bold text-text-primary">₦${parseFloat(newPool2Balance || 0).toLocaleString()}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-text-muted">New Family Savings</span>
+                            <span class="font-bold text-text-primary">₦${parseFloat(newPool1Balance || 0).toLocaleString()}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3 pt-2">
+                        <button onclick="downloadTransferReceipt('${transactionId}')" class="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl bg-brand text-white font-semibold hover:bg-brand-hover transition-colors">
+                            ${Icons.download()}
+                            Download
+                        </button>
+                        <button onclick="closeTransferReceiptModal()" class="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-border font-semibold hover:bg-surface-soft transition-colors">
+                            ${Icons.x()}
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.querySelector('#transfer-receipt-content').classList.remove('scale-95', 'opacity-0');
+    }, 10);
+    document.body.classList.add('overflow-hidden');
+    lucide.createIcons();
+}
+
+function closeTransferReceiptModal() {
+    const modal = document.getElementById('transfer-receipt-modal');
+    const content = modal?.querySelector('#transfer-receipt-content');
+    if (modal && content) {
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+            store.loadDashboard();
+            store.loadTransactions();
+        }, 200);
+    }
+}
+
+function downloadTransferReceipt(transactionId) {
+    const receiptData = localStorage.getItem('last_receipt_data');
+    if (receiptData) {
+        const data = JSON.parse(receiptData);
+        const blob = new Blob([data.ReceiptData], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `receipt-${transactionId}-${new Date().toISOString().split('T')[0]}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+}
+
+function showTransferReceiptData(transactionId, receiptData) {
+    const rawData = decodeURIComponent(receiptData);
+    const modal = document.getElementById('receipt-modal');
+    
+    // Parse receipt data
+    let amount = '0';
+    let fromFund = 'Personal Savings';
+    let toFund = 'Family Savings';
+    let date = new Date().toLocaleDateString();
+    let time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    // Parse the text format: "Transfer Receipt: Amount 150 transferred from pool2 to pool1. Transaction ID: ..., Date: ..."
+    const amountMatch = rawData.match(/Amount (\d+)/);
+    if (amountMatch) amount = amountMatch[1];
+    
+    if (rawData.includes('pool2 to pool1') || rawData.includes('pool2 to pool1')) {
+        fromFund = 'Personal Savings';
+        toFund = 'Family Savings';
+    } else if (rawData.includes('pool1 to pool2')) {
+        fromFund = 'Family Savings';
+        toFund = 'Personal Savings';
+    }
+    
+    const dateMatch = rawData.match(/Date: ([^,]+)/);
+    if (dateMatch) {
+        const d = new Date(dateMatch[1]);
+        date = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    }
+    
+    const refId = transactionId ? transactionId.slice(0, 8) : 'N/A';
+    
+    if (modal) {
+        modal.innerHTML = `
+            <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div class="absolute inset-0 bg-black/60" onclick="closeReceiptModal()"></div>
+                <div class="relative w-full max-w-sm rounded-2xl bg-surface shadow-2xl overflow-hidden">
+                    <!-- Header -->
+                    <div class="bg-brand px-6 py-4 text-center">
+                        <p class="text-white font-bold text-lg">Transfer Receipt</p>
+                    </div>
+                    
+                    <!-- Body -->
+                    <div class="p-6 space-y-4">
+                        <div class="text-center pb-4 border-b border-border">
+                            <p class="text-3xl font-bold text-brand">₦${parseInt(amount).toLocaleString()}</p>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-text-muted text-sm">From</span>
+                                <span class="text-text-primary font-medium">${fromFund}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-text-muted text-sm">To</span>
+                                <span class="text-text-primary font-medium">${toFund}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-text-muted text-sm">Date</span>
+                                <span class="text-text-primary">${date}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-text-muted text-sm">Time</span>
+                                <span class="text-text-primary">${time}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-text-muted text-sm">Reference</span>
+                                <span class="text-text-primary font-mono text-sm">${refId}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="flex gap-3 p-4 border-t border-border bg-surface-soft">
+                        <button onclick="downloadReceiptData('${transactionId}', '${encodeURIComponent(rawData)}')" class="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl bg-brand text-white font-semibold hover:bg-brand-hover">
+                            ${Icons.download()} Download
+                        </button>
+                        <button onclick="closeReceiptModal()" class="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl border-2 border-border font-semibold hover:bg-surface">
+                            ${Icons.x()} Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        document.body.classList.add('overflow-hidden');
+        lucide.createIcons();
+    }
+}
+
+function downloadReceiptData(transactionId, receiptData) {
+    const data = decodeURIComponent(receiptData);
+    const refId = transactionId ? transactionId.slice(0, 8) : 'receipt';
+    const blob = new Blob([data], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `receipt-${refId}-${new Date().toISOString().split('T')[0]}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
 }

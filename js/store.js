@@ -1,4 +1,34 @@
-// Store - State management with API integration (falls back to mock data)
+// Normalize backend PascalCase keys to lowercase for frontend
+function normalizeItem(item) {
+    if (!item || typeof item !== 'object') return item;
+    return {
+        id: item.ID || item.id,
+        member_id: item.MemberID || item.member_id,
+        member_name: item.MemberName || item.member_name,
+        amount: item.Amount || item.amount,
+        pool: item.Pool || item.pool,
+        type: item.Type || item.type,
+        reason: item.Reason || item.reason,
+        status: item.Status || item.status,
+        occasion: item.Occasion || item.occasion,
+        event_date: item.EventDate || item.event_date,
+        description: item.Description || item.description,
+        rejection_reason: item.RejectionReason || item.rejection_reason,
+        receipt_url: item.ReceiptURL || item.receipt_url,
+        read: item.Read || item.read || false,
+        message: item.Message || item.message,
+        created_at: item.CreatedAt || item.created_at,
+        // Keep original fields too
+        ...item
+    };
+}
+
+function normalizeArray(arr) {
+    if (!Array.isArray(arr)) return [];
+    return arr.map(normalizeItem);
+}
+
+// Store - State management with real API only
 const store = {
     data: {
         user: null,
@@ -10,9 +40,9 @@ const store = {
         members: []
     },
     
-    // Check if using mock data
+    // Always use real API - no mock fallback
     usingMock() {
-        return !backendAvailable;
+        return false;
     },
     
     // Auth methods
@@ -37,63 +67,24 @@ const store = {
         }
     },
     
-    // Login member (mock or real)
+    // Login member - always use real API
     async login(name, password) {
-        if (!backendAvailable) {
-            // Mock login - accept any credentials
-            localStorage.setItem('mock_logged_in', 'true');
-            localStorage.setItem('mock_is_admin', 'false');
-            this.user = { id: '1', name, interval: 'monthly', committed_amount: 50000, status: 'active' };
-            return;
-        }
-        try {
-            await auth.login(name, password);
-            this.user = { name };
-            try {
-                this.data.profile = await member.getProfile();
-                this.user = { ...this.user, ...this.data.profile };
-            } catch {}
-        } catch (e) {
-            // Fallback to mock on API error
-            console.log('API failed, using mock login');
-            localStorage.setItem('mock_logged_in', 'true');
-            localStorage.setItem('mock_is_admin', 'false');
-            this.user = { id: '1', name, interval: 'monthly', committed_amount: 50000, status: 'active' };
-        }
+        await auth.login(name, password);
+        this.user = { name };
+        this.data.profile = await member.getProfile();
+        this.user = { ...this.user, ...this.data.profile };
     },
     
-    // Register member (mock or real)
+    // Register member - always use real API
     async register({ name, password, interval, committed_amount, start_date }) {
-        if (!backendAvailable) {
-            localStorage.setItem('mock_logged_in', 'true');
-            localStorage.setItem('mock_is_admin', 'false');
-            this.user = { id: '1', name, interval, committed_amount, start_date, status: 'active' };
-            return;
-        }
-        // Register returns { status: "created" } without tokens
-        // Must login after registering
         await auth.register({ name, password, interval, committed_amount, start_date });
-        // Auto-login
         await this.login(name, password);
     },
     
-    // Admin login (mock or real)
+    // Admin login - always use real API
     async adminLogin(password) {
-        if (!backendAvailable) {
-            localStorage.setItem('mock_logged_in', 'true');
-            localStorage.setItem('mock_is_admin', 'true');
-            this.user = { name: 'Admin', isAdmin: true };
-            return;
-        }
-        try {
-            await auth.adminLogin(password);
-            this.user = { name: 'Admin', isAdmin: true };
-        } catch (e) {
-            console.log('API failed, using mock admin login');
-            localStorage.setItem('mock_logged_in', 'true');
-            localStorage.setItem('mock_is_admin', 'true');
-            this.user = { name: 'Admin', isAdmin: true };
-        }
+        await auth.adminLogin(password);
+        this.user = { name: 'Admin', isAdmin: true };
     },
     
     // Logout
@@ -110,38 +101,30 @@ const store = {
         }
         this.user = null;
         localStorage.removeItem('user_data');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('is_admin');
         this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [] };
         router.navigate('/login');
     },
     
     // Load dashboard
     async loadDashboard() {
-        if (this.usingMock()) {
-            this.data.dashboard = mockData.dashboard;
-            return this.data.dashboard;
-        }
         try {
             if (this.isAdmin()) {
                 this.data.dashboard = await admin.getDashboard();
             } else {
                 this.data.dashboard = await member.getDashboard();
             }
-            return this.data.dashboard;
         } catch (e) {
             console.error('Failed to load dashboard:', e);
-            this.data.dashboard = mockData.dashboard;
-            return this.data.dashboard;
+            this.data.dashboard = {};
         }
+        return this.data.dashboard || {};
     },
     
     // Load transactions
     async loadTransactions(options = {}) {
-        if (this.usingMock()) {
-            let tx = mockData.transactions;
-            if (options.pool) tx = tx.filter(t => t.pool === options.pool);
-            this.data.transactions = tx;
-            return tx;
-        }
         try {
             let result;
             if (this.isAdmin()) {
@@ -149,157 +132,241 @@ const store = {
             } else {
                 result = await member.getTransactions(options);
             }
-            this.data.transactions = result.transactions || [];
+            const raw = Array.isArray(result) ? result : (result?.transactions || result?.data || []);
+            
+            // For members, fetch receipts and attach to transactions
+            if (!this.isAdmin()) {
+                const receipts = await member.getReceipts();
+                const receiptMap = {};
+                receipts.forEach(r => { receiptMap[r.TransactionID] = r; });
+                raw.forEach(tx => {
+                    if (receiptMap[tx.ID]) {
+                        tx.receiptData = receiptMap[tx.ID].ReceiptData;
+                        tx.receiptType = receiptMap[tx.ID].ReceiptType;
+                    }
+                });
+            }
+            
+            this.data.transactions = normalizeArray(raw);
             return this.data.transactions;
         } catch (e) {
             console.error('Failed to load transactions:', e);
-            return mockData.transactions;
+            this.data.transactions = [];
+            return [];
+        }
+    },
+    
+    // Load receipts
+    async loadReceipts() {
+        try {
+            const receipts = await member.getReceipts();
+            this.data.receipts = receipts || [];
+            return this.data.receipts;
+        } catch (e) {
+            console.error('Failed to load receipts:', e);
+            this.data.receipts = [];
+            return [];
         }
     },
     
     // Load notifications
     async loadNotifications() {
-        if (!backendAvailable) {
-            this.data.notifications = mockData.notifications;
-            return this.data.notifications;
-        }
         try {
             const data = await member.getNotifications();
-            // Backend returns array directly
-            this.data.notifications = Array.isArray(data.notifications) ? data.notifications : (Array.isArray(data) ? data : []);
-            return this.data.notifications;
+            const raw = Array.isArray(data.notifications) ? data.notifications : (Array.isArray(data) ? data : []);
+            this.data.notifications = normalizeArray(raw);
         } catch (e) {
-            return mockData.notifications;
+            console.error('Failed to load notifications:', e);
+            this.data.notifications = [];
         }
+        return this.data.notifications;
     },
     
-    // Mark notification as read
-    async markRead(id) {
-        if (this.usingMock()) {
-            const notif = mockData.notifications.find(n => n.id === id);
-            if (notif) notif.read = true;
-            return;
-        }
-        try {
-            await member.markNotificationRead(id);
-            const notif = this.data.notifications.find(n => n.id === id);
-            if (notif) notif.read = true;
-        } catch {}
+    // Mark notification as read - optimistic
+    markRead(id) {
+        // Update UI immediately
+        const notif = this.data.notifications.find(n => n.id === id);
+        if (notif) notif.read = true;
+        this.updateNotifBadge();
+        // Sync in background
+        member.markNotificationRead(id).catch(e => {
+            console.error('Failed to mark notification as read:', e);
+            if (notif) notif.read = false;
+            this.updateNotifBadge();
+        });
     },
     
-    // Mark all as read
-    async markAllRead() {
-        if (this.usingMock()) {
-            mockData.notifications.forEach(n => n.read = true);
-            return;
-        }
-        const unread = this.data.notifications.filter(n => !n.read);
+    // Mark all as read - optimistic
+    markAllRead() {
+        const unread = (this.data.notifications || []).filter(n => !n.read);
+        // Update all immediately
+        unread.forEach(n => n.read = true);
+        this.updateNotifBadge();
+        // Sync in background
         for (const n of unread) {
-            await this.markRead(n.id);
+            member.markNotificationRead(n.id).catch(e => {
+                console.error('Failed to mark notification as read:', e);
+            });
         }
     },
     
     // Load care fund requests
     async loadCareFundRequests(status) {
-        if (!backendAvailable) {
-            let reqs = mockData.careFundRequests;
-            if (status) reqs = reqs.filter(r => r.status === status);
-            this.data.careFundRequests = reqs;
-            return reqs;
-        }
         try {
             let result;
             if (this.isAdmin()) {
                 result = await admin.getCareFundRequests(status);
-                // Backend returns direct array
-                this.data.careFundRequests = Array.isArray(result) ? result : (result.requests || []);
+                const raw = Array.isArray(result) ? result : (result?.requests || []);
+                this.data.careFundRequests = normalizeArray(raw);
             } else {
-                // Members don't have a direct endpoint, use mock for now
-                this.data.careFundRequests = mockData.careFundRequests.filter(r => r.member_id === '1');
+                result = await member.getCareFundRequests();
+                this.data.careFundRequests = normalizeArray(result);
             }
-            return this.data.careFundRequests;
+            if (status) {
+                this.data.careFundRequests = this.data.careFundRequests.filter(r => r.status === status);
+            }
         } catch (e) {
-            return mockData.careFundRequests;
+            console.error('Failed to load care fund requests:', e);
+            this.data.careFundRequests = [];
         }
+        return this.data.careFundRequests;
     },
     
-    // Submit care fund request
+    // Submit care fund request - optimistic
     async submitCareFundRequest({ amount, occasion, event_date, description }) {
-        if (this.usingMock()) {
-            const newReq = {
-                id: String(Date.now()),
-                member_id: '1',
-                member_name: this.user?.name || 'You',
-                amount, occasion, event_date, description,
-                status: 'pending', rejection_reason: null,
-                created_at: new Date().toISOString()
-            };
-            mockData.careFundRequests.unshift(newReq);
-            return newReq;
-        }
-        return member.submitCareFundRequest({ amount, occasion, event_date, description });
-    },
-    
-    // Update care fund request (approve/reject)
-    async updateCareFundRequest(id, status, rejection_reason) {
-        if (this.usingMock()) {
-            const req = mockData.careFundRequests.find(r => r.id === id);
-            if (req) {
-                req.status = status;
-                if (rejection_reason) req.rejection_reason = rejection_reason;
+        // Optimistic: add to list immediately
+        const optimisticReq = {
+            id: 'temp-' + Date.now(),
+            member_id: this.user?.id,
+            member_name: this.user?.name || 'You',
+            amount, occasion, event_date, description,
+            status: 'pending',
+            created_at: new Date().toISOString()
+        };
+        this.data.careFundRequests.unshift(optimisticReq);
+        
+        try {
+            const result = await member.submitCareFundRequest({ amount, occasion, event_date, description });
+            // Replace optimistic with real
+            const idx = this.data.careFundRequests.findIndex(r => r.id === optimisticReq.id);
+            if (idx !== -1) {
+                this.data.careFundRequests[idx] = normalizeItem(result);
             }
-            return req;
+            return result;
+        } catch (e) {
+            // Rollback
+            this.data.careFundRequests = this.data.careFundRequests.filter(r => r.id !== optimisticReq.id);
+            throw e;
         }
-        return admin.updateCareFundRequest(id, status, rejection_reason);
     },
     
-    // Create transaction
-    async createTransaction(data) {
-        if (this.usingMock()) {
-            const tx = { id: String(Date.now()), ...data, created_at: new Date().toISOString() };
-            mockData.transactions.unshift(tx);
-            return tx;
+    // Update care fund request (approve/reject) - optimistic
+    async updateCareFundRequest(id, status, rejection_reason) {
+        const idx = this.data.careFundRequests.findIndex(r => r.id === id);
+        if (idx !== -1) {
+            this.data.careFundRequests[idx].status = status;
+            if (rejection_reason) this.data.careFundRequests[idx].rejection_reason = rejection_reason;
         }
-        return admin.createTransaction(data);
+        try {
+            return await admin.updateCareFundRequest(id, status, rejection_reason);
+        } catch (e) {
+            if (idx !== -1) {
+                // Rollback - reload
+                await this.loadCareFundRequests();
+            }
+            throw e;
+        }
+    },
+    
+    // Create transaction - optimistic
+    async createTransaction(data) {
+        const optimisticTx = {
+            id: 'temp-' + Date.now(),
+            ...data,
+            created_at: new Date().toISOString()
+        };
+        this.data.transactions.unshift(optimisticTx);
+        
+        try {
+            const result = await admin.createTransaction(data);
+            // Reload transactions to get real data
+            await this.loadTransactions();
+            return result;
+        } catch (e) {
+            this.data.transactions = this.data.transactions.filter(t => t.id !== optimisticTx.id);
+            throw e;
+        }
     },
     
     // Create member
     async createMember(data) {
-        if (this.usingMock()) {
-            const m = { id: String(Date.now()), ...data, status: 'active' };
-            mockData.members.push(m);
-            return m;
-        }
         return admin.createMember(data);
     },
     
     // Reset password
     async resetPassword(member_id, new_password) {
-        if (this.usingMock()) return { success: true };
         return admin.resetPassword(member_id, new_password);
+    },
+    
+    // Load all members (admin)
+    async loadAllMembers() {
+        try {
+            this.data.members = await admin.getAllMembers();
+        } catch (e) {
+            console.error('Failed to load all members:', e);
+            this.data.members = [];
+        }
+        return this.data.members;
     },
     
     // Upload receipt
     async uploadReceipt(file) {
-        if (this.usingMock()) return { receipt_url: 'mock://receipt.png' };
         return admin.uploadReceipt(file);
+    },
+    
+    // Load profile
+    async loadProfile() {
+        try {
+            this.data.profile = await member.getProfile();
+            this.user = { ...this.user, ...this.data.profile };
+        } catch (e) {
+            console.error('Failed to load profile:', e);
+        }
+        return this.data.profile;
     },
     
     // Change password
     async changePassword(current_password, new_password) {
-        if (this.usingMock()) return { success: true };
         return member.changePassword(current_password, new_password);
+    },
+    
+    // Update profile (savings settings)
+    async updateProfile({ interval, committed_amount }) {
+        const result = await member.updateProfile({ interval, committed_amount });
+        // Update local profile
+        if (this.data.profile) {
+            if (interval) this.data.profile.interval = interval;
+            if (committed_amount) this.data.profile.committed_amount = String(committed_amount);
+        }
+        if (this.user) {
+            if (interval) this.user.interval = interval;
+            if (committed_amount) this.user.committed_amount = String(committed_amount);
+        }
+        return result;
     },
     
     // Transfer pool
     async transferPool(amount) {
-        if (this.usingMock()) return { success: true };
         return member.transferPool(amount);
+    },
+    
+    // Get receipt by transaction ID
+    async getReceipt(transactionId) {
+        return member.getReceipt(transactionId);
     },
     
     // Load general ledger
     async loadGeneralLedger(options = {}) {
-        if (this.usingMock()) return { transactions: mockData.transactions, pool1_balance: mockData.dashboard.pool1_balance, pool2_balance: mockData.dashboard.pool2_balance };
         if (!this.isAdmin()) return null;
         return admin.getGeneralLedger(options);
     },
@@ -307,6 +374,8 @@ const store = {
     // Polling intervals
     _notifInterval: null,
     _dashboardInterval: null,
+    _txInterval: null,
+    _pollFailures: 0,
     
     // Start polling
     startPolling() {
@@ -319,15 +388,31 @@ const store = {
             try {
                 await this.loadNotifications();
                 this.updateNotifBadge();
-            } catch {}
+                this._pollFailures = 0;
+            } catch {
+                this._pollFailures++;
+            }
         }, 30000);
         
-        // Poll dashboard every 60 seconds
+        // Poll dashboard every 30 seconds
         this._dashboardInterval = setInterval(async () => {
             try {
                 await this.loadDashboard();
-            } catch {}
-        }, 60000);
+                this._pollFailures = 0;
+            } catch {
+                this._pollFailures++;
+            }
+        }, 30000);
+        
+        // Poll transactions every 30 seconds
+        this._txInterval = setInterval(async () => {
+            try {
+                await this.loadTransactions();
+                this._pollFailures = 0;
+            } catch {
+                this._pollFailures++;
+            }
+        }, 30000);
     },
     
     // Stop polling
@@ -340,6 +425,11 @@ const store = {
             clearInterval(this._dashboardInterval);
             this._dashboardInterval = null;
         }
+        if (this._txInterval) {
+            clearInterval(this._txInterval);
+            this._txInterval = null;
+        }
+        this._pollFailures = 0;
     },
     
     // Update notification badge in nav
@@ -364,6 +454,6 @@ const store = {
     get profile() { return this.data.profile; },
     
     get unreadCount() {
-        return (this.data.notifications.length ? this.data.notifications : mockData.notifications).filter(n => !n.read).length;
+        return (this.data.notifications || []).filter(n => !n.read).length;
     }
 };

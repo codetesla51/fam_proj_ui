@@ -45,6 +45,8 @@ const Icons = {
     trendingUp: () => icon('trending-up'),
     trendingDown: () => icon('trending-down'),
     filePlus: () => icon('file-plus'),
+    fileText: () => icon('file-text'),
+    save: () => icon('save'),
     trash2: () => icon('trash-2'),
     edit: () => icon('edit'),
     search: () => icon('search'),
@@ -177,7 +179,7 @@ function Nav({ currentPath }) {
     const memberNav = [
         { href: '/member/dashboard', label: t('nav.home'), icon: Icons.home },
         { href: '/member/savings', label: t('nav.mySavings'), icon: Icons.wallet },
-        { href: '/member/care-fund', label: t('nav.careFund'), icon: Icons.heartHandshake },
+        { href: '/member/care-fund', label: t('nav.personalSavings'), icon: Icons.heartHandshake },
         { href: '/member/history', label: t('nav.myHistory'), icon: Icons.history },
         { href: '/member/transfer', label: 'Transfer', icon: Icons.arrowRightLeft }
     ];
@@ -191,6 +193,7 @@ function Nav({ currentPath }) {
     ];
     
     const nav = isAdmin ? adminNav : memberNav;
+    const showSettings = !isAdmin; // Only show settings for members, not admin
     
     function isActive(href) {
         const isExactMatch = href === '/admin/transactions';
@@ -270,11 +273,13 @@ function Nav({ currentPath }) {
         sidebar: `
             <nav class="flex flex-col gap-1 p-4 overflow-y-auto">
                 ${navItems()}
+                ${showSettings ? `
                 <div class="my-4 border-t border-border"></div>
                 <a href="${settingsHref}" class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium select-none active:opacity-70 ${settingsActive ? 'bg-brand-light text-brand' : 'text-text-secondary active:bg-surface-raised'}">
                     <span class="text-lg">${Icons.settings()}</span>
                     <span>${t('nav.settings')}</span>
                 </a>
+                ` : ''}
             </nav>
         `,
         mobileMenu: `
@@ -283,11 +288,13 @@ function Nav({ currentPath }) {
                 <aside class="absolute bottom-0 left-0 right-0 top-14 max-h-[calc(100vh-3.5rem)] overflow-y-auto rounded-t-3xl bg-surface">
                     <nav class="flex flex-col gap-1 p-4 pb-8">
                         ${mobileNavItems()}
+                        ${showSettings ? `
                         <div class="my-4 border-t border-border"></div>
                         <a href="${settingsHref}" onclick="toggleMobileMenu()" class="flex items-center gap-4 rounded-xl px-4 py-4 text-base font-medium text-text-primary select-none active:opacity-70">
                             <span class="text-2xl text-brand">${Icons.settings()}</span>
                             <span>${t('nav.settings')}</span>
                         </a>
+                        ` : ''}
                     </nav>
                 </aside>
             </div>
@@ -337,7 +344,7 @@ function KpiCard({ label, amount, subtext, highlight, isCurrency = true }) {
         <div class="group rounded-2xl border border-border p-4 sm:p-5 transition-all hover:shadow-md ${highlight ? 'border-brand/30 bg-gradient-to-br from-brand-light via-white to-white shadow-lg shadow-brand/15' : 'bg-surface shadow-sm'}">
             <div class="mb-2 flex items-center gap-2">
                 ${label === 'Family Savings' || label === 'My Savings' ? `<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.piggyBank()}</span>` : ''}
-                ${label === 'Care Fund' ? `<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.heartHandshake()}</span>` : ''}
+                ${label === 'Personal Savings' ? `<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.heartHandshake()}</span>` : ''}
                 ${label === 'Members' || label === 'Family Members' ? `<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.users()}</span>` : ''}
                 ${label === 'Overdue' ? `<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-warning/10 text-warning">${Icons.alertTriangle()}</span>` : ''}
                 <span class="text-[11px] font-bold uppercase tracking-wider text-text-muted">${label}</span>
@@ -364,7 +371,7 @@ function StatusBadge({ status }) {
 function PoolTag({ pool }) {
     return pool === 'pool1' 
         ? `<span class="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand/5 px-3 py-1.5 text-xs font-bold text-brand">${Icons.piggyBank()} ${t('member.familySavings')}</span>`
-        : `<span class="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-700">${Icons.heartHandshake()} ${t('member.careFund')}</span>`;
+        : `<span class="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-700">${Icons.heartHandshake()} ${t('member.personalSavings')}</span>`;
 }
 
 function EmptyState({ icon, message }) {

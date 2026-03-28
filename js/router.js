@@ -9,6 +9,7 @@ const router = {
         '/member/savings': 'memberSavings',
         '/member/care-fund': 'memberCareFund',
         '/member/history': 'memberHistory',
+        '/member/activity': 'memberActivity',
         '/member/transfer': 'memberTransfer',
         '/member/settings': 'memberSettings',
         '/admin/dashboard': 'adminDashboard',
@@ -17,6 +18,31 @@ const router = {
         '/admin/care-fund': 'adminCareFund',
         '/admin/members': 'adminMembers',
         '/notifications': 'notifications'
+    },
+    
+    pageTitles: {
+        '/': 'Home — Odelade Family Ledger',
+        '/login': 'Sign In — Odelade Family Ledger',
+        '/register': 'Create Account — Odelade Family Ledger',
+        '/admin/login': 'Manager Login — Odelade Family Ledger',
+        '/member/dashboard': 'Dashboard — Odelade Family Ledger',
+        '/member/savings': 'My Savings — Odelade Family Ledger',
+        '/member/care-fund': 'Personal Savings — Odelade Family Ledger',
+        '/member/history': 'Transaction History — Odelade Family Ledger',
+        '/member/activity': 'Family Activity — Odelade Family Ledger',
+        '/member/transfer': 'Transfer — Odelade Family Ledger',
+        '/member/settings': 'My Profile — Odelade Family Ledger',
+        '/admin/dashboard': 'Admin — Odelade Family Ledger',
+        '/admin/transactions': 'Family Transactions — Odelade Family Ledger',
+        '/admin/transactions/new': 'Record Payment — Odelade Family Ledger',
+        '/admin/care-fund': 'Withdraw Requests — Odelade Family Ledger',
+        '/admin/members': 'Family Members — Odelade Family Ledger',
+        '/notifications': 'Alerts — Odelade Family Ledger'
+    },
+    
+    setPageTitle(path) {
+        const title = this.pageTitles[path] || 'Odelade Family Ledger';
+        document.title = title;
     },
     
     loading: false,
@@ -100,6 +126,9 @@ const router = {
         const pageName = this.routes[path];
         const app = document.getElementById('app');
         
+        // Set page title
+        this.setPageTitle(path);
+        
         if (!pageName) {
             app.innerHTML = this.notFound();
             return;
@@ -111,6 +140,18 @@ const router = {
             return;
         }
         
+        // If already logged in, redirect to appropriate dashboard
+        if (path === '/login' || path === '/register' || path === '/admin/login') {
+            if (store.isLoggedIn()) {
+                if (store.isAdmin()) {
+                    this.navigate('/admin/dashboard', true);
+                } else {
+                    this.navigate('/member/dashboard', true);
+                }
+                return;
+            }
+        }
+        
         // Check auth for protected routes (exclude login pages)
         const isProtected = (path.startsWith('/member') || path.startsWith('/admin')) && path !== '/admin/login';
         
@@ -119,30 +160,52 @@ const router = {
                 this.navigate('/login');
                 return;
             }
+            // Admin trying to access member pages -> redirect to admin dashboard
+            if (path.startsWith('/member') && store.isAdmin()) {
+                this.navigate('/admin/dashboard');
+                return;
+            }
+            // Member trying to access admin pages -> redirect to member dashboard
             if (path.startsWith('/admin') && !store.isAdmin()) {
                 this.navigate('/member/dashboard');
                 return;
             }
             // Start polling when logged in
             store.startPolling();
+            
+            // Prefetch all data in parallel before rendering
+            await Promise.all([
+                store.loadDashboard(),
+                store.loadNotifications(),
+                store.loadTransactions(),
+                store.loadCareFundRequests()
+            ]);
+            // Update notification badge after prefetch
+            store.updateNotifBadge();
         } else {
             // Stop polling on auth pages
             store.stopPolling();
         }
         
-        // Show loading state
-        app.innerHTML = `
-            <div class="min-h-screen flex items-center justify-center bg-surface-soft">
-                <div class="text-center">
-                    <div class="loader mx-auto mb-4"></div>
-                    <p class="text-sm text-text-muted">${t('common.loading')}</p>
+        // Show loading only on first load with no cache
+        const hasCachedData = store.dashboard || store.transactions?.length || store.notifications?.length || store.careFundRequests?.length;
+        if (!hasCachedData) {
+            app.innerHTML = `
+                <div class="min-h-screen flex items-center justify-center bg-surface-soft">
+                    <div class="text-center">
+                        <div class="loader mx-auto mb-4"></div>
+                        <p class="text-sm text-text-muted">${t('common.loading')}</p>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        }
         
         // Load page content (async)
         try {
             const content = await pageFn();
+            
+            // Save for instant re-render
+            this._lastContent = { path, content };
             
             // Render nav + content for protected pages (exclude login pages)
             if ((path.startsWith('/member') || path.startsWith('/admin')) && path !== '/admin/login') {
@@ -169,16 +232,43 @@ const router = {
             }
         } catch (err) {
             console.error('Page render error:', err);
-            app.innerHTML = `
-                <div class="min-h-screen flex items-center justify-center bg-surface-soft p-6">
-                    <div class="text-center max-w-sm">
-                        <div class="mb-4 text-error">${Icons.alertCircle()}</div>
-                        <h2 class="text-lg font-bold text-text-primary mb-2">${t('common.error')}</h2>
-                        <p class="text-sm text-text-muted mb-4">${err.message || 'Failed to load page'}</p>
-                        <button onclick="router.refresh()" class="h-11 px-6 rounded-xl bg-brand text-white font-medium select-none">${t('common.back')}</button>
+            // Show cached content if available, otherwise error
+            if (this._lastContent && this._lastContent.path === path) {
+                // Use last content
+                if (path.startsWith('/member') || path.startsWith('/admin')) {
+                    const navComponents = Nav({ currentPath: path });
+                    app.innerHTML = `
+                        <div class="min-h-screen bg-surface-soft flex flex-col">
+                            <header class="sticky top-0 z-40">${navComponents.topNav}</header>
+                            <div class="flex flex-1 overflow-hidden">
+                                <aside class="hidden md:flex w-56 flex-shrink-0 border-r border-border bg-surface">
+                                    ${navComponents.sidebar}
+                                </aside>
+                                <main class="flex-1 overflow-y-auto overflow-x-hidden overscroll-behavior-y-contain p-4 pb-24 md:pb-8 sm:p-6 lg:p-8">
+                                    <div class="mx-auto max-w-4xl w-full min-w-0">
+                                        ${this._lastContent.content}
+                                    </div>
+                                </main>
+                            </div>
+                            <nav class="fixed bottom-0 left-0 right-0 md:hidden z-40">${navComponents.bottomNav}</nav>
+                            ${navComponents.mobileMenu}
+                        </div>
+                    `;
+                } else {
+                    app.innerHTML = this._lastContent.content;
+                }
+            } else {
+                app.innerHTML = `
+                    <div class="min-h-screen flex items-center justify-center bg-surface-soft p-6">
+                        <div class="text-center max-w-sm">
+                            <div class="mb-4 text-error">${Icons.alertCircle()}</div>
+                            <h2 class="text-lg font-bold text-text-primary mb-2">${t('common.error')}</h2>
+                            <p class="text-sm text-text-muted mb-4">${err.message || 'Failed to load page'}</p>
+                            <button onclick="router.refresh()" class="h-11 px-6 rounded-xl bg-brand text-white font-medium select-none">${t('common.back')}</button>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
         }
         
         // Try to init icons

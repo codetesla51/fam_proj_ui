@@ -1,60 +1,14 @@
 // API Service - All backend communication
-// Frontend runs on 5173, backend runs on 8080 (CORS hardcoded to 5173)
+// Frontend runs on 5173, backend runs on 8080
 const API_BASE = 'http://localhost:8080';
-
-// Mock data for development (when backend is not running)
-const mockData = {
-    dashboard: {
-        pool1_balance: 850000,
-        pool2_balance: 385000,
-        member_count: 6,
-        overdue_count: 1,
-        active_count: 5,
-        my_contributions: 150000,
-        my_pool2_contributions: 75000,
-        underfunded_members: [
-            { id: '6', name: 'Emeka Odelade', committed_amount: 50000, current_sum: 25000 }
-        ]
-    },
-    transactions: [
-        { id: '1', member_id: '1', pool: 'pool1', type: 'credit', amount: 50000, reason: 'Monthly contribution', receipt_url: null, created_at: '2026-03-20T10:00:00Z' },
-        { id: '2', member_id: '2', pool: 'pool1', type: 'credit', amount: 50000, reason: 'Monthly contribution', receipt_url: null, created_at: '2026-03-19T10:00:00Z' },
-        { id: '3', member_id: '1', pool: 'pool2', type: 'credit', amount: 15000, reason: 'Care fund contribution', receipt_url: null, created_at: '2026-03-18T10:00:00Z' },
-        { id: '4', member_id: '3', pool: 'pool1', type: 'credit', amount: 50000, reason: 'Monthly contribution', receipt_url: null, created_at: '2026-03-17T10:00:00Z' },
-        { id: '5', member_id: '2', pool: 'pool2', type: 'debit', amount: 100000, reason: 'Wedding support - Kehinde', receipt_url: null, created_at: '2026-03-15T10:00:00Z' },
-        { id: '6', member_id: '4', pool: 'pool1', type: 'credit', amount: 50000, reason: 'Monthly contribution', receipt_url: null, created_at: '2026-03-14T10:00:00Z' },
-        { id: '7', member_id: '5', pool: 'pool1', type: 'credit', amount: 75000, reason: 'Monthly contribution', receipt_url: null, created_at: '2026-03-12T10:00:00Z' },
-        { id: '8', member_id: '1', pool: 'pool1', type: 'credit', amount: 50000, reason: 'February contribution', receipt_url: null, created_at: '2026-02-20T10:00:00Z' }
-    ],
-    notifications: [
-        { id: '1', member_id: '1', message: 'Your payment of ₦50,000 has been recorded', read: false, created_at: '2026-03-20T10:05:00Z' },
-        { id: '2', member_id: '1', message: 'Your care fund request has been approved', read: false, created_at: '2026-03-18T14:00:00Z' },
-        { id: '3', member_id: '1', message: 'Welcome to the Odelade Family Ledger!', read: true, created_at: '2026-03-01T09:00:00Z' }
-    ],
-    careFundRequests: [
-        { id: '1', member_id: '2', member_name: 'Kehinde Odelade', amount: 100000, occasion: 'wedding', event_date: '2026-04-15', description: 'Need support for wedding preparations', status: 'approved', rejection_reason: null, created_at: '2026-03-10T10:00:00Z' },
-        { id: '2', member_id: '1', member_name: 'Taiwo Odelade', amount: 50000, occasion: 'medical', event_date: '2026-03-25', description: 'Hospital bills for my child', status: 'pending', rejection_reason: null, created_at: '2026-03-18T10:00:00Z' },
-        { id: '3', member_id: '4', member_name: 'Folake Odelade', amount: 75000, occasion: 'graduation', event_date: '2026-05-20', description: 'Graduation ceremony and celebration', status: 'pending', rejection_reason: null, created_at: '2026-03-15T10:00:00Z' },
-        { id: '4', member_id: '3', member_name: 'Adebayo Odelade', amount: 30000, occasion: 'birthday', event_date: '2026-03-01', description: '', status: 'rejected', rejection_reason: 'Request amount exceeds care fund balance', created_at: '2026-02-25T10:00:00Z' }
-    ],
-    members: [
-        { id: '1', name: 'Taiwo Odelade', interval: 'monthly', committed_amount: 50000, start_date: '2026-01-01', status: 'active' },
-        { id: '2', name: 'Kehinde Odelade', interval: 'monthly', committed_amount: 50000, start_date: '2026-01-01', status: 'active' },
-        { id: '3', name: 'Adebayo Odelade', interval: 'weekly', committed_amount: 15000, start_date: '2026-01-01', status: 'active' },
-        { id: '4', name: 'Folake Odelade', interval: 'monthly', committed_amount: 50000, start_date: '2026-02-01', status: 'active' },
-        { id: '5', name: 'Ngozi Odelade', interval: 'monthly', committed_amount: 75000, start_date: '2026-01-01', status: 'active' },
-        { id: '6', name: 'Emeka Odelade', interval: 'monthly', committed_amount: 50000, start_date: '2026-01-01', status: 'overdue' }
-    ]
-};
 
 // Check if backend is available
 let backendAvailable = false;
 async function checkBackend() {
     try {
-        const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(500) });
+        const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(1000) });
         if (res.ok) {
             const text = await res.text();
-            // Only mark as available if response is valid JSON (not HTML)
             if (!text.startsWith('<')) {
                 backendAvailable = true;
                 console.log('Backend available');
@@ -64,8 +18,7 @@ async function checkBackend() {
         backendAvailable = false;
     }
 }
-// Delay check to allow page to load first
-setTimeout(checkBackend, 100);
+checkBackend();
 
 // Token management
 const tokens = {
@@ -159,15 +112,63 @@ async function handleResponse(response) {
     const contentType = res.headers.get('content-type') || '';
     
     if (!res.ok) {
-        // Backend returns plain text errors, not JSON
-        const text = await res.text();
-        throw new Error(text || `Request failed: ${res.status}`);
+        let text = await res.text();
+        // Clean up empty or bracket-only responses
+        text = text.trim();
+        if (text === '' || text === '{}' || text === '[]') {
+            text = `Request failed: ${res.status}`;
+        }
+        // Translate to user-friendly message
+        throw new Error(translateError(text, res.status));
     }
     
     if (contentType.includes('application/json')) {
         return res.json();
     }
     return res.text();
+}
+
+// Translate backend errors to user-friendly messages
+function translateError(text, status) {
+    const lower = text.toLowerCase();
+    
+    // Map common backend errors to friendly messages
+    if (lower.includes('invalid credentials') || lower.includes('wrong password') || lower.includes('incorrect password')) {
+        return 'errors.wrongPassword';
+    }
+    if (lower.includes('user not found') || lower.includes('member not found') || lower.includes('not found')) {
+        return 'errors.userNotFound';
+    }
+    if (lower.includes('expired') || lower.includes('invalid token') || lower.includes('token')) {
+        return 'errors.sessionExpired';
+    }
+    if (lower.includes('unauthorized') || lower.includes('forbidden') || lower.includes('access denied')) {
+        return 'errors.unauthorized';
+    }
+    if (lower.includes('not admin') || lower.includes('admin only')) {
+        return 'errors.notAdmin';
+    }
+    if (lower.includes('insufficient') || lower.includes('not enough') || lower.includes('balance')) {
+        return 'errors.insufficientFunds';
+    }
+    if (lower.includes('network') || lower.includes('connection') || lower.includes('offline')) {
+        return 'errors.networkError';
+    }
+    if (lower.includes('500') || lower.includes('internal') || lower.includes('server')) {
+        return 'errors.serverError';
+    }
+    if (lower.includes('400') || lower.includes('bad request') || lower.includes('invalid')) {
+        return 'errors.invalidRequest';
+    }
+    if (lower.includes('upload') || lower.includes('file')) {
+        return 'errors.uploadFailed';
+    }
+    if (lower.includes('transfer')) {
+        return 'errors.transferFailed';
+    }
+    
+    // Clean up the error text if nothing matched
+    return text.replace(/[{}"\[\]]/g, '').trim() || 'errors.tryAgain';
 }
 
 // ===== AUTH ENDPOINTS =====
@@ -229,7 +230,7 @@ const auth = {
     },
     
     isAdmin() {
-        return tokens.isAdmin;
+        return !!tokens.isAdmin;
     },
     
     getToken() {
@@ -245,11 +246,22 @@ const member = {
         return handleResponse(apiFetch('/profile'));
     },
     
+    // Update profile (savings settings)
+    async updateProfile({ interval, committed_amount }) {
+        const body = {};
+        if (interval) body.interval = interval;
+        if (committed_amount) body.committed_amount = String(committed_amount);
+        return handleResponse(apiFetch('/profile', {
+            method: 'PUT',
+            body: JSON.stringify(body)
+        }));
+    },
+    
     // Change password
     async changePassword(current_password, new_password) {
         return handleResponse(apiFetch('/change-password', {
             method: 'POST',
-            body: JSON.stringify({ current_password, new_password })
+            body: JSON.stringify({ old_password: current_password, new_password })
         }));
     },
     
@@ -260,42 +272,60 @@ const member = {
         params.set('offset', (page - 1) * limit);
         const data = await handleResponse(apiFetch(`/transactions/mine?${params}`));
         // Backend returns { data: [...], total, limit, offset }
-        // We filter by pool on frontend if needed
+        // We filter by pool on frontend if needed (API uses Pool, not pool)
         let transactions = data.data || data || [];
         if (pool) {
-            transactions = transactions.filter(t => t.pool === pool);
+            transactions = transactions.filter(t => t.Pool === pool || t.pool === pool);
         }
         return { transactions, total: data.total || transactions.length };
     },
     
     // Transfer pool2 to pool1
     async transferPool(amount) {
-        return handleResponse(apiFetch('/pool/transfer', {
+        const data = await handleResponse(apiFetch('/pool/transfer', {
             method: 'POST',
             body: JSON.stringify({ amount: String(amount), reason: 'Pool 2 to Pool 1 transfer' })
+        }));
+        return data;
+    },
+    
+    // Get receipt by transaction ID
+    async getReceipt(transactionId) {
+        return handleResponse(apiFetch(`/receipts/${transactionId}`, {
+            method: 'GET'
         }));
     },
     
     // Submit care fund request
     async submitCareFundRequest({ amount, occasion, event_date, description }) {
+        // Backend expects amount as string
+        const body = { amount: String(amount) };
+        if (occasion) body.occasion = occasion;
+        if (event_date) body.event_date = event_date;
+        if (description) body.description = description;
         return handleResponse(apiFetch('/carefund/request', {
             method: 'POST',
-            body: JSON.stringify({ amount, occasion, event_date, description })
+            body: JSON.stringify(body)
         }));
     },
     
-    // Get own care fund requests (NOTE: not registered in backend, use dashboard)
+    // Get own care fund requests
     async getCareFundRequests() {
-        // Backend route /carefund/requests/mine is NOT registered
-        // Members must use dashboard data
-        return [];
+        const data = await handleResponse(apiFetch('/carefund/requests/mine'));
+        return Array.isArray(data) ? data : [];
+    },
+    
+    // Get own receipts
+    async getReceipts() {
+        const data = await handleResponse(apiFetch('/receipts/mine'));
+        return Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
     },
     
     // Get notifications
     async getNotifications() {
         const data = await handleResponse(apiFetch('/notifications/mine'));
-        // Backend returns array directly, not wrapped in { notifications: [...] }
-        return { notifications: Array.isArray(data) ? data : [] };
+        // Backend returns { data: [...] }
+        return { notifications: Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []) };
     },
     
     // Mark notification as read
@@ -319,6 +349,20 @@ const admin = {
         return handleResponse(apiFetch('/admin/members', {
             method: 'POST',
             body: JSON.stringify({ name, password, interval, committed_amount, start_date })
+        }));
+    },
+    
+    // Get all members (with full details)
+    async getAllMembers() {
+        const data = await handleResponse(apiFetch('/members/all'));
+        // Normalize keys
+        return (Array.isArray(data) ? data : []).map(m => ({
+            id: m.ID || m.id,
+            name: m.Name || m.name,
+            interval: m.Interval || m.interval,
+            committed_amount: m.CommittedAmount || m.committed_amount,
+            start_date: m.StartDate || m.start_date,
+            status: m.Status || m.status
         }));
     },
     
@@ -359,8 +403,8 @@ const admin = {
         const data = await handleResponse(apiFetch(`/transactions?${params}`));
         // Backend returns { data: [...], total, limit, offset }
         let transactions = data.data || data || [];
-        if (member_id) transactions = transactions.filter(t => t.member_id === member_id);
-        if (pool) transactions = transactions.filter(t => t.pool === pool);
+        if (member_id) transactions = transactions.filter(t => t.MemberID === member_id || t.member_id === member_id);
+        if (pool) transactions = transactions.filter(t => t.Pool === pool || t.pool === pool);
         return { transactions, total: data.total || transactions.length };
     },
     
@@ -392,7 +436,7 @@ const admin = {
         if (status === 'rejected' && rejection_reason) {
             body.rejection_reason = rejection_reason;
         }
-        return handleResponse(apiFetch(`/carefund/requests/update/${id}/`, {
+        return handleResponse(apiFetch(`/carefund/requests/update/${id}`, {
             method: 'PUT',
             body: JSON.stringify(body)
         }));
@@ -411,3 +455,8 @@ const health = {
         return handleResponse(apiFetch('/health'));
     }
 };
+
+// Make member and admin accessible globally
+window.member = member;
+window.admin = admin;
+window.auth = auth;

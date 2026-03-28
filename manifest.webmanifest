@@ -1,12 +1,13 @@
 {
   "name": "Odelade Family Ledger",
-  "short_name": "Family Ledger",
-  "description": "The Odelade family savings and care fund tracker",
+  "short_name": "Odelade Ledger",
+  "description": "Odelade Family Savings & Contributions — Olomolekondo, Ikire, Osun",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F0FDFA",
   "theme_color": "#0D9488",
   "orientation": "portrait",
+  "categories": ["finance", "family"],
   "icons": [
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
