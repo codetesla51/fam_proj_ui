@@ -656,6 +656,9 @@ const pages = {
     },
     
     memberHistory: async () => {
+        // Reset filters for fresh page load
+        window.historyFilters = { fund: 'all', type: 'all' };
+        
         // Load transactions and receipts
         let transactions = [];
         let receipts = {};
@@ -685,8 +688,6 @@ const pages = {
             console.error('Failed to load:', e);
         }
         
-        // State for filters
-        window.historyFilters = window.historyFilters || { fund: 'all', type: 'all' };
         const filters = window.historyFilters;
         
         // Calculate summary
@@ -965,49 +966,129 @@ const pages = {
     },
     
     adminTransactions: async () => {
+        // Reset filters
+        window.adminTxFilters = window.adminTxFilters || { fund: 'all', type: 'all' };
+        
         const txData = await store.loadTransactions();
-        const transactions = Array.isArray(txData) ? txData : (txData?.transactions || []);
+        let transactions = Array.isArray(txData) ? txData : (txData?.transactions || []);
+        
+        // Normalize fields
+        transactions = transactions.map(tx => ({
+            id: tx.ID || tx.id,
+            member_name: tx.member_name || tx.MemberName || '',
+            pool: tx.pool || tx.Pool,
+            type: tx.type || tx.Type,
+            amount: tx.amount || tx.Amount,
+            reason: tx.Reason || tx.reason,
+            created_at: tx.created_at || tx.CreatedAt,
+            receipt_url: tx.receipt_url || tx.ReceiptURL || tx.receiptData
+        }));
+        
+        const filters = window.adminTxFilters;
+        
+        // Apply filters
+        let filtered = transactions.filter(tx => {
+            if (filters.fund !== 'all' && tx.pool !== filters.fund) return false;
+            if (filters.type !== 'all' && tx.type !== filters.type) return false;
+            return true;
+        });
+        
+        // Summary
+        const totalIn = filtered.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        const totalOut = filtered.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        
+        // Group by date
+        const grouped = {};
+        filtered.forEach(tx => {
+            const date = new Date(tx.created_at);
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            let dateKey = formatDate(tx.created_at);
+            if (date.toDateString() === today.toDateString()) dateKey = 'Today';
+            else if (date.toDateString() === yesterday.toDateString()) dateKey = 'Yesterday';
+            
+            if (!grouped[dateKey]) grouped[dateKey] = [];
+            grouped[dateKey].push(tx);
+        });
+        
         return `
-            <div class="w-full min-w-0 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="w-full min-w-0 mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">${Icons.clipboardList()}${t('transaction.familyMoneyHistory')}</h1>
                     <p class="text-xs sm:text-sm text-text-muted">All family transactions</p>
                 </div>
                 <a href="/admin/transactions/new" class="flex h-11 items-center justify-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all select-none">${Icons.plus()} Record Payment</a>
             </div>
+            
+            <!-- Summary Bar -->
+            <div class="w-full min-w-0 mb-4 grid grid-cols-3 gap-3">
+                <div class="rounded-xl bg-success/10 p-3 border border-success/20">
+                    <p class="text-xs text-success font-medium">Money In</p>
+                    <p class="text-lg font-bold text-success">+${formatCurrency(totalIn)}</p>
+                </div>
+                <div class="rounded-xl bg-error/10 p-3 border border-error/20">
+                    <p class="text-xs text-error font-medium">Money Out</p>
+                    <p class="text-lg font-bold text-error">-${formatCurrency(totalOut)}</p>
+                </div>
+                <div class="rounded-xl bg-brand/10 p-3 border border-brand/20">
+                    <p class="text-xs text-brand font-medium">Net Balance</p>
+                    <p class="text-lg font-bold text-brand">${formatCurrency(totalIn - totalOut)}</p>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="w-full min-w-0 mb-4 flex flex-wrap gap-2">
+                <button onclick="window.adminTxFilters.fund='all';window.adminTxFilters.type='all';router.refresh()" class="px-3 py-2 text-xs font-medium rounded-lg ${filters.fund==='all' && filters.type==='all' ? 'bg-brand text-white' : 'bg-surface text-text-secondary border border-border'}">All</button>
+                <button onclick="window.adminTxFilters.fund='pool1';router.refresh()" class="px-3 py-2 text-xs font-medium rounded-lg ${filters.fund==='pool1' ? 'bg-brand text-white' : 'bg-surface text-text-secondary border border-border'}">Family Savings</button>
+                <button onclick="window.adminTxFilters.fund='pool2';router.refresh()" class="px-3 py-2 text-xs font-medium rounded-lg ${filters.fund==='pool2' ? 'bg-brand text-white' : 'bg-surface text-text-secondary border border-border'}">Personal Savings</button>
+                <button onclick="window.adminTxFilters.type='credit';router.refresh()" class="px-3 py-2 text-xs font-medium rounded-lg ${filters.type==='credit' ? 'bg-success text-white' : 'bg-surface text-text-secondary border border-border'}">Money In</button>
+                <button onclick="window.adminTxFilters.type='debit';router.refresh()" class="px-3 py-2 text-xs font-medium rounded-lg ${filters.type==='debit' ? 'bg-error text-white' : 'bg-surface text-text-secondary border border-border'}">Money Out</button>
+            </div>
+            
+            <!-- Transactions -->
             <div class="w-full min-w-0">
-                ${Card({ children: transactions.length > 0 ? `
-                    <div class="rounded-xl overflow-hidden border border-border">
-                        <div class="overflow-x-auto w-full">
-                            <table class="w-full min-w-[760px]">
-                                <thead><tr class="bg-table-header text-left border-b border-border">
-                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.member')}</th>
-                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.fund')}</th>
-                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.type')}</th>
-                                    <th class="whitespace-nowrap px-4 py-3.5 text-right text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.amount')}</th>
-                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.reason')}</th>
-                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.date')}</th>
-                                    <th class="whitespace-nowrap px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">${t('table.proof')}</th>
-                                </tr></thead>
-                                <tbody class="divide-y divide-border">
-                                    ${transactions.map((tx, i) => `
-                                        <tr class="${i % 2 ? 'bg-surface-soft' : 'bg-surface'} hover:bg-surface-raised transition-colors cursor-pointer">
-                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm font-medium">${tx.member_name || tx.memberName || ''}</td>
-                                            <td class="whitespace-nowrap px-4 py-3.5">${PoolTag({ pool: tx.pool })}</td>
-                                            <td class="whitespace-nowrap px-4 py-3.5 text-sm font-medium ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}</td>
-                                            <td class="whitespace-nowrap px-4 py-3.5 text-right text-sm font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}</td>
-                                                <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${tx.reason}</td>
-                                                <td class="whitespace-nowrap px-4 py-3.5 text-sm text-text-secondary">${formatDate(tx.created_at)}</td>
-                                                <td class="whitespace-nowrap px-4 py-3.5">
-                                                    ${(tx.receiptData || tx.receipt_url || tx.ReceiptURL || tx.ReceiptData) ? `<button onclick="showTransferReceiptData('${tx.ID}', '${encodeURIComponent(tx.receiptData || tx.receipt_url || tx.ReceiptURL || tx.ReceiptData || '')}')" class="text-brand hover:text-brand-hover font-medium text-sm flex items-center gap-1">${Icons.fileText()} Receipt</button>` : ''}
-                                                </td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
+            ${filtered.length > 0 ? `
+                <div class="space-y-6">
+                    ${Object.entries(grouped).map(([dateKey, txs]) => `
+                        <div>
+                            <h3 class="text-sm font-semibold text-text-muted mb-3">${dateKey}</h3>
+                            <div class="grid gap-3 grid-cols-1 md:grid-cols-2">
+                                ${txs.map(tx => `
+                                    <div class="rounded-xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
+                                        <div class="flex items-start gap-3">
+                                            <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${tx.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
+                                                ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-semibold text-text-primary">${tx.member_name}</p>
+                                                <p class="text-xs text-text-muted mt-1">${cleanReason(tx.reason, tx.type)}</p>
+                                                <div class="flex items-center gap-2 mt-2">
+                                                    <span class="text-xs font-medium px-2 py-0.5 rounded-full ${tx.pool === 'pool1' ? 'bg-brand/10 text-brand' : 'bg-pool2/10 text-pool2'}">${tx.pool === 'pool1' ? 'Family Savings' : 'Personal Savings'}</span>
+                                                </div>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="text-xl font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}</p>
+                                                <p class="text-xs text-text-muted mt-1">${formatDate(tx.created_at)}</p>
+                                                ${tx.receipt_url ? `<button onclick="showTransferReceiptData('${tx.id}', '${encodeURIComponent(tx.receipt_url)}')" class="text-xs text-brand font-medium mt-1 block">View Receipt</button>` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
-                    </div>
-                ` : EmptyState({ icon: Icons.clipboardList(), message: t('common.noData') }) })}
+                    `).join('')}
+                </div>
+                <p class="text-center text-sm text-text-muted mt-4">${filtered.length} transaction${filtered.length !== 1 ? 's' : ''}</p>
+            ` : `
+                <div class="rounded-2xl border border-border bg-surface p-8 text-center">
+                    <div class="mb-3 flex justify-center">${Icons.wallet()}</div>
+                    <p class="text-sm font-medium text-text-primary">No transactions found</p>
+                    <p class="text-xs text-text-muted mt-1">Record a payment to get started</p>
+                </div>
+            `}
             </div>
         `;
     },
@@ -1233,7 +1314,7 @@ const pages = {
             
             <div class="w-full min-w-0 space-y-4">
                 ${requestsToShow.length > 0 ? requestsToShow.map(r => `
-                    <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-5 shadow-sm hover:shadow-md transition-all">
+                    <div id="request-card-${r.id}" class="w-full min-w-0 rounded-2xl border border-border bg-surface p-5 shadow-sm hover:shadow-md transition-all">
                         <div class="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                             <div class="flex items-center gap-3">
                                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-brand/10 text-brand flex-shrink-0">
@@ -1264,7 +1345,7 @@ const pages = {
                             <button onclick="acceptRequest('${r.id}')" class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-success py-3 font-medium text-white transition-colors active:bg-success/90 select-none">
                                 ${Icons.check()} ${t('careFund.accepted')}
                             </button>
-                            <button onclick="declineRequest('${r.id}')" class="flex flex-1 items-center justify-center gap-2 rounded-xl border border-error py-3 font-medium text-error transition-colors active:bg-error/5 select-none">
+                            <button onclick="showDeclineForm('${r.id}')" class="flex flex-1 items-center justify-center gap-2 rounded-xl border border-error py-3 font-medium text-error transition-colors active:bg-error/5 select-none">
                                 ${Icons.x()} ${t('careFund.notApproved')}
                             </button>
                         </div>
@@ -1783,13 +1864,43 @@ async function acceptRequest(id) {
 }
 
 // Admin - Decline Care Fund Request
-async function declineRequest(id) {
-    const reason = prompt(t('careFund.declineReason') || 'Reason for declining:');
-    if (!reason) return;
+window.decliningRequestId = null;
+
+function showDeclineForm(id) {
+    window.decliningRequestId = id;
+    const card = document.getElementById(`request-card-${id}`);
+    if (card) {
+        card.innerHTML += `
+            <div id="decline-form-${id}" class="mt-3 rounded-xl bg-error/5 border border-error/20 p-4">
+                <p class="text-sm font-medium text-text-primary mb-2">Reason for declining:</p>
+                <textarea id="decline-reason-${id}" rows="3" class="w-full rounded-lg border border-border bg-surface p-3 text-sm focus:border-brand focus:outline-none" placeholder="Enter reason..."></textarea>
+                <div class="mt-3 flex gap-2">
+                    <button onclick="submitDecline('${id}')" class="flex-1 rounded-lg bg-error py-2 text-sm font-medium text-white">Confirm Decline</button>
+                    <button onclick="cancelDecline('${id}')" class="flex-1 rounded-lg border border-border py-2 text-sm font-medium text-text-secondary">Cancel</button>
+                </div>
+            </div>
+        `;
+    }
+}
+
+function cancelDecline(id) {
+    window.decliningRequestId = null;
+    const form = document.getElementById(`decline-form-${id}`);
+    if (form) form.remove();
+}
+
+async function submitDecline(id) {
+    const reasonEl = document.getElementById(`decline-reason-${id}`);
+    const reason = reasonEl?.value?.trim();
+    if (!reason) {
+        showToast('Please enter a reason', 'error');
+        return;
+    }
     
     try {
         await store.updateCareFundRequest(id, 'rejected', reason);
-        showToast(t('careFund.notApproved'), 'info');
+        showToast('Request declined', 'info');
+        window.decliningRequestId = null;
         router.refresh();
     } catch (err) {
         let msg = err.message || 'errors.tryAgain';
@@ -1800,6 +1911,10 @@ async function declineRequest(id) {
         }
         showToast(msg, 'error');
     }
+}
+
+async function declineRequest(id) {
+    showDeclineForm(id);
 }
 
 // Member - Change Password

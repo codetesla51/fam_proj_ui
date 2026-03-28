@@ -1,4 +1,4 @@
-const CACHE_NAME = 'family-ledger-v1';
+const CACHE_NAME = 'family-ledger-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -7,8 +7,8 @@ const STATIC_ASSETS = [
   '/js/pages.js',
   '/js/components.js',
   '/js/i18n.js',
-  '/js/mock.js',
-  '/js/utils.js'
+  '/js/utils.js',
+  '/js/api.js'
 ];
 
 // Install event - cache static assets

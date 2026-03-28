@@ -138,6 +138,7 @@ const Icons = {
     xCircle2: () => icon('x-circle-2'),
     info2: () => icon('info'),
     helpCircle2: () => icon('help-circle'),
+    helpCircle: () => icon('help-circle'),
     alertCircle2: () => icon('alert-circle'),
     alertTriangle3: () => icon('alert-triangle'),
     minus: () => icon('minus'),
