@@ -171,7 +171,7 @@ const auth = {
         }));
         tokens.access = data.access_token;
         tokens.refresh = data.refresh_token;
-        tokens.isAdmin = 'false';
+        tokens.isAdmin = false;
         return data;
     },
     
@@ -194,7 +194,7 @@ const auth = {
         }));
         tokens.access = data.access_token;
         tokens.refresh = data.refresh_token;
-        tokens.isAdmin = 'true';
+        tokens.isAdmin = true;
         return data;
     },
     

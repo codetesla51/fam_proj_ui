@@ -399,22 +399,26 @@ const pages = {
         const dashboard = await store.loadDashboard();
         const d = dashboard || {};
         
-        // Get pool2 balance from transactions if not in dashboard
+        // Get pool2 balance from dashboard
         let pool2Balance = d.my_pool2_contributions;
-        if (!pool2Balance || pool2Balance === '0') {
-            const txns = await store.loadTransactions({ pool: 'pool2' });
-            const txArray = Array.isArray(txns) ? txns : (txns?.data || []);
-            // Calculate pool2: credits - debits
-            const credits = txArray.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-            const debits = txArray.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-            pool2Balance = String(credits - debits);
-        }
         
-        const recentData = d.recent_transactions || [];
-        // Attach receipts to recent transactions
-        let recent = recentData.slice(0, 5);
+        // Fetch recent transactions directly from API and normalize
+        let recent = [];
         try {
             const memberApi = window.member;
+            const result = await memberApi.getTransactions({ limit: 10 });
+            let rawTx = result?.transactions || result?.data || [];
+            // Normalize PascalCase fields
+            recent = rawTx.map(tx => ({
+                id: tx.ID || tx.id,
+                type: tx.Type || tx.type,
+                amount: tx.Amount || tx.amount,
+                reason: tx.Reason || tx.reason,
+                created_at: tx.CreatedAt || tx.created_at,
+                pool: tx.Pool || tx.pool,
+                receipt_url: tx.ReceiptURL || tx.receipt_url
+            }));
+            // Attach receipts
             const receipts = await memberApi.getReceipts();
             const receiptMap = {};
             receipts.forEach(r => { receiptMap[r.TransactionID] = r; });
@@ -422,7 +426,8 @@ const pages = {
                 ...p,
                 receiptData: receiptMap[p.id]?.ReceiptData
             }));
-        } catch (e) { console.error('Failed to load receipts:', e); }
+        } catch (e) { console.error('Failed to load transactions:', e); }
+        
         const name = store.user?.name?.split(' ')[0] || 'Friend';
         return `
             <div class="w-full min-w-0">
