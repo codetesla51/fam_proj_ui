@@ -1,6 +1,5 @@
 // API Service - All backend communication
-// Frontend runs on 5173, backend runs on 8080
-const API_BASE = 'http://localhost:8080';
+const API_BASE = window.ENV?.BACKEND_URL || 'http://localhost:8080';
 
 // Check if backend is available
 let backendAvailable = false;

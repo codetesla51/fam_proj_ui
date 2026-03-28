@@ -1,0 +1,21 @@
+{
+  "name": "family-ledger-ui",
+  "version": "1.0.0",
+  "description": "Odelade Family Ledger - Family Savings & Contributions",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "family",
+    "savings",
+    "ledger",
+    "contributions"
+  ],
+  "author": "Odelade Family",
+  "license": "MIT"
+}
