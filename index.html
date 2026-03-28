@@ -13,6 +13,25 @@
         window.ENV = window.ENV || { BACKEND_URL: 'http://localhost:8080' };
     </script>
     
+    <!-- DEBUG: Remove after fixing -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var debug = document.createElement('div');
+            debug.style.cssText = 'position:fixed;bottom:20px;left:20px;z-index:99999;padding:10px 15px;border-radius:20px;font-size:12px;font-weight:bold;box-shadow:0 4px 12px rgba(0,0,0,0.3)';
+            var url = window.ENV?.BACKEND_URL || 'undefined';
+            if (url.includes('localhost')) {
+                debug.style.background = '#fee2e2';
+                debug.style.color = '#dc2626';
+                debug.innerHTML = 'BROKEN — hitting localhost<br>' + url;
+            } else {
+                debug.style.background = '#dcfce7';
+                debug.style.color = '#16a34a';
+                debug.innerHTML = 'OK — hitting production<br>' + url;
+            }
+            document.body.appendChild(debug);
+        });
+    </script>
+    
     <!-- SEO Meta Tags -->
     <title>Odelade Family Ledger — Family Savings & Contributions</title>
     <meta name="description" content="The Odelade Family savings and contributions ledger. Manage family funds, track contributions, and stay connected with your family finances.">
