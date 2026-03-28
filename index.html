@@ -8,8 +8,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Odelade Ledger">
     
-    <!-- Environment Variables -->
-    <script src="/env.js"></script>
+    <!-- Environment Variables (for Vercel, set BACKEND_URL in project settings) -->
+    <script>
+        window.ENV = window.ENV || { BACKEND_URL: 'http://localhost:8080' };
+    </script>
     
     <!-- SEO Meta Tags -->
     <title>Odelade Family Ledger — Family Savings & Contributions</title>
