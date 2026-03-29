@@ -794,7 +794,17 @@ const pages = {
                             </div>
                         `).join('')}
                     </div>
-                    ${filtered.length >= 20 ? `<p class="text-center text-sm text-text-muted mt-4">You have reached the end of your history</p>` : ''}
+                    ${filtered.length >= 20 ? `
+                    <div class="flex items-center justify-between mt-6 pt-4 border-t border-border">
+                        <button onclick="window.historyPage = (window.historyPage || 1) - 1; router.refresh()" class="px-5 py-3 rounded-xl border border-border text-sm font-medium text-text-secondary hover:bg-surface-soft disabled:opacity-50" ${(window.historyPage || 1) <= 1 ? 'disabled' : ''}>
+                            ${Icons.chevronLeft()} Previous
+                        </button>
+                        <span class="text-sm text-text-muted">Page ${window.historyPage || 1}</span>
+                        <button onclick="window.historyPage = (window.historyPage || 1) + 1; router.refresh()" class="px-5 py-3 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand-hover">
+                            Next ${Icons.chevronRight()}
+                        </button>
+                    </div>
+                    ` : ''}
                 ` : `
                     <div class="rounded-2xl border border-border bg-surface p-8 text-center">
                         <div class="mb-3 flex justify-center">${Icons.history()}</div>
