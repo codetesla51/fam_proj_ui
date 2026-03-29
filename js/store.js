@@ -147,7 +147,6 @@ const store = {
             this.data.transactions = normalizeArray(raw);
             return this.data.transactions;
         } catch (e) {
-            console.error('Failed to load transactions:', e);
             this.data.transactions = [];
             return [];
         }

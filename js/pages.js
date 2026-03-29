@@ -791,7 +791,7 @@ const pages = {
                 ...p,
                 receiptData: receiptMap[p.id]?.ReceiptData
             }));
-        } catch (e) { console.error('Failed to load transactions:', e); }
+        } catch (e) { }
         
         return `
             <div class="w-full min-w-0 mb-6">
