@@ -399,37 +399,14 @@ const pages = {
     
     // Member Pages
     memberDashboard: async () => {
-        const dashboard = await store.loadDashboard();
+        const dashboard = store.data.dashboard || await store.loadDashboard();
         const d = dashboard || {};
         
         // Get pool2 balance from dashboard
         let pool2Balance = d.my_pool2_contributions;
         
-        // Fetch recent transactions directly from API and normalize
-        let recent = [];
-        try {
-            const memberApi = window.member;
-            const result = await memberApi.getTransactions({ limit: 10 });
-            let rawTx = result?.transactions || result?.data || [];
-            // Normalize PascalCase fields
-            recent = rawTx.map(tx => ({
-                id: tx.ID || tx.id,
-                type: tx.Type || tx.type,
-                amount: tx.Amount || tx.amount,
-                reason: tx.Reason || tx.reason,
-                created_at: tx.CreatedAt || tx.created_at,
-                pool: tx.Pool || tx.pool,
-                receipt_url: tx.ReceiptURL || tx.receipt_url
-            }));
-            // Attach receipts
-            const receipts = await memberApi.getReceipts();
-            const receiptMap = {};
-            receipts.forEach(r => { receiptMap[r.TransactionID] = r; });
-            recent = recent.map(p => ({
-                ...p,
-                receiptData: receiptMap[p.id]?.ReceiptData
-            }));
-        } catch (e) { console.error('Failed to load transactions:', e); }
+        // Use cached transactions from store
+        let recent = store.data.transactions?.slice(0, 10) || [];
         
         const name = store.user?.name?.split(' ')[0] || 'Friend';
         return `
@@ -461,23 +438,28 @@ const pages = {
                     </div>
                     ${recent.length > 0 ? `
                         <div class="w-full min-w-0 space-y-3">
-                            ${recent.map(p => `
+                            ${recent.map(p => {
+                                const pType = p.type || p.Type || 'credit';
+                                const pReason = p.reason || p.Reason || '';
+                                const pAmount = p.amount || p.Amount || 0;
+                                const pCreated = p.created_at || p.CreatedAt || '';
+                                const pMemberName = p.member_name || p.MemberName || 'Family member';
+                                return `
                                 <div class="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3 hover:shadow-md transition-shadow">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
-                                        ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? Icons.arrowUpRight() : Icons.arrowDownRight()}
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${pType === 'credit' || pReason.includes('Transfer from pool2') ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
+                                        ${pType === 'credit' || pReason.includes('Transfer from pool2') ? Icons.arrowUpRight() : Icons.arrowDownRight()}
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-semibold text-text-primary truncate">${cleanReason(p.reason, p.type)}</p>
-                                        <p class="text-xs text-text-muted">${p.member_name || 'Family member'} • ${formatDate(p.created_at)}</p>
+                                        <p class="text-sm font-semibold text-text-primary truncate">${cleanReason(pReason, pType)}</p>
+                                        <p class="text-xs text-text-muted">${pMemberName} • ${formatDate(pCreated)}</p>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        ${p.receiptData ? `<button onclick="showTransferReceiptData('${p.id}', '${encodeURIComponent(p.receiptData || '')}')" class="p-2 text-brand hover:text-brand-hover" title="View Receipt">${Icons.fileText()}</button>` : ''}
-                                        <p class="text-sm font-bold whitespace-nowrap ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? 'text-success' : 'text-error'}">
-                                            ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? '+' : '-'}${formatCurrency(p.amount)}
+                                        <p class="text-sm font-bold whitespace-nowrap ${pType === 'credit' || pReason.includes('Transfer from pool2') ? 'text-success' : 'text-error'}">
+                                            ${pType === 'credit' || pReason.includes('Transfer from pool2') ? '+' : '-'}${formatCurrency(pAmount)}
                                         </p>
                                     </div>
                                 </div>
-                            `).join('')}
+                            `}).join('')}
                         </div>
                     ` : `
                         <div class="rounded-2xl border border-border bg-surface p-8 text-center">
@@ -501,29 +483,12 @@ const pages = {
     },
     
     memberSavings: async () => {
-        const memberApi = window.member;
-        let transactions = [];
-        try {
-            const result = await memberApi.getTransactions({ pool: 'pool1', limit: 50 });
-            let rawTx = result?.transactions || result?.data || [];
-            // Normalize field names from API (Pool, Type, Amount, CreatedAt)
-            transactions = rawTx.map(tx => ({
-                id: tx.ID || tx.id,
-                pool: tx.Pool || tx.pool,
-                type: tx.Type || tx.type,
-                amount: tx.Amount || tx.amount,
-                reason: tx.Reason || tx.reason,
-                created_at: tx.CreatedAt || tx.created_at,
-                member_name: tx.MemberName || tx.member_name || 'Family member',
-                receipt_url: tx.ReceiptURL || tx.receipt_url
-            }));
-        } catch (e) {
-            console.error('Failed to load savings:', e);
-        }
+        // Use cached transactions from store, filter by pool1
+        let transactions = (store.data.transactions || []).filter(t => t.pool === 'pool1' || t.Pool === 'pool1');
         
         // Calculate summary
-        const totalIn = transactions.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        const totalOut = transactions.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        const totalIn = transactions.filter(t => t.type === 'credit' || t.Type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || t.Amount || 0), 0);
+        const totalOut = transactions.filter(t => t.type === 'debit' || t.Type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || t.Amount || 0), 0);
         
         return `
             <div class="w-full min-w-0 mb-4">
@@ -550,25 +515,32 @@ const pages = {
             <div class="w-full min-w-0">
             ${transactions.length > 0 ? `
                 <div class="w-full min-w-0 space-y-2">
-                    ${transactions.map((tx, i) => `
+                    ${transactions.map((tx, i) => {
+                        const txType = tx.type || tx.Type || 'credit';
+                        const txAmount = tx.amount || tx.Amount || 0;
+                        const txReason = tx.reason || tx.Reason || '';
+                        const txCreated = tx.created_at || tx.CreatedAt || '';
+                        const txMemberName = tx.member_name || tx.MemberName || 'Family member';
+                        const txReceiptUrl = tx.receipt_url || tx.ReceiptURL || '';
+                        return `
                         <div class="rounded-xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
                             <div class="flex items-start gap-3">
-                                <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${tx.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
-                                    ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
+                                <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${txType === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
+                                    ${txType === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-semibold text-text-primary">${cleanReason(tx.reason, tx.type)}</p>
-                                    <p class="text-xs text-text-muted mt-1">${tx.member_name || 'Family member'} • ${formatDate(tx.created_at)}</p>
+                                    <p class="text-sm font-semibold text-text-primary">${cleanReason(txReason, txType)}</p>
+                                    <p class="text-xs text-text-muted mt-1">${txMemberName} • ${formatDate(txCreated)}</p>
                                 </div>
                                 <div class="text-right flex items-center gap-2">
                                     <div>
-                                        <p class="text-lg font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}</p>
-                                        ${tx.receipt_url ? `<button onclick="showReceiptImage('${tx.receipt_url}')" class="text-xs text-brand font-medium mt-1 block">View Receipt</button>` : ''}
+                                        <p class="text-lg font-bold ${txType === 'credit' ? 'text-success' : 'text-error'}">${txType === 'credit' ? '+' : '-'}${formatCurrency(txAmount)}</p>
+                                        ${txReceiptUrl ? `<button onclick="showReceiptImage('${txReceiptUrl}')" class="text-xs text-brand font-medium mt-1 block">View Receipt</button>` : ''}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    `).join('')}
+                    `}).join('')}
                 </div>
                 <p class="text-center text-sm text-text-muted mt-4">${transactions.length} payment${transactions.length !== 1 ? 's' : ''} recorded</p>
             ` : `
