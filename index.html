@@ -242,7 +242,7 @@
     <script>
         // Single initialization point
         function initApp() {
-            if (typeof store === 'undefined' || typeof router === 'undefined') {
+            if (typeof store === 'undefined' || typeof router === 'undefined' || typeof pages === 'undefined') {
                 setTimeout(initApp, 50);
                 return;
             }
