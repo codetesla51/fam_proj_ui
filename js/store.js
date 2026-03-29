@@ -126,17 +126,13 @@ const store = {
     
     // Load transactions
     async loadTransactions(options = {}) {
-        console.log('[loadTransactions] isAdmin:', this.isAdmin());
         try {
             let result;
             if (this.isAdmin()) {
-                console.log('[loadTransactions] using admin.getTransactions');
                 result = await admin.getTransactions(options);
             } else {
-                console.log('[loadTransactions] using member.getTransactions');
                 result = await member.getTransactions(options);
             }
-            console.log('[loadTransactions] result:', result);
             
             // Handle both array and object response formats
             let raw = [];

@@ -407,14 +407,10 @@ const pages = {
     // Member Pages
     memberDashboard: async () => {
         // Load dashboard and transactions if not already loaded
-        console.log('[memberDashboard] store.data.transactions:', store.data.transactions?.length);
-        
         const [dashboard, transactions] = await Promise.all([
             store.data.dashboard ? Promise.resolve(store.data.dashboard) : store.loadDashboard(),
             store.data.transactions?.length ? Promise.resolve(store.data.transactions) : store.loadTransactions()
         ]);
-        
-        console.log('[memberDashboard] transactions after load:', transactions?.length);
         
         const d = dashboard || {};
         
@@ -460,6 +456,7 @@ const pages = {
                                 const pAmount = p.amount || p.Amount || 0;
                                 const pCreated = p.created_at || p.CreatedAt || '';
                                 const pMemberName = p.member_name || p.MemberName || 'Family member';
+                                const pReceiptUrl = p.receipt_url || p.ReceiptURL || '';
                                 return `
                                 <div class="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3 hover:shadow-md transition-shadow">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${pType === 'credit' || pReason.includes('Transfer from pool2') ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
@@ -470,6 +467,7 @@ const pages = {
                                         <p class="text-xs text-text-muted">${pMemberName} • ${formatDate(pCreated)}</p>
                                     </div>
                                     <div class="flex items-center gap-2">
+                                        ${pReceiptUrl ? `<button onclick="showReceiptImage('${pReceiptUrl}')" class="text-xs text-brand font-medium">View</button>` : ''}
                                         <p class="text-sm font-bold whitespace-nowrap ${pType === 'credit' || pReason.includes('Transfer from pool2') ? 'text-success' : 'text-error'}">
                                             ${pType === 'credit' || pReason.includes('Transfer from pool2') ? '+' : '-'}${formatCurrency(pAmount)}
                                         </p>
