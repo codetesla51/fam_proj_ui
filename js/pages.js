@@ -915,11 +915,11 @@ const pages = {
                         <form onsubmit="handleCareFundRequest(event)" class="space-y-5">
                             <!-- Request Type Toggle -->
                             <div class="flex gap-2">
-                                <button type="button" onclick="window.requestType='care_fund'; this.closest('form').querySelector('#care-amount').focus()" 
+                                <button type="button" onclick="window.requestType='care_fund'; document.getElementById('care-fund-fields').classList.remove('hidden'); this.classList.add('bg-brand','text-white'); this.classList.remove('border-border','text-text-secondary'); this.nextElementSibling.classList.remove('bg-brand','text-white'); this.nextElementSibling.classList.add('border-border','text-text-secondary')" 
                                     class="request-type-btn flex-1 py-3 px-4 rounded-xl font-semibold text-sm border-2 border-brand bg-brand text-white" data-type="care_fund">
                                     Get Money from Family
                                 </button>
-                                <button type="button" onclick="window.requestType='withdrawal'; this.closest('form').querySelector('#care-amount').focus()"
+                                <button type="button" onclick="window.requestType='withdrawal'; document.getElementById('care-fund-fields').classList.add('hidden'); this.classList.add('bg-brand','text-white'); this.classList.remove('border-border','text-text-secondary'); this.previousElementSibling.classList.remove('bg-brand','text-white'); this.previousElementSibling.classList.add('border-border','text-text-secondary')"
                                     class="request-type-btn flex-1 py-3 px-4 rounded-xl font-semibold text-sm border-2 border-border text-text-secondary hover:border-brand" data-type="withdrawal">
                                     Withdraw from Savings
                                 </button>
@@ -933,6 +933,33 @@ const pages = {
                                         class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface pl-12 pr-4 text-lg font-bold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                                 </div>
                             </div>
+                            
+                            <!-- Care Fund Fields -->
+                            <div id="care-fund-fields" class="space-y-4">
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-bold text-text-primary">What is this for?</label>
+                                    <select id="care-occasion" class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                        <option value="">Select occasion</option>
+                                        <option value="birthday">Birthday</option>
+                                        <option value="wedding">Wedding</option>
+                                        <option value="newBaby">New Baby</option>
+                                        <option value="graduation">Graduation</option>
+                                        <option value="medical">Medical</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-bold text-text-primary">When do you need it?</label>
+                                    <input type="date" id="care-event-date" 
+                                        class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-bold text-text-primary">Tell us more (optional)</label>
+                                    <textarea id="care-description" rows="2" placeholder="Any additional details..."
+                                        class="w-full min-w-0 rounded-2xl border-2 border-border bg-surface p-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"></textarea>
+                                </div>
+                            </div>
+                            
                             <button type="submit" id="care-btn" class="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-brand text-lg font-bold text-white shadow-lg shadow-brand/25 select-none">
                                 ${Icons.heartHandshake()} ${t('careFund.sendRequest')}
                             </button>
@@ -2009,7 +2036,9 @@ async function handleAddMember(e) {
         return;
     }
     
-    // Check if member has enough balance in personal savings - calculate from transactions if needed
+    // Check if member has enough balance in personal savings - ONLY for withdrawal requests
+    // Care fund requests (Get Money from Family) don't need balance check
+    const requestType = document.getElementById('request-type')?.value || 'care_fund';
     let balance = 0;
     const dashboard = await store.loadDashboard();
     if (dashboard?.my_pool2_contributions && dashboard.my_pool2_contributions !== '0') {
@@ -2023,7 +2052,8 @@ async function handleAddMember(e) {
     }
     const requested = parseInt(amount);
     
-    if (requested > balance) {
+    // Only check balance for withdrawal requests
+    if (requestType === 'withdrawal' && requested > balance) {
         showToast('Not enough money in your personal savings. You have ' + formatCurrency(balance), 'error');
         return;
     }
@@ -2033,11 +2063,21 @@ async function handleAddMember(e) {
     
     try {
         const requestType = document.getElementById('request-type')?.value || 'care_fund';
+        const occasion = document.getElementById('care-occasion')?.value;
+        const eventDate = document.getElementById('care-event-date')?.value;
+        const description = document.getElementById('care-description')?.value;
+        
+        // For care fund requests, occasion is required
+        if (requestType === 'care_fund' && !occasion) {
+            showToast('Please select what this is for', 'error');
+            return;
+        }
+        
         await store.submitCareFundRequest({
             amount: String(parseInt(amount)),
-            occasion: 'other',
-            event_date: new Date().toISOString().split('T')[0],
-            description: '',
+            occasion: occasion || 'other',
+            event_date: eventDate || new Date().toISOString().split('T')[0],
+            description: description || '',
             type: requestType
         });
         showToast(t('common.success'), 'success');
