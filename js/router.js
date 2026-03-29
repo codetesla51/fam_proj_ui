@@ -184,11 +184,15 @@ const router = {
                 store._polling = true;
                 store.startPolling();
             }
+            // Force fresh data after login or when stale
+            const forceFresh = store._justLoggedIn;
+            store._justLoggedIn = false;
             await Promise.allSettled([
-                store.loadDashboard().catch(e => console.warn('dashboard failed', e)),
-                store.loadNotifications().catch(e => console.warn('notifications failed', e)),
-                store.loadTransactions().catch(e => console.warn('transactions failed', e)),
-                store.loadCareFundRequests().catch(e => console.warn('carefund failed', e))
+                store.loadDashboard(forceFresh).catch(e => console.warn('dashboard failed', e)),
+                store.loadNotifications(forceFresh).catch(e => console.warn('notifications failed', e)),
+                store.loadTransactions({}, forceFresh).catch(e => console.warn('transactions failed', e)),
+                store.loadCareFundRequests(null, forceFresh).catch(e => console.warn('carefund failed', e)),
+                store.loadAllMembers(forceFresh).catch(e => console.warn('members failed', e))
             ]);
             store.updateNotifBadge();
         }
