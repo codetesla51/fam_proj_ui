@@ -155,6 +155,32 @@
         /* Smooth transitions */
         .transition-smooth { transition: all 0.2s ease-out; }
         
+        /* Money overflow protection */
+        .money-amount {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            min-width: 0;
+        }
+        .money-card {
+            min-width: 0;
+            overflow: hidden;
+        }
+        .money-cell {
+            white-space: nowrap;
+            min-width: 0;
+        }
+        
+        /* Highlight animation for updated values */
+        @keyframes moneyUpdate {
+            0% { background-color: rgba(13, 148, 136, 0.2); }
+            100% { background-color: transparent; }
+        }
+        .money-updated {
+            animation: moneyUpdate 1s ease-out;
+        }
+        
         /* DEV ERROR OVERLAY - remove for production */
         #error-overlay { position: fixed; inset: 0; background: #0F172A; color: #fff; z-index: 99999; padding: 20px; overflow: auto; font-family: monospace; font-size: 13px; display: none; }
         /* END DEV ERROR OVERLAY */

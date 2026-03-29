@@ -1,11 +1,54 @@
 // Utilities
 
+// Format money with compact option for large amounts
+function formatMoney(amount, options = {}) {
+    const { compact = false, signed = false } = options;
+    
+    // Handle null, undefined, or string amounts
+    if (amount === null || amount === undefined || amount === '') return '₦0';
+    
+    // Parse the amount
+    let num = parseFloat(amount);
+    if (isNaN(num)) return '₦0';
+    
+    // Handle negative amounts
+    const isNegative = num < 0;
+    if (isNegative) num = Math.abs(num);
+    
+    let formatted;
+    
+    // Use compact format for large numbers
+    if (compact && num >= 1000) {
+        if (num >= 1_000_000_000) {
+            formatted = '₦' + (num / 1_000_000_000).toFixed(1) + 'B';
+        } else if (num >= 1_000_000) {
+            formatted = '₦' + (num / 1_000_000).toFixed(1) + 'M';
+        } else if (num >= 1_000) {
+            formatted = '₦' + (num / 1_000).toFixed(1) + 'K';
+        }
+    } else {
+        formatted = '₦' + num.toLocaleString('en-NG', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+        });
+    }
+    
+    // Add sign prefix
+    if (signed) {
+        return isNegative ? '-' + formatted : '+' + formatted;
+    }
+    
+    return formatted;
+}
+
 function formatCurrency(amount) {
-    return new Intl.NumberFormat('en-NG', {
-        style: 'currency',
-        currency: 'NGN',
-        minimumFractionDigits: 0
-    }).format(amount);
+    if (amount === null || amount === undefined || amount === '') return '₦0';
+    const num = parseFloat(amount);
+    if (isNaN(num)) return '₦0';
+    return '₦' + num.toLocaleString('en-NG', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+    });
 }
 
 function formatDate(dateStr, options = {}) {
