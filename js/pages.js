@@ -1004,8 +1004,20 @@ const pages = {
             amount: tx.amount || tx.Amount,
             reason: tx.Reason || tx.reason,
             created_at: tx.created_at || tx.CreatedAt,
-            receipt_url: tx.receipt_url || tx.ReceiptURL || tx.receiptData
+            receipt_url: tx.receipt_url || tx.ReceiptURL
         }));
+        
+        // Attach receipts from receipts table (for transfers)
+        try {
+            const adminApi = window.admin;
+            const receipts = await adminApi.getReceipts();
+            const receiptMap = {};
+            receipts.forEach(r => { receiptMap[r.TransactionID] = r; });
+            transactions = transactions.map(tx => ({
+                ...tx,
+                receiptData: receiptMap[tx.id]?.ReceiptData
+            }));
+        } catch (e) { console.warn('failed to load receipts', e); }
         
         const filters = window.adminTxFilters;
         
@@ -1101,7 +1113,8 @@ const pages = {
                                             <div class="text-right">
                                                 <p class="text-xl font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}</p>
                                                 <p class="text-xs text-text-muted mt-1">${formatDate(tx.created_at)}</p>
-                                                ${tx.receipt_url ? `<button onclick="showReceiptImage('${tx.receipt_url}')" class="text-xs text-brand font-medium mt-1 block">View Receipt</button>` : ''}
+                                                ${tx.receipt_url ? `<a href="${tx.receipt_url}" target="_blank" class="text-xs text-brand font-medium mt-1 block">View Receipt</a>` : ''}
+                                                ${!tx.receipt_url && tx.receiptData ? `<button onclick="showTransferReceiptData('${tx.id}', '${encodeURIComponent(tx.receiptData)}')" class="text-xs text-brand font-medium mt-1 block">View Receipt</button>` : ''}
                                             </div>
                                         </div>
                                     </div>
