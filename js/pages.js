@@ -549,7 +549,7 @@ const pages = {
                                 <div class="text-right flex items-center gap-2">
                                     <div>
                                         <p class="text-lg font-bold ${txType === 'credit' ? 'text-success' : 'text-error'}">${txType === 'credit' ? '+' : '-'}${formatCurrency(txAmount)}</p>
-                                        ${txReceiptUrl ? `<button onclick="showReceiptImage('${txReceiptUrl}')" class="text-xs text-brand font-medium mt-1 block">View Receipt</button>` : ''}
+                                        ${txReceiptUrl ? `<a href="${txReceiptUrl}" target="_blank" class="text-xs text-brand font-medium mt-1 block">View Receipt</a>` : ''}
                                     </div>
                                 </div>
                             </div>
@@ -745,7 +745,8 @@ const pages = {
                                     </div>
                                     <div class="text-right">
                                         <p class="text-lg font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}</p>
-                                        ${tx.receiptData ? `<button onclick="showTransferReceiptData('${tx.id}', '${encodeURIComponent(tx.receiptData)}')" class="text-xs text-brand font-medium mt-1 block">View Receipt</button>` : ''}
+                                        ${tx.receipt_url ? `<a href="${tx.receipt_url}" target="_blank" class="text-xs text-brand font-medium mt-1 block">View Receipt</a>` : ''}
+                                        ${tx.receiptData && !tx.receipt_url ? `<button onclick="showTransferReceiptData('${tx.id}', '${encodeURIComponent(tx.receiptData)}')" class="text-xs text-brand font-medium mt-1 block">View Receipt</button>` : ''}
                                     </div>
                                 </div>
                             </div>
@@ -769,7 +770,7 @@ const pages = {
         let transactions = [];
         try {
             const memberApi = window.member;
-            const result = await memberApi.getTransactions({ limit: 50 });
+            const result = await memberApi.getAllTransactions({ limit: 50 });
             let rawTx = result?.transactions || result?.data || [];
             // Normalize PascalCase fields
             transactions = rawTx.map(tx => ({
@@ -779,9 +780,10 @@ const pages = {
                 amount: tx.Amount || tx.amount,
                 reason: tx.Reason || tx.reason,
                 created_at: tx.CreatedAt || tx.created_at,
-                pool: tx.Pool || tx.pool
+                pool: tx.Pool || tx.pool,
+                receipt_url: tx.ReceiptURL || tx.receipt_url
             }));
-            // Attach receipts
+            // Attach receipts from receipts table
             const receipts = await memberApi.getReceipts();
             const receiptMap = {};
             receipts.forEach(r => { receiptMap[r.TransactionID] = r; });
@@ -813,7 +815,8 @@ const pages = {
                                     <p class="text-xs text-text-muted">${p.member_name || 'Family member'} • ${formatDate(p.created_at)}</p>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    ${p.receiptData ? `<button onclick="showTransferReceiptData('${p.id}', '${encodeURIComponent(p.receiptData || '')}')" class="p-2 text-brand hover:text-brand-hover" title="View Receipt">${Icons.fileText()}</button>` : ''}
+                                    ${p.receipt_url ? `<a href="${p.receipt_url}" target="_blank" class="p-2 text-brand hover:text-brand-hover" title="View Receipt">${Icons.fileText()}</a>` : ''}
+                                    ${!p.receipt_url && p.receiptData ? `<button onclick="showTransferReceiptData('${p.id}', '${encodeURIComponent(p.receiptData || '')}')" class="p-2 text-brand hover:text-brand-hover" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                     <p class="text-sm font-bold whitespace-nowrap ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? 'text-success' : 'text-error'}">
                                         ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? '+' : '-'}${formatCurrency(p.amount)}
                                     </p>
@@ -934,11 +937,11 @@ const pages = {
                     ${KpiCard({ label: 'Overdue', amount: d.overdue_count || 0, subtext: t('member.behind'), isCurrency: false })}
                 </div>
                 
-                ${d.underfunded && d.underfunded.length > 0 ? `
+                ${d.underfunded_members && d.underfunded_members.length > 0 ? `
                     <div class="w-full min-w-0 mb-6 rounded-2xl border border-error/20 bg-error/5 p-4 overflow-x-hidden">
                         <div class="mb-3 flex items-center gap-2">${Icons.alertTriangle()}<p class="text-sm font-bold text-error">${t('admin.behindTitle')}</p></div>
                         <div class="w-full min-w-0 space-y-2 overflow-x-hidden">
-                            ${d.underfunded.map(m => {
+                            ${d.underfunded_members.map(m => {
                                 const name = m.Name || m.name || '?';
                                 const committed = parseFloat(m.CommittedAmount || m.committed_amount || 0);
                                 const current = parseFloat(m.CurrentSum || m.current_sum || 0);
@@ -2074,12 +2077,17 @@ async function handlePoolTransfer() {
             };
             localStorage.setItem('last_receipt_data', JSON.stringify(receiptData));
             showTransferReceiptModal(receiptData, result.pool2_balance, result.pool1_contribution);
+            // Reload transactions so the new transfer appears in history
+            await store.loadTransactions();
+            router.refresh();
         } else if (result.transaction_id) {
             // Old format fallback
             try {
                 const receipt = await store.getReceipt(result.transaction_id);
                 localStorage.setItem('last_receipt_data', JSON.stringify(receipt));
                 showTransferReceiptModal(receipt, result.pool2_balance, result.pool1_contribution);
+                await store.loadTransactions();
+                router.refresh();
             } catch (receiptErr) {
                 console.error('Failed to fetch receipt:', receiptErr);
                 showToast(t('common.success') + ' (Receipt unavailable)', 'success');
@@ -2087,6 +2095,7 @@ async function handlePoolTransfer() {
             }
         } else {
             showToast(t('common.success'), 'success');
+            await store.loadTransactions();
             router.refresh();
         }
     } catch (err) {

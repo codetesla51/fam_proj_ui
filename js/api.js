@@ -295,6 +295,23 @@ const member = {
         return { transactions, total: data?.total || transactions.length };
     },
     
+    // Get all family transactions (for family activity page)
+    async getAllTransactions({ pool, page = 1, limit = 50 } = {}) {
+        const params = new URLSearchParams();
+        params.set('limit', limit);
+        params.set('offset', (page - 1) * limit);
+        if (pool) params.set('pool', pool);
+        const data = await handleResponse(apiFetch(`/transactions?${params}`));
+        // Backend returns { data: [...], total, limit, offset }
+        let transactions = [];
+        if (Array.isArray(data?.data)) {
+            transactions = data.data;
+        } else if (Array.isArray(data)) {
+            transactions = data;
+        }
+        return { transactions, total: data?.total || transactions.length };
+    },
+    
     // Transfer pool2 to pool1
     async transferPool(amount) {
         const data = await handleResponse(apiFetch('/pool/transfer', {
