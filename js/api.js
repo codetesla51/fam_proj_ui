@@ -1,5 +1,5 @@
 // API Service - All backend communication
-const API_BASE = window.ENV?.BACKEND_URL || 'http://localhost:8080';
+const API_BASE = 'http://localhost:8080';
 
 // Token management
 const tokens = {
