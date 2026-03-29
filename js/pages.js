@@ -63,7 +63,7 @@ const pages = {
             <div class="flex w-full lg:w-[45%] flex-col">
                 <!-- Language Switcher - Top Right -->
                 <div class="flex justify-end p-6">
-                    <button onclick="openLangModal()" class="flex h-11 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary hover:bg-surface-soft active:scale-95 transition-all select-none">
+                    <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-2xl px-4 text-sm font-medium text-text-secondary hover:bg-surface-soft active:scale-95 transition-all select-none">
                         ${Icons.globe()}
                         <span>${getCurrentLangName()}</span>
                         ${Icons.chevronDown()}
@@ -85,7 +85,7 @@ const pages = {
                             <p class="mt-2 text-sm text-text-muted">Sign in to see your family savings</p>
                         </div>
                         
-                        <div id="login-error" class="mb-5 hidden rounded-xl border border-error/20 bg-error/5 p-4 text-sm text-error flex items-center gap-2">
+                        <div id="login-error" class="mb-5 hidden rounded-2xl border border-error/20 bg-error/5 p-4 text-sm text-error flex items-center gap-2">
                             ${Icons.alertCircle()}
                             <span></span>
                         </div>
@@ -95,7 +95,7 @@ const pages = {
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.yourName')}</label>
                                 <input type="text" id="login-name" placeholder="${t('auth.yourNamePlaceholder')}"
                                     onblur="this.classList.toggle('border-error', !this.value.trim())"
-                                    class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                    class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                             </div>
                             
                             <div class="space-y-2">
@@ -103,7 +103,7 @@ const pages = {
                                 <div class="relative">
                                     <input type="password" id="login-password" 
                                         onblur="this.classList.toggle('border-error', !this.value.trim())"
-                                        class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                        class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                                     <button type="button" onclick="togglePassword('login-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
                                         ${Icons.eye()}
                                     </button>
@@ -111,7 +111,7 @@ const pages = {
                             </div>
                             
                             <button type="submit" id="login-btn"
-                                class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-brand text-base font-bold text-white shadow-lg shadow-brand/25 transition-all hover:bg-brand-hover hover:shadow-xl hover:shadow-brand/35 active:scale-[0.98] select-none">
+                                class="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-brand text-base font-bold text-white shadow-lg shadow-brand/25 transition-all hover:bg-brand-hover hover:shadow-xl hover:shadow-brand/35 active:scale-[0.98] select-none">
                                 ${Icons.logIn()}
                                 ${t('auth.signIn')}
                             </button>
@@ -125,7 +125,7 @@ const pages = {
                         </div>
                         
                         <!-- Join CTA -->
-                        <a href="/register" class="flex h-14 w-full items-center justify-center gap-3 rounded-xl border-2 border-brand/30 bg-brand-light/30 text-base font-bold text-brand transition-all hover:bg-brand-light hover:border-brand active:scale-[0.98] select-none">
+                        <a href="/register" class="flex h-14 w-full items-center justify-center gap-3 rounded-2xl border-2 border-brand/30 bg-brand-light/30 text-base font-bold text-brand transition-all hover:bg-brand-light hover:border-brand active:scale-[0.98] select-none">
                             ${Icons.userPlus()}
                             Join the Odelade Family
                         </a>
@@ -188,7 +188,7 @@ const pages = {
             <div class="flex w-full lg:w-[45%] flex-col">
                 <!-- Language Switcher - Top Right -->
                 <div class="flex justify-end p-6">
-                    <button onclick="openLangModal()" class="flex h-11 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary hover:bg-surface-soft active:scale-95 transition-all select-none">
+                    <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-2xl px-4 text-sm font-medium text-text-secondary hover:bg-surface-soft active:scale-95 transition-all select-none">
                         ${Icons.globe()}
                     </button>
                 </div>
@@ -212,7 +212,7 @@ const pages = {
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.fullName')} <span class="text-error">*</span></label>
                                 <input type="text" id="reg-name" placeholder="e.g. Taiwo Odelade"
-                                    class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                    class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                                 <p class="text-xs text-text-muted pl-1">${t('auth.fullNameHelper')}</p>
                             </div>
                             
@@ -220,7 +220,7 @@ const pages = {
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.createPassword')} <span class="text-error">*</span></label>
                                 <div class="relative">
                                     <input type="password" id="reg-password"
-                                        class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                        class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                                     <button type="button" onclick="togglePassword('reg-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
                                         ${Icons.eye()}
                                     </button>
@@ -231,7 +231,7 @@ const pages = {
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.confirmPassword')} <span class="text-error">*</span></label>
                                 <div class="relative">
                                     <input type="password" id="reg-confirm"
-                                        class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                        class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                                     <button type="button" onclick="togglePassword('reg-confirm')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
                                         ${Icons.eye()}
                                     </button>
@@ -240,7 +240,7 @@ const pages = {
                             
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-text-primary">${t('register.howOften')} <span class="text-error">*</span></label>
-                                <div class="flex rounded-xl border-2 border-border p-1.5 gap-2">
+                                <div class="flex rounded-2xl border-2 border-border p-1.5 gap-2">
                                     <button type="button" onclick="setSchedule('weekly')" id="btn-weekly"
                                         class="flex-1 rounded-lg py-3.5 text-sm font-semibold transition-all text-text-secondary hover:bg-surface-soft select-none">
                                         ${Icons.calendar()} ${t('register.everyWeek')}
@@ -257,13 +257,13 @@ const pages = {
                                 <div class="relative">
                                     <span class="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
                                     <input type="number" id="reg-amount" placeholder="50,000"
-                                        class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface py-3 pl-12 pr-4 text-lg font-semibold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                        class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface py-3 pl-12 pr-4 text-lg font-semibold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                                 </div>
                                 <p class="text-xs text-text-muted pl-1">${t('register.howMuchHelper')}</p>
                             </div>
                             
                             <button type="submit" id="reg-btn"
-                                class="flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-brand text-base font-bold text-white shadow-lg shadow-brand/25 transition-all hover:bg-brand-hover hover:shadow-xl hover:shadow-brand/35 active:scale-[0.98] select-none">
+                                class="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-brand text-base font-bold text-white shadow-lg shadow-brand/25 transition-all hover:bg-brand-hover hover:shadow-xl hover:shadow-brand/35 active:scale-[0.98] select-none">
                                 ${Icons.userPlus()}
                                 ${t('auth.createAccount')}
                             </button>
@@ -277,7 +277,7 @@ const pages = {
                         </div>
                         
                         <!-- Login Link -->
-                        <a href="/login" class="flex h-14 w-full items-center justify-center gap-3 rounded-xl border-2 border-brand/30 bg-brand-light/30 text-base font-bold text-brand transition-all hover:bg-brand-light hover:border-brand active:scale-[0.98] select-none">
+                        <a href="/login" class="flex h-14 w-full items-center justify-center gap-3 rounded-2xl border-2 border-brand/30 bg-brand-light/30 text-base font-bold text-brand transition-all hover:bg-brand-light hover:border-brand active:scale-[0.98] select-none">
                             ${Icons.logIn()}
                             Sign in to your account
                         </a>
@@ -349,19 +349,19 @@ const pages = {
                     </div>
                     
                     <div class="mb-4 flex justify-end">
-                        <button onclick="openLangModal()" class="flex h-11 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary hover:bg-surface-raised transition-colors select-none">
+                        <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-2xl px-4 text-sm font-medium text-text-secondary hover:bg-surface-raised transition-colors select-none">
                             ${Icons.globe()}
                             <span class="hidden sm:inline">Language</span>
                         </button>
                     </div>
                     
                     <div class="w-full min-w-0 rounded-3xl border border-border bg-surface p-8 shadow-xl">
-                        <div id="admin-error" class="mb-6 hidden rounded-xl border border-error/20 bg-error/10 p-4 text-sm text-error flex items-center gap-3">
+                        <div id="admin-error" class="mb-6 hidden rounded-2xl border border-error/20 bg-error/10 p-4 text-sm text-error flex items-center gap-3">
                             ${Icons.alertCircle()}
                             <span></span>
                         </div>
                         
-                        <div id="admin-success" class="mb-4 hidden rounded-xl border border-success/20 bg-success/10 p-4 text-sm text-success flex items-center gap-3">
+                        <div id="admin-success" class="mb-4 hidden rounded-2xl border border-success/20 bg-success/10 p-4 text-sm text-success flex items-center gap-3">
                             ${Icons.checkCircle()}
                             <span></span>
                         </div>
@@ -374,7 +374,7 @@ const pages = {
                                 </label>
                                 <div class="relative">
                                     <input type="password" id="admin-password" placeholder="Enter your password"
-                                        class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 placeholder:text-text-muted">
+                                        class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 placeholder:text-text-muted">
                                     <button type="button" onclick="togglePassword('admin-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-brand transition-colors select-none">
                                         ${Icons.eye()}
                                     </button>
@@ -382,7 +382,7 @@ const pages = {
                             </div>
                             
                             <button type="submit" id="admin-submit-btn"
-                                class="flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-brand px-6 text-base font-bold text-white shadow-lg shadow-brand/30 transition-all hover:bg-brand-hover hover:shadow-xl hover:shadow-brand/40 active:scale-[0.98] select-none">
+                                class="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-brand px-6 text-base font-bold text-white shadow-lg shadow-brand/30 transition-all hover:bg-brand-hover hover:shadow-xl hover:shadow-brand/40 active:scale-[0.98] select-none">
                                 ${Icons.logIn()}
                                 Sign In as Manager
                             </button>
@@ -517,7 +517,7 @@ const pages = {
             
             <!-- Summary -->
             <div class="w-full min-w-0 mb-4">
-                <div class="rounded-xl bg-success/10 p-4 border border-success/20">
+                <div class="rounded-2xl bg-success/10 p-4 border border-success/20">
                     <p class="text-xs text-success font-medium">Total Saved</p>
                     <p class="text-xl font-bold text-success">+${formatCurrency(totalIn)}</p>
                 </div>
@@ -536,7 +536,7 @@ const pages = {
                         const txReceiptUrl = tx.receipt_url || tx.ReceiptURL || '';
                         const txReceiptData = tx.receiptData || tx.ReceiptData || '';
                         return `
-                        <div class="rounded-xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
+                        <div class="rounded-2xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
                             <div class="flex items-start gap-3">
                                 <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${txType === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
                                     ${txType === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
@@ -619,17 +619,17 @@ const pages = {
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
                                     <input type="number" id="transfer-amount" placeholder="0" max="${pool2Balance || 0}"
-                                        class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface py-3 pl-12 pr-4 text-lg font-semibold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                        class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface py-3 pl-12 pr-4 text-lg font-semibold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                                 </div>
                                 <p class="text-xs text-text-muted">${t('transfer.maximum')}: ${formatCurrency(pool2Balance || 0)}</p>
                             </div>
                             
-                            <button type="submit" id="transfer-btn" class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-bold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/40 hover:-translate-y-0.5 transition-all select-none">
+                            <button type="submit" id="transfer-btn" class="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-brand px-4 font-bold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/40 hover:-translate-y-0.5 transition-all select-none">
                                 ${Icons.arrowRightLeft()} ${t('common.transferNow')}
                             </button>
                         </form>
                         
-                        <div class="mt-6 rounded-xl bg-surface-soft p-4">
+                        <div class="mt-6 rounded-2xl bg-surface-soft p-4">
                             <p class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">${t('transfer.howItWorks')}</p>
                             <ul class="space-y-2 text-sm text-text-secondary">
                                 <li class="flex items-start gap-2">${Icons.checkCircle()} ${t('transfer.step1')}</li>
@@ -706,11 +706,11 @@ const pages = {
             
             <!-- Summary Bar -->
             <div class="w-full min-w-0 mb-4 grid grid-cols-2 gap-3">
-                <div class="rounded-xl bg-success/10 p-3 border border-success/20">
+                <div class="rounded-2xl bg-success/10 p-3 border border-success/20">
                     <p class="text-xs text-success font-medium">Total Money In</p>
                     <p class="text-lg font-bold text-success">+${formatCurrency(totalIn)}</p>
                 </div>
-                <div class="rounded-xl bg-error/10 p-3 border border-error/20">
+                <div class="rounded-2xl bg-error/10 p-3 border border-error/20">
                     <p class="text-xs text-error font-medium">Total Money Out</p>
                     <p class="text-lg font-bold text-error">-${formatCurrency(totalOut)}</p>
                 </div>
@@ -737,7 +737,7 @@ const pages = {
                 ${filtered.length > 0 ? `
                     <div class="w-full min-w-0 space-y-2">
                         ${paginatedTransactions.map((tx, i) => `
-                            <div class="rounded-xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
+                            <div class="rounded-2xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
                                 <div class="flex items-start gap-3">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${tx.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
                                         ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
@@ -888,11 +888,11 @@ const pages = {
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
                                     <input type="number" id="care-amount" placeholder="0" max="${pool2Balance || 0}"
-                                        class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface pl-12 pr-4 text-lg font-bold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                        class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface pl-12 pr-4 text-lg font-bold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                                 </div>
                                 <p class="text-xs text-text-muted">Available: ${formatCurrency(pool2Balance || 0)}</p>
                             </div>
-                            <button type="submit" id="care-btn" class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-brand text-lg font-bold text-white shadow-lg shadow-brand/25 select-none">
+                            <button type="submit" id="care-btn" class="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-brand text-lg font-bold text-white shadow-lg shadow-brand/25 select-none">
                                 ${Icons.heartHandshake()} ${t('careFund.sendRequest')}
                             </button>
                         </form>
@@ -907,7 +907,7 @@ const pages = {
                     children: requests.length > 0 ? `
                         <div class="space-y-3">
                             ${requests.map(r => `
-                                <div class="rounded-xl border border-border bg-surface-soft p-4">
+                                <div class="rounded-2xl border border-border bg-surface-soft p-4">
                                     <div class="flex items-center justify-between mb-2">
                                         <div>
                                             <p class="font-bold text-text-primary">${formatCurrency(r.amount)}</p>
@@ -1055,20 +1055,20 @@ const pages = {
                     <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">${Icons.clipboardList()}${t('transaction.familyMoneyHistory')}</h1>
                     <p class="text-xs sm:text-sm text-text-muted">All family transactions</p>
                 </div>
-                <a href="/admin/transactions/new" class="flex h-11 items-center justify-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all select-none">${Icons.plus()} Record Payment</a>
+                <a href="/admin/transactions/new" class="flex h-12 items-center justify-center gap-2 rounded-2xl bg-brand px-4 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all select-none">${Icons.plus()} Record Payment</a>
             </div>
             
             <!-- Summary Bar -->
             <div class="w-full min-w-0 mb-4 grid grid-cols-3 gap-3">
-                <div class="rounded-xl bg-success/10 p-3 border border-success/20">
+                <div class="rounded-2xl bg-success/10 p-3 border border-success/20">
                     <p class="text-xs text-success font-medium">Money In</p>
                     <p class="text-lg font-bold text-success">+${formatCurrency(totalIn)}</p>
                 </div>
-                <div class="rounded-xl bg-error/10 p-3 border border-error/20">
+                <div class="rounded-2xl bg-error/10 p-3 border border-error/20">
                     <p class="text-xs text-error font-medium">Money Out</p>
                     <p class="text-lg font-bold text-error">-${formatCurrency(totalOut)}</p>
                 </div>
-                <div class="rounded-xl bg-brand/10 p-3 border border-brand/20">
+                <div class="rounded-2xl bg-brand/10 p-3 border border-brand/20">
                     <p class="text-xs text-brand font-medium">Net Balance</p>
                     <p class="text-lg font-bold text-brand">${formatCurrency(totalIn - totalOut)}</p>
                 </div>
@@ -1092,7 +1092,7 @@ const pages = {
                             <h3 class="text-sm font-semibold text-text-muted mb-3">${dateKey}</h3>
                             <div class="grid gap-3 grid-cols-1 md:grid-cols-2">
                                 ${txs.map(tx => `
-                                    <div class="rounded-xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
+                                    <div class="rounded-2xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
                                         <div class="flex items-start gap-3">
                                             <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${tx.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
                                                 ${tx.type === 'credit' ? Icons.arrowUpRight() : Icons.arrowDownRight()}
@@ -1143,7 +1143,7 @@ const pages = {
                     <form onsubmit="handleRecordPayment(event)" class="space-y-5">
                         <div class="space-y-2">
                             <label class="block text-sm font-semibold text-text-primary">${t('transaction.whichMember')} <span class="text-error">*</span></label>
-                            <select id="txn-member" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                            <select id="txn-member" class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                                 <option value="">Select a member</option>
                                 ${members.map(m => `<option value="${m.id}">${m.name}</option>`).join('')}
                                 <option value="other">Other member...</option>
@@ -1152,7 +1152,7 @@ const pages = {
                         
                         <div class="space-y-2">
                             <label class="block text-sm font-semibold text-text-primary">${t('transaction.whichFund')} <span class="text-error">*</span></label>
-                            <div class="flex rounded-xl border border-border p-1 gap-2">
+                            <div class="flex rounded-2xl border border-border p-1 gap-2">
                                 <button type="button" onclick="setFund('pool1')" id="fund-pool1" class="flex-1 rounded-lg py-3 text-sm font-medium bg-brand text-white select-none">${t('member.familySavings')}</button>
                                 <button type="button" onclick="setFund('pool2')" id="fund-pool2" class="flex-1 rounded-lg py-3 text-sm font-medium text-text-secondary select-none">${t('member.personalSavings')}</button>
                             </div>
@@ -1160,7 +1160,7 @@ const pages = {
                         
                         <div class="space-y-2">
                             <label class="block text-sm font-semibold text-text-primary">${t('transaction.whatType')} <span class="text-error">*</span></label>
-                            <div class="flex rounded-xl border border-border p-1 gap-2">
+                            <div class="flex rounded-2xl border border-border p-1 gap-2">
                                 <button type="button" onclick="setTxType('credit')" id="type-credit" class="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium bg-success text-white select-none">${Icons.arrowUpRight()} ${t('table.moneyIn')}</button>
                                 <button type="button" onclick="setTxType('debit')" id="type-debit" class="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium text-text-secondary select-none">${Icons.arrowDownRight()} ${t('table.moneyOut')}</button>
                             </div>
@@ -1170,20 +1170,20 @@ const pages = {
                             <label class="block text-sm font-semibold text-text-primary">${t('transaction.howMuch')} <span class="text-error">*</span></label>
                             <div class="relative">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
-                                <input type="number" id="txn-amount" placeholder="0" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                <input type="number" id="txn-amount" placeholder="0" class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                             </div>
                         </div>
                         
                         <div class="space-y-2">
                             <label class="block text-sm font-semibold text-text-primary">${t('transaction.whatFor')} <span class="text-error">*</span></label>
-                            <input type="text" id="txn-reason" placeholder="${t('transaction.whatForHelper')}" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                            <input type="text" id="txn-reason" placeholder="${t('transaction.whatForHelper')}" class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                             <p class="text-xs text-text-muted">${t('transaction.whatForHelper')}</p>
                         </div>
                         
                         <div class="space-y-2">
                             <label class="block text-sm font-semibold text-text-primary">${t('transaction.attachProof')}</label>
                             <div class="flex items-center gap-3">
-                                <label class="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-surface-soft px-4 text-sm font-medium text-text-secondary hover:border-brand hover:text-brand transition-all select-none">
+                                <label class="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-surface-soft px-4 text-sm font-medium text-text-secondary hover:border-brand hover:text-brand transition-all select-none">
                                     ${Icons.paperclip()}
                                     <span id="receipt-label">Choose file</span>
                                     <input type="file" id="txn-receipt" accept="image/*,.pdf" class="hidden" onchange="document.getElementById('receipt-label').textContent = this.files[0]?.name || 'Choose file'">
@@ -1192,7 +1192,7 @@ const pages = {
                             </div>
                         </div>
                         
-                        <button type="submit" id="txn-btn" class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 font-semibold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/35 active:scale-[0.98] transition-all select-none">
+                        <button type="submit" id="txn-btn" class="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand px-4 font-semibold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/35 active:scale-[0.98] transition-all select-none">
                             ${Icons.check()} ${t('transaction.recordBtn')}
                         </button>
                     </form>
@@ -1231,7 +1231,7 @@ const pages = {
                     <form onsubmit="handleUpdateSettings(event)" class="space-y-4">
                         <div class="space-y-2">
                             <label class="block text-sm font-semibold text-text-primary">${t('settings.savingsInterval')}</label>
-                            <div class="flex rounded-xl border border-border p-1 gap-2">
+                            <div class="flex rounded-2xl border border-border p-1 gap-2">
                                 <button type="button" onclick="setSettingsInterval('weekly')" id="interval-weekly" class="flex-1 rounded-lg py-3 text-sm font-medium ${p.interval === 'weekly' ? 'bg-brand text-white' : 'text-text-secondary'} select-none">
                                     ${t('register.everyWeek')}
                                 </button>
@@ -1247,12 +1247,12 @@ const pages = {
                             <div class="relative">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">₦</span>
                                 <input type="number" id="settings-amount" value="${p.committed_amount || ''}" placeholder="0"
-                                    class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface pl-10 pr-4 text-base font-medium focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                    class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface pl-10 pr-4 text-base font-medium focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                             </div>
                             <p class="text-xs text-text-muted">${t('settings.committedAmountHelper')}</p>
                         </div>
                         
-                        <button type="submit" id="settings-btn" class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand text-base font-semibold text-white shadow-lg shadow-brand/25 select-none">
+                        <button type="submit" id="settings-btn" class="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand text-base font-semibold text-white shadow-lg shadow-brand/25 select-none">
                             ${Icons.save()} ${t('common.save')}
                         </button>
                     </form>
@@ -1265,19 +1265,19 @@ const pages = {
                         <div class="space-y-2">
                             <label class="block text-sm font-semibold text-text-primary">${t('settings.currentPassword')}</label>
                             <input type="password" id="settings-current-pw" placeholder="${t('settings.currentPassword')}"
-                                class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                         </div>
                         <div class="space-y-2">
                             <label class="block text-sm font-semibold text-text-primary">${t('settings.newPassword')}</label>
                             <input type="password" id="settings-new-pw" placeholder="${t('settings.newPassword')}"
-                                class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                         </div>
                         <div class="space-y-2">
                             <label class="block text-sm font-semibold text-text-primary">${t('settings.confirmNew')}</label>
                             <input type="password" id="settings-confirm-pw" placeholder="${t('settings.confirmNew')}"
-                                class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                         </div>
-                        <button type="submit" id="password-btn" class="flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-brand text-base font-semibold text-brand select-none">
+                        <button type="submit" id="password-btn" class="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-brand text-base font-semibold text-brand select-none">
                             ${Icons.lock()} ${t('settings.changePassword')}
                         </button>
                     </form>
@@ -1286,7 +1286,7 @@ const pages = {
                 <!-- Install App -->
                 <div class="w-full min-w-0 mb-5 rounded-2xl border border-border bg-surface p-5">
                     <h2 class="mb-4 text-sm font-bold uppercase tracking-wider text-text-muted">${t('settings.installApp')}</h2>
-                    <button onclick="installApp()" class="flex w-full items-center gap-4 rounded-xl bg-brand-light p-4 text-base font-bold text-brand select-none">
+                    <button onclick="installApp()" class="flex w-full items-center gap-4 rounded-2xl bg-brand-light p-4 text-base font-bold text-brand select-none">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                         ${t('settings.install')}
                     </button>
@@ -1296,7 +1296,7 @@ const pages = {
                 <!-- Language -->
                 <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-5">
                     <h2 class="mb-4 text-sm font-bold uppercase tracking-wider text-text-muted">${t('settings.language')}</h2>
-                    <button onclick="openLangModal()" class="flex w-full items-center gap-4 rounded-xl bg-surface-soft p-4 text-base font-semibold text-text-primary select-none">
+                    <button onclick="openLangModal()" class="flex w-full items-center gap-4 rounded-2xl bg-surface-soft p-4 text-base font-semibold text-text-primary select-none">
                         ${Icons.globe()}
                         ${getCurrentLangName()}
                     </button>
@@ -1362,7 +1362,7 @@ const pages = {
                 <p class="text-xs sm:text-sm text-text-muted">Review and respond to withdrawal requests</p>
             </div>
             
-            <div class="w-full min-w-0 mb-4 flex gap-1 rounded-xl border border-border bg-surface p-1">
+            <div class="w-full min-w-0 mb-4 flex gap-1 rounded-2xl border border-border bg-surface p-1">
                 ${tabBtn('pending', t('careFund.pending'), pending.length)}
                 ${tabBtn('accepted', t('careFund.accepted'), accepted.length)}
                 ${tabBtn('rejected', t('careFund.notApproved'), rejected.length)}
@@ -1379,7 +1379,7 @@ const pages = {
                     const status = r.Status || r.status;
                     
                     return `
-                    <div id="request-card-${reqId}" class="w-full min-w-0 rounded-xl border border-border bg-surface p-4 shadow-sm hover:shadow-md transition-all">
+                    <div id="request-card-${reqId}" class="w-full min-w-0 rounded-2xl border border-border bg-surface p-4 shadow-sm hover:shadow-md transition-all">
                         <div class="flex items-start gap-3">
                             <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand/10 text-brand flex-shrink-0">
                                 ${occasionIcons[occasion] ? occasionIcons[occasion]() : Icons.helpCircle()}
@@ -1440,7 +1440,7 @@ const pages = {
                 </h1>
                 <p class="text-xs sm:text-sm text-text-muted">${memberCount} family members</p>
             </div>
-            <button onclick="showAddMemberModal()" class="flex h-12 items-center justify-center gap-2 rounded-xl bg-brand px-4 font-semibold text-white shadow-lg shadow-brand/20 hover:shadow-xl hover:shadow-brand/30 hover:-translate-y-0.5 transition-all select-none sm:w-auto">
+            <button onclick="showAddMemberModal()" class="flex h-12 items-center justify-center gap-2 rounded-2xl bg-brand px-4 font-semibold text-white shadow-lg shadow-brand/20 hover:shadow-xl hover:shadow-brand/30 hover:-translate-y-0.5 transition-all select-none sm:w-auto">
                 ${Icons.userPlus()}
                 <span>${t('members.addMember')}</span>
             </button>
@@ -1460,7 +1460,7 @@ const pages = {
                             </p>
                         </div>
                     </div>
-                    <div class="mb-4 space-y-2 rounded-xl bg-surface-soft p-4">
+                    <div class="mb-4 space-y-2 rounded-2xl bg-surface-soft p-4">
                         <div class="flex justify-between items-center">
                             <span class="text-xs text-text-muted">Status</span>
                             <span class="font-bold ${m.status === 'active' ? 'text-success' : 'text-error'}">${m.status === 'active' ? 'Up to date' : 'Behind'}</span>
@@ -1492,15 +1492,15 @@ const pages = {
                 <form onsubmit="handleAddMember(event)" class="space-y-4">
                     <div class="space-y-1.5">
                         <label class="block text-sm font-medium text-text-primary">${t('members.fullName')} <span class="text-error">*</span></label>
-                        <input type="text" id="new-member-name" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                        <input type="text" id="new-member-name" class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                     </div>
                     <div class="space-y-1.5">
                         <label class="block text-sm font-medium text-text-primary">${t('members.password')} <span class="text-error">*</span></label>
-                        <input type="password" id="new-member-password" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                        <input type="password" id="new-member-password" class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                     </div>
                     <div class="space-y-1.5">
                         <label class="block text-sm font-medium text-text-primary">How often will they save?</label>
-                        <div class="flex rounded-xl border border-border p-1 gap-1">
+                        <div class="flex rounded-2xl border border-border p-1 gap-1">
                             <button type="button" onclick="setNewMemberInterval('weekly')" id="interval-weekly-btn" class="flex-1 rounded-lg py-2 text-sm font-medium select-none">Every Week</button>
                             <button type="button" onclick="setNewMemberInterval('monthly')" id="interval-monthly-btn" class="flex-1 rounded-lg py-2 text-sm font-medium select-none bg-brand text-white">Every Month</button>
                         </div>
@@ -1510,12 +1510,12 @@ const pages = {
                         <label class="block text-sm font-medium text-text-primary">${t('members.howMuchEach')}</label>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">₦</span>
-                            <input type="number" id="new-member-amount" placeholder="0" class="h-12 w-full min-w-0 rounded-xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                            <input type="number" id="new-member-amount" placeholder="0" class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                         </div>
                     </div>
                     <div class="flex gap-3 pt-2">
-                        <button type="button" onclick="closeAddMemberModal()" class="flex h-12 flex-1 items-center justify-center rounded-xl border border-border font-medium select-none">${t('common.cancel')}</button>
-                        <button type="submit" class="flex h-12 flex-1 items-center justify-center rounded-xl bg-brand font-medium text-white select-none">${t('members.addMember')}</button>
+                        <button type="button" onclick="closeAddMemberModal()" class="flex h-12 flex-1 items-center justify-center rounded-2xl border border-border font-medium select-none">${t('common.cancel')}</button>
+                        <button type="submit" class="flex h-12 flex-1 items-center justify-center rounded-2xl bg-brand font-medium text-white select-none">${t('members.addMember')}</button>
                     </div>
                 </form>
             </div>
@@ -1545,7 +1545,7 @@ const pages = {
             return `
                 <button onclick="${isUnread ? `handleMarkRead('${n.id}')` : ''}" class="w-full text-left flex items-start gap-4 p-4 rounded-2xl ${isUnread ? 'bg-brand-light/50 border border-brand/30' : 'bg-surface-soft border border-transparent'} hover:shadow-md transition-all select-none">
                     <div class="flex-shrink-0 mt-1">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl ${isUnread ? 'bg-brand text-white shadow-md shadow-brand/30' : 'bg-surface-raised text-text-muted'}">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-2xl ${isUnread ? 'bg-brand text-white shadow-md shadow-brand/30' : 'bg-surface-raised text-text-muted'}">
                             ${Icons.bell()}
                         </div>
                     </div>
@@ -1570,7 +1570,7 @@ const pages = {
                         <p class="text-sm text-text-muted mt-0.5">${unread.length > 0 ? unread.length + ' unread' : t('common.allCaughtUp')}</p>
                     </div>
                     ${unread.length > 0 ? `
-                        <button onclick="handleMarkAllRead()" class="h-10 px-4 rounded-xl bg-brand text-white text-sm font-semibold shadow-md shadow-brand/25 select-none">
+                        <button onclick="handleMarkAllRead()" class="h-10 px-4 rounded-2xl bg-brand text-white text-sm font-semibold shadow-md shadow-brand/25 select-none">
                             ${t('common.markAllRead')}
                         </button>
                     ` : ''}
@@ -1601,7 +1601,7 @@ const pages = {
             <h1 class="text-4xl font-bold mb-2">404</h1>
             <h2 class="text-xl font-semibold text-text-secondary mb-4">Page Not Found</h2>
             <p class="text-text-muted mb-8 text-center max-w-md">The page you're looking for doesn't exist or has been moved.</p>
-            <a href="/" class="flex h-12 items-center justify-center rounded-xl bg-brand px-6 font-medium text-white hover:bg-brand-hover active:bg-brand-hover">
+            <a href="/" class="flex h-12 items-center justify-center rounded-2xl bg-brand px-6 font-medium text-white hover:bg-brand-hover active:bg-brand-hover">
                 ${Icons.home()}
                 Go Home
             </a>
@@ -1614,7 +1614,7 @@ const pages = {
             <h1 class="text-4xl font-bold mb-2">500</h1>
             <h2 class="text-xl font-semibold text-text-secondary mb-4">Server Error</h2>
             <p class="text-text-muted mb-8 text-center max-w-md">Something went wrong on our end. Please try again later.</p>
-            <button onclick="location.reload()" class="flex h-12 items-center justify-center rounded-xl bg-brand px-6 font-medium text-white hover:bg-brand-hover active:bg-brand-hover">
+            <button onclick="location.reload()" class="flex h-12 items-center justify-center rounded-2xl bg-brand px-6 font-medium text-white hover:bg-brand-hover active:bg-brand-hover">
                 ${Icons.refreshCw()}
                 Try Again
             </button>
@@ -1985,7 +1985,7 @@ function showDeclineForm(id) {
     const card = document.getElementById(`request-card-${id}`);
     if (card) {
         card.innerHTML += `
-            <div id="decline-form-${id}" class="mt-3 rounded-xl bg-error/5 border border-error/20 p-4">
+            <div id="decline-form-${id}" class="mt-3 rounded-2xl bg-error/5 border border-error/20 p-4">
                 <p class="text-sm font-medium text-text-primary mb-2">Reason for declining:</p>
                 <textarea id="decline-reason-${id}" rows="3" class="w-full rounded-lg border border-border bg-surface p-3 text-sm focus:border-brand focus:outline-none" placeholder="Enter reason..."></textarea>
                 <div class="mt-3 flex gap-2">
@@ -2277,7 +2277,7 @@ function showReceiptImage(url) {
                 </div>
                 <div class="p-4">
                     <img src="${url}" alt="Receipt" class="w-full rounded-lg" onerror="this.parentElement.innerHTML='<div class=\\'text-center p-8\\'><p class=\\'text-text-muted\\'>Could not load receipt image</p></div>'">
-                    <a href="${url}" target="_blank" download class="mt-4 flex items-center justify-center gap-2 h-12 rounded-xl bg-brand text-white font-semibold hover:bg-brand-hover transition-colors">
+                    <a href="${url}" target="_blank" download class="mt-4 flex items-center justify-center gap-2 h-12 rounded-2xl bg-brand text-white font-semibold hover:bg-brand-hover transition-colors">
                         ${Icons.download()}
                         Open Full Image
                     </a>
@@ -2350,7 +2350,7 @@ async function showTransferReceiptModal(receipt, newPool2Balance, newPool1Balanc
                         </div>
                     </div>
                     
-                    <div class="bg-surface-soft rounded-xl p-4 space-y-2">
+                    <div class="bg-surface-soft rounded-2xl p-4 space-y-2">
                         <div class="flex justify-between text-sm">
                             <span class="text-text-muted">New Personal Savings</span>
                             <span class="font-bold text-text-primary">₦${parseFloat(newPool2Balance || 0).toLocaleString()}</span>
@@ -2362,14 +2362,14 @@ async function showTransferReceiptModal(receipt, newPool2Balance, newPool1Balanc
                     </div>
                     
                     <div class="flex gap-2 pt-2">
-                        <button onclick="downloadReceiptFromModal()" class="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl bg-brand text-white font-semibold hover:bg-brand-hover transition-colors">
+                        <button onclick="downloadReceiptFromModal()" class="flex-1 flex items-center justify-center gap-2 h-12 rounded-2xl bg-brand text-white font-semibold hover:bg-brand-hover transition-colors">
                             ${Icons.download()}
                             Download
                         </button>
-                        <button onclick="copyReceiptNumber('${receiptNumber}')" class="flex items-center justify-center gap-2 h-12 px-4 rounded-xl bg-surface-soft border border-border font-semibold hover:bg-surface-raised transition-colors">
+                        <button onclick="copyReceiptNumber('${receiptNumber}')" class="flex items-center justify-center gap-2 h-12 px-4 rounded-2xl bg-surface-soft border border-border font-semibold hover:bg-surface-raised transition-colors">
                             ${Icons.copy()}
                         </button>
-                        <button onclick="closeTransferReceiptModal()" class="flex items-center justify-center gap-2 h-12 px-4 rounded-xl border-2 border-border font-semibold hover:bg-surface-soft transition-colors">
+                        <button onclick="closeTransferReceiptModal()" class="flex items-center justify-center gap-2 h-12 px-4 rounded-2xl border-2 border-border font-semibold hover:bg-surface-soft transition-colors">
                             ${Icons.x()}
                         </button>
                     </div>
@@ -2565,10 +2565,10 @@ function showTransferReceiptData(transactionId, receiptData) {
                     
                     <!-- Footer -->
                     <div class="flex gap-3 p-4 border-t border-border bg-surface-soft">
-                        <button onclick="downloadReceiptData('${transactionId}', '${encodeURIComponent(rawData)}')" class="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl bg-brand text-white font-semibold hover:bg-brand-hover">
+                        <button onclick="downloadReceiptData('${transactionId}', '${encodeURIComponent(rawData)}')" class="flex-1 flex items-center justify-center gap-2 h-11 rounded-2xl bg-brand text-white font-semibold hover:bg-brand-hover">
                             ${Icons.download()} Download
                         </button>
-                        <button onclick="closeReceiptModal()" class="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl border-2 border-border font-semibold hover:bg-surface">
+                        <button onclick="closeReceiptModal()" class="flex-1 flex items-center justify-center gap-2 h-11 rounded-2xl border-2 border-border font-semibold hover:bg-surface">
                             ${Icons.x()} Close
                         </button>
                     </div>
@@ -2715,13 +2715,13 @@ function renderPagination(pageKey, currentPage, totalItems, limit = 20) {
     return `
         <div class="flex items-center justify-between mt-6 pt-4 border-t border-border">
             <button onclick="window.${pageKey}Page = (window.${pageKey}Page || 1) - 1; if(window.${pageKey}Page < 1) window.${pageKey}Page = 1; router.refresh()" 
-                class="px-4 py-2.5 rounded-xl border border-border text-sm font-medium text-text-secondary hover:bg-surface-soft disabled:opacity-50 ${currentPage <= 1 ? 'disabled' : ''}" 
+                class="px-4 py-2.5 rounded-2xl border border-border text-sm font-medium text-text-secondary hover:bg-surface-soft disabled:opacity-50 ${currentPage <= 1 ? 'disabled' : ''}" 
                 ${currentPage <= 1 ? 'disabled' : ''}>
                 ${Icons.chevronLeft()} Previous
             </button>
             <span class="text-sm text-text-muted">Page ${currentPage} of ${totalPages}</span>
             <button onclick="window.${pageKey}Page = (window.${pageKey}Page || 1) + 1; router.refresh()" 
-                class="px-4 py-2.5 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand-hover ${currentPage >= totalPages ? 'disabled opacity-50' : ''}"
+                class="px-4 py-2.5 rounded-2xl bg-brand text-white text-sm font-medium hover:bg-brand-hover ${currentPage >= totalPages ? 'disabled opacity-50' : ''}"
                 ${currentPage >= totalPages ? 'disabled' : ''}>
                 Next ${Icons.chevronRight()}
             </button>
