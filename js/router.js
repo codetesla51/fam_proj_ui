@@ -156,17 +156,23 @@ const router = {
         const isProtected = (path.startsWith('/member') || path.startsWith('/admin')) && path !== '/admin/login';
         
         if (isProtected) {
-            if (!store.isLoggedIn()) {
-                this.navigate('/login');
+            // Check if logged in (either admin or member)
+            const hasToken = localStorage.getItem('access_token');
+            const isAdminRoute = path.startsWith('/admin');
+            const isAdmin = localStorage.getItem('is_admin') === 'true';
+            
+            if (!hasToken) {
+                this.navigate(isAdminRoute ? '/admin/login' : '/login');
                 return;
             }
+            
             // Admin trying to access member pages -> redirect to admin dashboard
-            if (path.startsWith('/member') && store.isAdmin()) {
+            if (path.startsWith('/member') && isAdmin) {
                 this.navigate('/admin/dashboard');
                 return;
             }
             // Member trying to access admin pages -> redirect to member dashboard
-            if (path.startsWith('/admin') && !store.isAdmin()) {
+            if (isAdminRoute && !isAdmin) {
                 this.navigate('/member/dashboard');
                 return;
             }
@@ -174,31 +180,38 @@ const router = {
             store.startPolling();
             
             // Prefetch all data in parallel before rendering
-            await Promise.all([
-                store.loadDashboard(),
-                store.loadNotifications(),
-                store.loadTransactions(),
-                store.loadCareFundRequests()
-            ]);
-            // Update notification badge after prefetch
-            store.updateNotifBadge();
+            try {
+                await Promise.all([
+                    store.loadDashboard(),
+                    store.loadNotifications(),
+                    store.loadTransactions(),
+                    store.loadCareFundRequests()
+                ]);
+                // Update notification badge after prefetch
+                store.updateNotifBadge();
+            } catch (e) {
+                console.error('Prefetch error:', e);
+            }
         } else {
             // Stop polling on auth pages
             store.stopPolling();
         }
         
-        // Show loading only on first load with no cache
+        // Show loading state
         const hasCachedData = store.dashboard || store.transactions?.length || store.notifications?.length || store.careFundRequests?.length;
-        if (!hasCachedData) {
-            app.innerHTML = `
-                <div class="min-h-screen flex items-center justify-center bg-surface-soft">
-                    <div class="text-center">
-                        <div class="loader mx-auto mb-4"></div>
-                        <p class="text-sm text-text-muted">${t('common.loading')}</p>
-                    </div>
+        app.innerHTML = `
+            <div class="min-h-screen flex flex-col items-center justify-center bg-surface-soft">
+                <div class="mb-6">
+                    <svg class="w-16 h-16 text-brand animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
                 </div>
-            `;
-        }
+                <div class="loader mx-auto mb-4"></div>
+                <p class="text-sm text-text-muted">Loading...</p>
+            </div>
+        `;
         
         // Load page content (async)
         try {

@@ -94,12 +94,15 @@ const store = {
     
     // Admin login - always use real API
     async adminLogin(password) {
-        // Clear ALL tokens first
+        // Clear ALL tokens first (but preserve is_admin flag if already set)
+        const wasAdmin = localStorage.getItem('is_admin') === 'true';
         tokens.clear();
         localStorage.removeItem('user_data');
         this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [] };
         
         await auth.adminLogin(password);
+        // Set admin flag AFTER getting tokens
+        localStorage.setItem('is_admin', 'true');
         this.user = { name: 'Admin', isAdmin: true };
     },
     

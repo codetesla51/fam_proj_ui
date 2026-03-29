@@ -12,9 +12,9 @@ const tokens = {
     clear() {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        localStorage.removeItem('is_admin');
         localStorage.removeItem('user_name');
         localStorage.removeItem('user_id');
+        // DO NOT clear is_admin - it's set separately and needed for route protection
     }
 };
 
