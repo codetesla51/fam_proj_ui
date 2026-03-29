@@ -678,9 +678,11 @@ const pages = {
         
         const filters = window.historyFilters;
         
-        // Calculate summary
-        const totalIn = transactions.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        const totalOut = transactions.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        // Calculate summary - exclude transfers from totals
+        const isTransfer = (t) => (t.reason || '').toLowerCase().includes('transfer');
+        const totalIn = transactions.filter(t => t.type === 'credit' && !isTransfer(t)).reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        const totalOut = transactions.filter(t => t.type === 'debit' && !isTransfer(t)).reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        const totalTransfers = transactions.filter(t => isTransfer(t)).reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
         
         // Apply filters
         let filtered = transactions.filter(tx => {
@@ -701,14 +703,22 @@ const pages = {
             <!-- Summary Bar -->
             <div class="w-full min-w-0 mb-4 grid grid-cols-2 gap-3">
                 <div class="rounded-xl bg-success/10 p-3 border border-success/20">
-                    <p class="text-xs text-success font-medium">Total Money In</p>
+                    <p class="text-xs text-success font-medium">Total Deposited</p>
                     <p class="text-lg font-bold text-success">+${formatCurrency(totalIn)}</p>
                 </div>
                 <div class="rounded-xl bg-error/10 p-3 border border-error/20">
-                    <p class="text-xs text-error font-medium">Total Money Out</p>
+                    <p class="text-xs text-error font-medium">Total Withdrawn</p>
                     <p class="text-lg font-bold text-error">-${formatCurrency(totalOut)}</p>
                 </div>
             </div>
+            ${totalTransfers > 0 ? `
+            <div class="w-full min-w-0 mb-4">
+                <div class="rounded-xl bg-pool2/10 p-3 border border-pool2/20">
+                    <p class="text-xs text-pool2 font-medium">Internal Transfers</p>
+                    <p class="text-lg font-bold text-pool2">${formatCurrency(totalTransfers)}</p>
+                </div>
+            </div>
+            ` : ''}
             
             <!-- Filters -->
             <div class="w-full min-w-0 mb-4 flex flex-wrap gap-2">
@@ -1006,9 +1016,11 @@ const pages = {
             return true;
         });
         
-        // Summary
-        const totalIn = filtered.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        const totalOut = filtered.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        // Summary - exclude transfers from totals
+        const isTransfer = (t) => (t.reason || '').toLowerCase().includes('transfer');
+        const totalIn = filtered.filter(t => t.type === 'credit' && !isTransfer(t)).reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        const totalOut = filtered.filter(t => t.type === 'debit' && !isTransfer(t)).reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        const totalTransfers = filtered.filter(t => isTransfer(t)).reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
         
         // Group by date
         const grouped = {};
@@ -1037,17 +1049,21 @@ const pages = {
             </div>
             
             <!-- Summary Bar -->
-            <div class="w-full min-w-0 mb-4 grid grid-cols-3 gap-3">
+            <div class="w-full min-w-0 mb-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div class="rounded-xl bg-success/10 p-3 border border-success/20">
-                    <p class="text-xs text-success font-medium">Money In</p>
+                    <p class="text-xs text-success font-medium">Total Deposited</p>
                     <p class="text-lg font-bold text-success">+${formatCurrency(totalIn)}</p>
                 </div>
                 <div class="rounded-xl bg-error/10 p-3 border border-error/20">
-                    <p class="text-xs text-error font-medium">Money Out</p>
+                    <p class="text-xs text-error font-medium">Total Withdrawn</p>
                     <p class="text-lg font-bold text-error">-${formatCurrency(totalOut)}</p>
                 </div>
+                <div class="rounded-xl bg-pool2/10 p-3 border border-pool2/20">
+                    <p class="text-xs text-pool2 font-medium">Internal Transfers</p>
+                    <p class="text-lg font-bold text-pool2">${formatCurrency(totalTransfers)}</p>
+                </div>
                 <div class="rounded-xl bg-brand/10 p-3 border border-brand/20">
-                    <p class="text-xs text-brand font-medium">Net Balance</p>
+                    <p class="text-xs text-brand font-medium">Net</p>
                     <p class="text-lg font-bold text-brand">${formatCurrency(totalIn - totalOut)}</p>
                 </div>
             </div>
