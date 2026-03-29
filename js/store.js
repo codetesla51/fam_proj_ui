@@ -48,11 +48,11 @@ const store = {
     
     // Auth methods
     isLoggedIn() {
-        return this.usingMock() ? !!localStorage.getItem('mock_logged_in') : auth.isLoggedIn();
+        return authState.isLoggedIn;
     },
     
     isAdmin() {
-        return this.usingMock() ? localStorage.getItem('mock_is_admin') === 'true' : auth.isAdmin();
+        return authState.isAdmin;
     },
     
     get user() {
@@ -70,12 +70,10 @@ const store = {
     
     // Login member - always use real API
     async login(name, password) {
-        // Clear ALL tokens first
-        tokens.clear();
-        localStorage.removeItem('user_data');
+        authState.clear();
         this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [] };
-        
         await auth.login(name, password);
+        authState.set(tokens.access, false);
         this.user = { name };
         this.data.profile = await member.getProfile();
         this.user = { ...this.user, ...this.data.profile };
@@ -94,30 +92,18 @@ const store = {
     
     // Admin login - always use real API
     async adminLogin(password) {
-        // Clear ALL tokens first (but preserve is_admin flag if already set)
-        const wasAdmin = localStorage.getItem('is_admin') === 'true';
-        tokens.clear();
-        localStorage.removeItem('user_data');
+        authState.clear();
         this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [] };
-        
-        await auth.adminLogin(password);
-        // Set admin flag AFTER getting tokens
-        localStorage.setItem('is_admin', 'true');
+        const data = await auth.adminLogin(password);
+        authState.set(data.access_token, true);
         this.user = { name: 'Admin', isAdmin: true };
     },
     
     // Logout - clear EVERYTHING
     async logout() {
-        // Stop polling
         this.stopPolling();
-        
-        // Clear all localStorage
-        localStorage.clear();
-        
-        // Reset all data
+        authState.clear();
         this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [], receipts: [] };
-        
-        // Navigate to login
         router.navigate('/login');
     },
     

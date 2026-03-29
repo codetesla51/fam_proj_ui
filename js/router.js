@@ -142,12 +142,8 @@ const router = {
         
         // If already logged in, redirect to appropriate dashboard
         if (path === '/login' || path === '/register' || path === '/admin/login') {
-            if (store.isLoggedIn()) {
-                if (store.isAdmin()) {
-                    this.navigate('/admin/dashboard', true);
-                } else {
-                    this.navigate('/member/dashboard', true);
-                }
+            if (authState.isLoggedIn) {
+                this.navigate(authState.isAdmin ? '/admin/dashboard' : '/member/dashboard', true);
                 return;
             }
         }
@@ -156,28 +152,22 @@ const router = {
         const isProtected = (path.startsWith('/member') || path.startsWith('/admin')) && path !== '/admin/login';
         
         if (isProtected) {
-            // Read fresh from localStorage each time
-            const hasToken = localStorage.getItem('access_token');
+            const hasToken = authState.isLoggedIn;
             const isAdminRoute = path.startsWith('/admin');
-            const isAdmin = localStorage.getItem('is_admin') === 'true';
+            const isAdmin = authState.isAdmin;
             
             if (!hasToken) {
                 this.navigate(isAdminRoute ? '/admin/login' : '/login', true);
                 return;
             }
             
-            // Admin trying to access member pages -> redirect to admin dashboard
             if (path.startsWith('/member') && isAdmin) {
                 this.navigate('/admin/dashboard', true);
                 return;
             }
-            // Member trying to access admin pages -> double-check before redirect
             if (isAdminRoute && !isAdmin) {
-                const doubleCheck = localStorage.getItem('is_admin') === 'true';
-                if (!doubleCheck) {
-                    this.navigate('/member/dashboard', true);
-                    return;
-                }
+                this.navigate('/member/dashboard', true);
+                return;
             }
             // Start polling when logged in
             store.startPolling();

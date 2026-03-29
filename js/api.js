@@ -1,20 +1,37 @@
 // API Service - All backend communication
 const API_BASE = 'https://ledger-system-e7t7.onrender.com';
 
-// Token management
+// Auth state - single source of truth for auth status
+const authState = {
+    token: localStorage.getItem('access_token'),
+    isAdmin: localStorage.getItem('is_admin') === 'true',
+    set(token, isAdmin) {
+        this.token = token;
+        this.isAdmin = isAdmin;
+        localStorage.setItem('access_token', token);
+        localStorage.setItem('refresh_token', token);
+        localStorage.setItem('is_admin', isAdmin ? 'true' : 'false');
+    },
+    clear() {
+        this.token = null;
+        this.isAdmin = false;
+        localStorage.clear();
+    },
+    get isLoggedIn() {
+        return !!this.token;
+    }
+};
+
+// Token management (used by apiFetch)
 const tokens = {
-    get access() { return localStorage.getItem('access_token'); },
-    set access(v) { localStorage.setItem('access_token', v); },
+    get access() { return authState.token; },
+    set access(v) { authState.token = v; localStorage.setItem('access_token', v); },
     get refresh() { return localStorage.getItem('refresh_token'); },
     set refresh(v) { localStorage.setItem('refresh_token', v); },
-    get isAdmin() { return localStorage.getItem('is_admin') === 'true'; },
-    set isAdmin(v) { localStorage.setItem('is_admin', v === true || v === 'true' ? 'true' : 'false'); },
     clear() {
+        // Only clear tokens, not authState
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        localStorage.removeItem('user_name');
-        localStorage.removeItem('user_id');
-        // DO NOT clear is_admin - it's set separately and needed for route protection
     }
 };
 
@@ -219,11 +236,11 @@ const auth = {
     },
     
     isLoggedIn() {
-        return !!tokens.access;
+        return authState.isLoggedIn;
     },
     
     isAdmin() {
-        return !!tokens.isAdmin;
+        return authState.isAdmin;
     },
     
     getToken() {
