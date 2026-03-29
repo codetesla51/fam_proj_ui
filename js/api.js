@@ -65,7 +65,7 @@ async function apiFetch(endpoint, options = {}) {
             // Admin tokens cannot be refreshed - just logout
             if (authState.isAdmin) {
                 tokens.clear();
-                window.location.href = '/admin/login';
+                router.navigate('/admin/login', true);
                 throw new Error('Session expired. Please login again.');
             }
             // Member tokens can be refreshed
@@ -79,7 +79,7 @@ async function apiFetch(endpoint, options = {}) {
             }
             // Refresh failed or no refresh token, logout
             tokens.clear();
-            window.location.href = '/login';
+            router.navigate('/login', true);
             throw new Error('Session expired. Please login again.');
         }
         
