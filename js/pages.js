@@ -407,10 +407,14 @@ const pages = {
     // Member Pages
     memberDashboard: async () => {
         // Load dashboard and transactions if not already loaded
+        console.log('[memberDashboard] store.data.transactions:', store.data.transactions?.length);
+        
         const [dashboard, transactions] = await Promise.all([
             store.data.dashboard ? Promise.resolve(store.data.dashboard) : store.loadDashboard(),
             store.data.transactions?.length ? Promise.resolve(store.data.transactions) : store.loadTransactions()
         ]);
+        
+        console.log('[memberDashboard] transactions after load:', transactions?.length);
         
         const d = dashboard || {};
         
