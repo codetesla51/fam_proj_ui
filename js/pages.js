@@ -163,7 +163,7 @@ const pages = {
                                 ${Icons.wallet()}
                             </div>
                             <span class="text-2xl font-bold text-white">₦500K+</span>
-                            <span class="text-xs text-white/60">Saved Together</span>
+                            <span class="text-xs text-white/60">${t('common.savedTogether') || 'Saved Together'}</span>
                         </div>
                         <div class="flex flex-col items-center gap-3">
                             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
@@ -344,7 +344,7 @@ const pages = {
                             ${Icons.shield()}
                             ${t('common.familyManagerAccess')}
                         </div>
-                        <h2 class="text-2xl sm:text-3xl font-bold text-text-primary">Welcome Back</h2>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-text-primary">${t('auth.welcomeBack') || 'Welcome Back'}</h2>
                         <p class="text-text-muted mt-2">Enter your manager password to continue</p>
                     </div>
                     
@@ -384,14 +384,14 @@ const pages = {
                             <button type="submit" id="admin-submit-btn"
                                 class="flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-brand px-6 text-base font-bold text-white shadow-lg shadow-brand/30 transition-all hover:bg-brand-hover hover:shadow-xl hover:shadow-brand/40 active:scale-[0.98] select-none">
                                 ${Icons.logIn()}
-                                Sign In as Manager
+                                ${t('auth.signInAsManager')}
                             </button>
                         </form>
                         
                         <div class="mt-8 pt-6 border-t border-border">
                             <a href="/login" class="flex items-center justify-center gap-2 text-sm font-medium text-text-muted hover:text-brand transition-colors select-none">
                                 ${Icons.arrowLeft()}
-                                Back to family login
+                                ${t('auth.backToFamily')}
                             </a>
                         </div>
                     </div>

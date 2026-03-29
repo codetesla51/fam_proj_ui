@@ -99,6 +99,7 @@ const translations = {
             yesterday: "Yesterday", confirm: "Confirm", delete: "Delete",
             edit: "Edit", close: "Close", search: "Search", noData: "No data",
             active: "Active",
+            savedTogether: "Saved Together",
             upToDate: "Up to date", new: "New", earlier: "Earlier",
             noNewNotifications: "No new notifications",
             alertsCaughtUp: "You're all caught up!",
@@ -228,6 +229,7 @@ const translations = {
     },
     yo: {
         app: { name: "Odelade Family Ledger", tagline: "Owo igbasilẹ̀ ìdàgbàsókè" },
+        common: { save: "Fi", cancel: "Padà", loading: "N gba...", error: "Nkan kan lọ. Jọ̀wọ́ gbiyanju lẹẹkan si.", success: "Ti ṣẹ́lẹ̀!", markAllRead: "Ṣe gbogbo wọn ti a ka", allCaughtUp: "O ti pari", back: "Padà", viewReceipt: "Wo resi", justNow: "Nisisiyi", yesterday: "Ana", confirm: "Jọ̀wọ́", delete: "Paarẹ́", edit: "Yípùn", close: "Páde", search: "Wadi", noData: "Ko si data", active: "Ń ṣiṣẹ́", savedTogether: "A Fi Pamọ́ Pọ̀" },
         nav: { home: "Àkọ́kọ́", mySavings: "Owo Ti Mo Fi Pamọ́", personalSavings: "Owo Ti Mo", myHistory: "Itan Owo Mi", settings: "Ètò", notifications: "Àlàyé", recordPayment: "Tọ́pẹ́ Owo", familySavings: "Owo Àwọn Ará", helpRequests: "Àpẹ̀ẹ́rẹ̀ Iranlọwọ́", familyMembers: "Àwọn Ará Ilé" },
         auth: { yourName: "Oruko Re", password: "Ọ̀rọ̀ àgbá", signIn: "Wọ̀ Ó Ṣìnnì", createAccount: "Ṣẹ̀dà Àpò Ìfowópamọ́ Mi", fullName: "Oruko Pipe Re", fullNameHelper: "Fi oruko re sinu bi a ń mọ̀ yín", createPassword: "Ṣẹ̀dà Ọ̀rọ̀ Àgbá", createPasswordHelper: "Yan nkan ti o ko ranti", confirmPassword: "Ṣe àfihàn Ọ̀rọ̀ Àgbá", confirmPasswordHelper: "Tẹ ọ̀rọ̀ àgbá rẹ lẹẹkan si", managerPassword: "Ọ̀rọ̀ Àgbá Alakoso", signInAsManager: "Wọ̀ Ó Ṣìnnì Bi Alakoso", backToFamily: "Padà sí wọ̀ílì àwọn ará", alreadyHave: "Se o ni account?", noAccount: "Ko si account?", wrongCredentials: "Oruko tabi ọ̀rọ̀ àgbá kò tọ̀.", welcomeBack: "Ẹ káàbọ̀" },
         register: { howOften: "Bawo ni o ngbooro ṣe wà?", howMuch: "Elomirọ̀ ti o ngbooro ṣe?", howMuchHelper: "Iye owo ti o ngbooro ṣe laipari", whenStart: "Ngbẹ̀yin ti o ngbẹ̀?", whenStartHelper: "Oṣù ti o bẹ̀rẹ̀ ifowopamọ́", everyWeek: "Ọsẹ̀ Kọ̀ọ̀kan", everyMonth: "Oṣù Kọ̀ọ̀kan" },
@@ -238,7 +240,7 @@ const translations = {
         careFund: { balance: "Iye Owo Iranlọwọ́", requestHelp: "Gba Owo Lati Ará", pastRequests: "Àwọn Ti O Ti Gba", noRequests: "O ko si gbasilẹ̀ owo rara", whatFor: "Kini elomirọ̀?", howMuchNeed: "Elomirọ̀ ni?", whenOccasion: "Ngba?", tellMore: "Sọ̀rọ̀ siwaju", optional: "le ṣe pataki", sendRequest: "Gba Owo", accepted: "A gba", pending: "Njẹ́", notApproved: "Ko gba" },
         members: { addMember: "Fi Ara Tuntun", fullName: "Oruko Pipe", password: "Ọ̀rọ̀ Àgbá", passwordHelper: "Wọn le yi pada lẹ́yà", howOften: "Bawo ni wọn ngbooro ṣe?", howMuchEach: "Elomirọ̀ ni?", startingFrom: "Ngbẹ̀yin ti?", resetPassword: "Yi Ọ̀rọ̀ Àgbá Pada" },
         settings: { myDetails: "Ìfitonilẹ́", changePassword: "Yi Ọ̀rọ̀ Àgbá Pada", currentPassword: "Ọ̀rọ̀ Àgbá Yi", newPassword: "Ọ̀rọ̀ Àgbá Tuntun", confirmNew: "Ṣe Àfihàn Ọ̀rọ̀ Àgbá Tuntun", language: "Ede", installApp: "Fi Ọ́ Tẹ̀lẹ̀", installPrompt: "Fi si oju opo wẹ́rẹ́ rẹ fún irapada", install: "Fi", iosInstructions: "Tẹ bọtini pin, lẹ́yin naa 'Fi si Oju Opo Wẹ́rẹ́'", dismiss: "Padà", contactManager: "Beere si alakoso lati yi ifowopamọ́ rẹ pada" },
-        common: { save: "Fi", cancel: "Padà", loading: "N gba...", error: "Nkan kan lọ. Jọ̀wọ́ gbiyanju lẹẹkan si.", success: "Ti ṣẹ́lẹ̀!", markAllRead: "Ṣe gbogbo wọn ti a ka", allCaughtUp: "O ti pari", back: "Padà", viewReceipt: "Wo resi", justNow: "Nisisiyi", yesterday: "Ana", confirm: "Jọ̀wọ́", delete: "Paarẹ́", edit: "Yípùn", close: "Páde", search: "Wadi", noData: "Ko si data" },
+        common: { save: "Fi", cancel: "Padà", loading: "N gba...", error: "Nkan kan lọ. Jọ̀wọ́ gbiyanju lẹẹkan si.", success: "Ti ṣẹ́lẹ̀!", markAllRead: "Ṣe gbogbo wọn ti a ka", allCaughtUp: "O ti pari", back: "Padà", viewReceipt: "Wo resi", justNow: "Nisisiyi", yesterday: "Ana", confirm: "Jọ̀wọ́", delete: "Paarẹ́", edit: "Yípùn", close: "Páde", search: "Wadi", noData: "Ko si data", active: "Ń ṣiṣẹ́", savedTogether: "A Fi Pamọ́ Pọ̀" },
         validation: { required: "A nilo elomirọ̀", passwordMismatch: "Ọ̀rọ̀ àgbá ko dọ́gba" },
         errors: {
             pageNotFound: "A ko rí iwe yii",
