@@ -38,7 +38,9 @@ const translations = {
             recentPayments: "Recent Payments", requestHelp: "Request Family Help",
             noPayments: "No payments recorded yet. Your family manager will record your first payment.",
             historyDesc: "All your transactions across both funds",
-            savingsHistory: "Your Family Savings history"
+            savingsHistory: "Your Family Savings history",
+            mySavings: "My Savings", familyActivity: "Family Activity",
+            myHistory: "My History", transfer: "Transfer", settings: "Settings"
         },
         admin: {
             familyOverview: "Family Overview", totalMembers: "Family Members",
@@ -49,7 +51,8 @@ const translations = {
             addMember: "Add Family Member", reviewRequests: "Review Withdrawals",
             dashboardDesc: "Family savings at a glance",
             members: "Members", behindTitle: "Members Behind on Savings",
-            active: "active"
+            active: "active", members: "Family Members",
+            transactions: "Transactions", careFund: "Withdrawal Requests", dashboard: "Dashboard"
         },
         table: {
             date: "Date", type: "Type", amount: "Amount", reason: "Reason",
@@ -113,7 +116,14 @@ const translations = {
             requestWithdraw: "Request Withdraw", transferNow: "Transfer Now",
             familyOverview: "Family Overview", quickActions: "Quick Actions",
             recordPayment: "Record Payment", addMember: "Add Member",
-            reviewRequests: "Review Requests", allUpToDate: "All members are up to date"
+            reviewRequests: "Review Requests", allUpToDate: "All members are up to date",
+            active: "Active", inactive: "Inactive",
+            tryAgain: "Try again"
+        },
+        errors: {
+            tryAgain: "Something went wrong, please try again",
+            pageNotFound: "Page not found",
+            pageNotFoundDesc: "The page you are looking for does not exist"
         },
         ui: {
             mySavings: "My Savings",
