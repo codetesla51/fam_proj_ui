@@ -9,7 +9,6 @@ const authState = {
         this.token = token;
         this.isAdmin = isAdmin;
         localStorage.setItem('access_token', token);
-        localStorage.setItem('refresh_token', token);
         localStorage.setItem('is_admin', isAdmin ? 'true' : 'false');
     },
     clear() {
@@ -62,7 +61,7 @@ async function apiFetch(endpoint, options = {}) {
         // Handle 401 - token expired (but not for login endpoints)
         if (response.status === 401 && endpoint !== '/auth/admin/login' && endpoint !== '/login') {
             // Admin tokens cannot be refreshed - just logout
-            if (tokens.isAdmin) {
+            if (authState.isAdmin) {
                 tokens.clear();
                 window.location.href = '/admin/login';
                 throw new Error('Session expired. Please login again.');
