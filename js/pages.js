@@ -1551,9 +1551,9 @@ const pages = {
         
         function item(n, isUnread) {
             return `
-                <button onclick="${isUnread ? `handleMarkRead('${n.id}')` : ''}" class="w-full text-left flex items-start gap-4 p-4 rounded-2xl ${isUnread ? 'bg-brand-light/50 border border-brand/30' : 'bg-surface-soft border border-transparent'} hover:shadow-md transition-all select-none">
+                <button onclick="${isUnread ? `handleMarkRead('${n.id}')` : ''}" class="w-full text-left flex items-start gap-4 p-4 rounded-2xl ${isUnread ? 'bg-brand-light/30 border-l-4 border-l-brand' : 'bg-surface-soft border border-transparent'} hover:shadow-md transition-all select-none">
                     <div class="flex-shrink-0 mt-1">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl ${isUnread ? 'bg-brand text-white shadow-md shadow-brand/30' : 'bg-surface-raised text-text-muted'}">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl ${isUnread ? 'bg-brand text-white shadow-lg shadow-brand/30' : 'bg-surface-raised text-text-muted'}">
                             ${Icons.bell()}
                         </div>
                     </div>
@@ -1563,7 +1563,7 @@ const pages = {
                     </div>
                     ${isUnread ? `
                         <div class="flex-shrink-0 mt-1">
-                            <span class="flex h-3 w-3 rounded-full bg-brand"></span>
+                            <span class="flex h-3 w-3 rounded-full bg-brand animate-pulse"></span>
                         </div>
                     ` : ''}
                 </button>
@@ -1571,14 +1571,14 @@ const pages = {
         }
         
         return `
-            <div class="w-full min-w-0 px-4">
+            <div class="w-full min-w-0 px-4 animate-fadeIn">
                 <div class="mb-6 flex items-center justify-between">
                     <div>
                         <h1 class="text-xl font-bold text-text-primary">${t('nav.notifications')}</h1>
-                        <p class="text-sm text-text-muted mt-0.5">${unread.length > 0 ? unread.length + ' unread' : t('common.allCaughtUp')}</p>
+                        <p class="text-sm text-text-muted mt-0.5">${unread.length > 0 ? unread.length + ' ' + (t('common.unread') || 'unread') : t('common.allCaughtUp')}</p>
                     </div>
                     ${unread.length > 0 ? `
-                        <button onclick="handleMarkAllRead()" class="h-10 px-4 rounded-xl bg-brand text-white text-sm font-semibold shadow-md shadow-brand/25 select-none">
+                        <button onclick="handleMarkAllRead()" class="h-12 px-5 rounded-xl bg-brand text-white text-sm font-semibold shadow-lg shadow-brand/25 hover:bg-brand-hover active:scale-[0.98] transition-all select-none">
                             ${t('common.markAllRead')}
                         </button>
                     ` : ''}
@@ -1586,11 +1586,11 @@ const pages = {
                 
                 ${notifications.length === 0 ? `
                     <div class="flex flex-col items-center justify-center py-20">
-                        <div class="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-surface-soft text-3xl">
+                        <div class="mb-5 flex h-24 w-24 items-center justify-center rounded-2xl bg-surface-soft text-text-muted">
                             ${Icons.bell()}
                         </div>
-                        <h3 class="text-lg font-semibold text-text-primary mb-1">${t('common.allCaughtUp')}</h3>
-                        <p class="text-sm text-text-muted">${t('common.noNewNotifications')}</p>
+                        <h3 class="text-xl font-bold text-text-primary mb-2">${t('common.allCaughtUp')}</h3>
+                        <p class="text-base text-text-muted text-center">${t('common.noNewNotifications')}</p>
                     </div>
                 ` : `
                     <div class="space-y-3">
