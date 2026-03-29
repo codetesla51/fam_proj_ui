@@ -2065,9 +2065,9 @@ async function handleAddMember(e) {
 }
 
 // Helper to select request type
-function selectRequestType(type) {
-    window.requestType = type;
-    document.getElementById('request-type').value = type;
+function selectRequestType(requestType) {
+    window.requestType = requestType;
+    document.getElementById('request-type').value = requestType;
     
     const careFundBtn = document.getElementById('type-care_fund');
     const withdrawalBtn = document.getElementById('type-withdrawal');
@@ -2075,7 +2075,7 @@ function selectRequestType(type) {
     const withdrawalInfo = document.getElementById('withdrawal-info');
     const btnText = document.getElementById('btn-text');
     
-    if (type === 'care_fund') {
+    if (requestType === 'care_fund') {
         // Style care fund button
         careFundBtn.className = 'request-type-btn p-4 rounded-2xl border-2 border-brand bg-brand-light text-left transition-all hover:shadow-md';
         careFundBtn.querySelector('span').className = 'font-bold text-brand';
