@@ -126,6 +126,8 @@ const router = {
         const pageName = this.routes[path];
         const app = document.getElementById('app');
         
+        console.log('[router.render] path:', path, 'authState.isLoggedIn:', authState.isLoggedIn, 'authState.isAdmin:', authState.isAdmin);
+        
         // Set page title
         this.setPageTitle(path);
         
@@ -134,15 +136,10 @@ const router = {
             return;
         }
         
-        const pageFn = pages[pageName];
-        if (!pageFn) {
-            app.innerHTML = this.notFound();
-            return;
-        }
-        
         // If already logged in, redirect to appropriate dashboard
         if (path === '/login' || path === '/register' || path === '/admin/login') {
             if (authState.isLoggedIn) {
+                console.log('[router] redirecting to', authState.isAdmin ? '/admin/dashboard' : '/member/dashboard', 'because isLoggedIn=true isAdmin=' + authState.isAdmin);
                 this.navigate(authState.isAdmin ? '/admin/dashboard' : '/member/dashboard', true);
                 return;
             }
@@ -157,40 +154,45 @@ const router = {
             const isAdmin = authState.isAdmin;
             
             if (!hasToken) {
+                console.log('[router] redirecting to', isAdminRoute ? '/admin/login' : '/login', 'because isLoggedIn=false');
                 this.navigate(isAdminRoute ? '/admin/login' : '/login', true);
                 return;
             }
             
             if (path.startsWith('/member') && isAdmin) {
+                console.log('[router] redirecting to /admin/dashboard because isAdmin=true is trying to access member route');
                 this.navigate('/admin/dashboard', true);
                 return;
             }
             if (isAdminRoute && !isAdmin) {
+                console.log('[router] redirecting to /member/dashboard because isAdmin=false is trying to access admin route');
                 this.navigate('/member/dashboard', true);
                 return;
             }
-            // Start polling when logged in
-            store.startPolling();
-            
-            // Prefetch all data in parallel before rendering
-            try {
-                await Promise.all([
-                    store.loadDashboard(),
-                    store.loadNotifications(),
-                    store.loadTransactions(),
-                    store.loadCareFundRequests()
-                ]);
-                // Update notification badge after prefetch
-                store.updateNotifBadge();
-            } catch (e) {
-                console.error('Prefetch error:', e);
-            }
-        } else {
-            // Stop polling on auth pages
-            store.stopPolling();
         }
         
-        // Show loading state
+        const pageFn = pages[pageName];
+        if (!pageFn) {
+            app.innerHTML = this.notFound();
+            return;
+        }
+        
+        // Start polling when logged in
+        store.startPolling();
+        
+        // Prefetch all data in parallel before rendering
+        try {
+            await Promise.all([
+                store.loadDashboard(),
+                store.loadNotifications(),
+                store.loadTransactions(),
+                store.loadCareFundRequests()
+            ]);
+            // Update notification badge after prefetch
+            store.updateNotifBadge();
+        } catch (e) {
+            console.error('Prefetch error:', e);
+        }
         const hasCachedData = store.dashboard || store.transactions?.length || store.notifications?.length || store.careFundRequests?.length;
         app.innerHTML = `
             <div class="min-h-screen flex flex-col items-center justify-center bg-surface-soft">

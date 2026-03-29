@@ -95,7 +95,9 @@ const store = {
         authState.clear();
         this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [] };
         const data = await auth.adminLogin(password);
+        console.log('[store.adminLogin] auth.adminLogin returned:', data);
         authState.set(data.access_token, true);
+        console.log('[store.adminLogin] authState after set — isLoggedIn:', authState.isLoggedIn, 'isAdmin:', authState.isAdmin);
         this.user = { name: 'Admin', isAdmin: true };
     },
     

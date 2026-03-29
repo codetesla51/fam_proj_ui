@@ -6,10 +6,12 @@ const authState = {
     token: localStorage.getItem('access_token'),
     isAdmin: localStorage.getItem('is_admin') === 'true',
     set(token, isAdmin) {
+        console.log('[authState.set] token:', token, 'isAdmin:', isAdmin);
         this.token = token;
         this.isAdmin = isAdmin;
         localStorage.setItem('access_token', token);
         localStorage.setItem('is_admin', isAdmin ? 'true' : 'false');
+        console.log('[authState.set] done. isLoggedIn:', this.isLoggedIn, 'isAdmin:', this.isAdmin);
     },
     clear() {
         this.token = null;
