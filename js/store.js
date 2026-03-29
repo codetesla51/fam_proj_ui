@@ -1,3 +1,29 @@
+// Cache helper for instant data display
+const cache = {
+    set(key, data) {
+        try {
+            localStorage.setItem(`cache_${key}`, JSON.stringify({
+                data,
+                timestamp: Date.now()
+            }));
+        } catch(e) {}
+    },
+    get(key) {
+        try {
+            const item = localStorage.getItem(`cache_${key}`);
+            if (!item) return null;
+            return JSON.parse(item).data;
+        } catch(e) {
+            return null;
+        }
+    },
+    clear() {
+        Object.keys(localStorage)
+            .filter(k => k.startsWith('cache_'))
+            .forEach(k => localStorage.removeItem(k));
+    }
+};
+
 // Normalize backend PascalCase keys to lowercase for frontend
 function normalizeItem(item) {
     if (!item || typeof item !== 'object') return item;
@@ -37,9 +63,9 @@ const store = {
     data: {
         user: null,
         profile: null,
-        transactions: [],
-        notifications: [],
-        careFundRequests: [],
+        transactions: null,
+        notifications: null,
+        careFundRequests: null,
         dashboard: null,
         members: [],
         receipts: []
@@ -103,7 +129,7 @@ const store = {
         if (lang) localStorage.setItem('language', lang);
         
         // Reset all in-memory store data and clear timestamps
-        this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [], receipts: [] };
+        this.data = { user: null, profile: null, transactions: null, notifications: null, careFundRequests: null, dashboard: null, members: null, receipts: [] };
         this._clearTimestamps();
         
         // Mark as just logged in to force fresh fetch
@@ -136,7 +162,7 @@ const store = {
         if (lang) localStorage.setItem('language', lang);
         
         // Reset all in-memory store data and clear timestamps
-        this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [], receipts: [] };
+        this.data = { user: null, profile: null, transactions: null, notifications: null, careFundRequests: null, dashboard: null, members: null, receipts: [] };
         this._clearTimestamps();
         
         // Mark as just logged in to force fresh fetch
@@ -172,7 +198,7 @@ const store = {
         if (lang) localStorage.setItem('language', lang);
         
         // Reset all in-memory store data and clear timestamps
-        this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [], receipts: [] };
+        this.data = { user: null, profile: null, transactions: null, notifications: null, careFundRequests: null, dashboard: null, members: null, receipts: [] };
         this._clearTimestamps();
         
         // Mark as just logged in to force fresh fetch
@@ -207,7 +233,7 @@ const store = {
         sessionStorage.clear();
         
         // Clear all data and timestamps
-        this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [], receipts: [] };
+        this.data = { user: null, profile: null, transactions: null, notifications: null, careFundRequests: null, dashboard: null, members: null, receipts: null };
         this._clearTimestamps();
         this._justLoggedIn = false;
         
@@ -216,6 +242,11 @@ const store = {
     
     // Load dashboard
     async loadDashboard(force = false) {
+        // Load from cache instantly
+        if (!this.data.dashboard) {
+            const cached = cache.get('dashboard');
+            if (cached) this.data.dashboard = cached;
+        }
         // Check if stale unless forced
         if (!force && !this.isStale('dashboard')) {
             return this.data.dashboard || {};
@@ -226,16 +257,22 @@ const store = {
             } else {
                 this.data.dashboard = await member.getDashboard();
             }
+            cache.set('dashboard', this.data.dashboard);
             this._markFresh('dashboard');
         } catch (e) {
-            console.error('Failed to load dashboard:', e);
-            this.data.dashboard = {};
+            console.warn('dashboard fetch failed, using cache');
         }
         return this.data.dashboard || {};
     },
     
     // Load transactions
     async loadTransactions(options = {}, force = false) {
+        const cacheKey = 'transactions_' + JSON.stringify(options);
+        // Load from cache instantly
+        if (!this.data.transactions) {
+            const cached = cache.get(cacheKey);
+            if (cached) this.data.transactions = cached;
+        }
         // Check if stale unless forced
         if (!force && !this.isStale('transactions')) {
             return this.data.transactions || [];
@@ -259,11 +296,12 @@ const store = {
             }
             
             this.data.transactions = normalizeArray(raw);
+            cache.set(cacheKey, this.data.transactions);
             this._markFresh('transactions');
             return this.data.transactions;
         } catch (e) {
-            this.data.transactions = [];
-            return [];
+            console.warn('transactions fetch failed, using cache');
+            return this.data.transactions || [];
         }
     },
     
@@ -297,6 +335,11 @@ const store = {
     },
     
     async loadNotifications(force = false) {
+        // Load from cache instantly
+        if (!this.data.notifications) {
+            const cached = cache.get('notifications');
+            if (cached) this.data.notifications = cached;
+        }
         // Check if stale unless forced
         if (!force && !this.isStale('notifications')) {
             return this.data.notifications || [];
@@ -305,12 +348,12 @@ const store = {
             const data = await member.getNotifications();
             const raw = Array.isArray(data.notifications) ? data.notifications : (Array.isArray(data) ? data : []);
             this.data.notifications = normalizeArray(raw);
+            cache.set('notifications', this.data.notifications);
             this._markFresh('notifications');
         } catch (e) {
-            console.warn('notifications unavailable, skipping');
-            this.data.notifications = this.data.notifications || [];
+            console.warn('notifications unavailable, using cache');
         }
-        return this.data.notifications;
+        return this.data.notifications || [];
     },
     
     // Mark notification as read - optimistic
@@ -343,6 +386,12 @@ const store = {
     
     // Load care fund requests
     async loadCareFundRequests(status, force = false) {
+        const cacheKey = 'careFundRequests';
+        // Load from cache instantly
+        if (!this.data.careFundRequests) {
+            const cached = cache.get(cacheKey);
+            if (cached) this.data.careFundRequests = cached;
+        }
         // Check if stale unless forced
         if (!force && !this.isStale('careFundRequests')) {
             if (status) {
@@ -363,12 +412,12 @@ const store = {
             if (status) {
                 this.data.careFundRequests = this.data.careFundRequests.filter(r => r.status === status);
             }
+            cache.set(cacheKey, this.data.careFundRequests);
             this._markFresh('careFundRequests');
         } catch (e) {
-            console.error('Failed to load care fund requests:', e);
-            this.data.careFundRequests = [];
+            console.warn('care fund requests fetch failed, using cache');
         }
-        return this.data.careFundRequests;
+        return this.data.careFundRequests || [];
     },
     
     // Submit care fund request - optimistic
@@ -458,18 +507,24 @@ const store = {
     
     // Load all members (admin)
     async loadAllMembers(force = false) {
+        const cacheKey = 'members';
+        // Load from cache instantly
+        if (!this.data.members) {
+            const cached = cache.get(cacheKey);
+            if (cached) this.data.members = cached;
+        }
         // Check if stale unless forced
         if (!force && !this.isStale('members')) {
             return this.data.members || [];
         }
         try {
             this.data.members = await admin.getAllMembers();
+            cache.set(cacheKey, this.data.members);
             this._markFresh('members');
         } catch (e) {
-            console.error('Failed to load all members:', e);
-            this.data.members = [];
+            console.warn('members fetch failed, using cache');
         }
-        return this.data.members;
+        return this.data.members || [];
     },
     
     // Upload receipt

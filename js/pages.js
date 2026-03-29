@@ -492,7 +492,7 @@ const pages = {
                                         ${pReceiptUrl ? `<button onclick="showReceiptImage('${pReceiptUrl}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                         ${!pReceiptUrl && pReceiptData ? `<button onclick="showTransferReceiptData('${p.id || p.ID}', '${encodeURIComponent(pReceiptData)}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                         <p class="text-sm font-bold whitespace-nowrap ${pType === 'credit' || pReason.includes('Transfer from pool2') ? 'text-success' : 'text-error'}">
-                                            ${pType === 'credit' || pReason.includes('Transfer from pool2') ? '+' : '-'}${formatMoney(pAmount)}
+                                            ${pType === 'credit' || pReason.includes('Transfer from pool2') ? '+' : '-'}${formatMoney(pAmount, { compact: true })}
                                         </p>
                                     </div>
                                 </div>
@@ -569,7 +569,7 @@ const pages = {
                                 </div>
                                 <div class="text-right flex items-center gap-2">
                                     <div>
-                                        <p class="text-lg font-bold ${txType === 'credit' ? 'text-success' : 'text-error'}">${txType === 'credit' ? '+' : '-'}${formatMoney(txAmount)}</p>
+                                        <p class="text-lg font-bold ${txType === 'credit' ? 'text-success' : 'text-error'}">${txType === 'credit' ? '+' : '-'}${formatMoney(txAmount, { compact: true })}</p>
                                         ${txReceiptUrl ? `<button onclick="showReceiptImage('${txReceiptUrl}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                         ${!txReceiptUrl && txReceiptData ? `<button onclick="showTransferReceiptData('${tx.id || tx.ID}', '${encodeURIComponent(txReceiptData)}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                     </div>
@@ -772,7 +772,7 @@ const pages = {
                                         <p class="text-xs text-text-muted mt-1">${formatDate(tx.created_at)}</p>
                                     </div>
                                     <div class="text-right flex items-center gap-2">
-                                        <p class="text-lg font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatMoney(tx.amount)}</p>
+                                        <p class="text-lg font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatMoney(tx.amount, { compact: true })}</p>
                                         ${tx.receipt_url ? `<button onclick="showReceiptImage('${tx.receipt_url}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                         ${tx.receiptData && !tx.receipt_url ? `<button onclick="showTransferReceiptData('${tx.id}', '${encodeURIComponent(tx.receiptData)}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                     </div>
@@ -859,7 +859,7 @@ const pages = {
                                     ${p.receipt_url ? `<a href="${p.receipt_url}" target="_blank" class="p-2 text-brand hover:text-brand-hover" title="View Receipt">${Icons.fileText()}</a>` : ''}
                                     ${!p.receipt_url && p.receiptData ? `<button onclick="showTransferReceiptData('${p.id}', '${encodeURIComponent(p.receiptData || '')}')" class="p-2 text-brand hover:text-brand-hover" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                     <p class="text-sm font-bold whitespace-nowrap ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? 'text-success' : 'text-error'}">
-                                        ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? '+' : '-'}${formatMoney(p.amount)}
+                                        ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? '+' : '-'}${formatMoney(p.amount, { compact: true })}
                                     </p>
                                 </div>
                             </div>
@@ -1236,7 +1236,7 @@ const pages = {
                                                 </div>
                                             </div>
                                             <div class="text-right flex flex-col items-end gap-2">
-                                                <p class="text-xl font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatMoney(tx.amount)}</p>
+                                                <p class="text-xl font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatMoney(tx.amount, { compact: true })}</p>
                                                 <div class="flex items-center gap-2">
                                                     ${tx.receipt_url ? `<button onclick="showReceiptImage('${tx.receipt_url}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                                 </div>
@@ -2137,7 +2137,7 @@ function selectRequestType(requestType) {
     
     // Only check balance for withdrawal requests
     if (requestType === 'withdrawal' && requested > balance) {
-        showToast('Not enough money in your personal savings. You have ' + formatMoney(balance), 'error');
+        showToast('Not enough money in your personal savings. You have ' + formatMoney(balance, { compact: true }), 'error');
         return;
     }
     
@@ -2330,7 +2330,7 @@ async function handlePoolTransfer() {
     const requested = parseInt(amount);
     
     if (requested > balance) {
-        showToast('Not enough money. You have ' + formatMoney(balance) + ' available', 'error');
+        showToast('Not enough money. You have ' + formatMoney(balance, { compact: true }) + ' available', 'error');
         return;
     }
     
