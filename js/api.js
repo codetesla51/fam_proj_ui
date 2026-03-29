@@ -1,5 +1,5 @@
 // API Service - All backend communication
-const API_BASE = 'http://localhost:8080';
+const API_BASE = 'https://ledger-system-e7t7.onrender.com';
 
 // Token management
 const tokens = {

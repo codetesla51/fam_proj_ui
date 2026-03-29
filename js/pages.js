@@ -2040,7 +2040,18 @@ async function handlePoolTransfer() {
     try {
         const result = await store.transferPool(parseInt(amount));
         
-        if (result.transaction_id) {
+        // New format: receipt_id and receipt_number returned directly
+        if (result.receipt_id) {
+            const receiptData = {
+                id: result.receipt_id,
+                receipt_number: result.receipt_number,
+                amount: amount,
+                created_at: new Date().toISOString()
+            };
+            localStorage.setItem('last_receipt_data', JSON.stringify(receiptData));
+            showTransferReceiptModal(receiptData, result.pool2_balance, result.pool1_contribution);
+        } else if (result.transaction_id) {
+            // Old format fallback
             try {
                 const receipt = await store.getReceipt(result.transaction_id);
                 localStorage.setItem('last_receipt_data', JSON.stringify(receipt));
@@ -2170,9 +2181,9 @@ async function showTransferReceiptModal(receipt, newPool2Balance, newPool1Balanc
     
     const user = store.user;
     const memberName = user?.name || 'Member';
-    const amount = receipt?.Amount || '0';
-    const date = receipt?.CreatedAt ? new Date(receipt.CreatedAt).toLocaleString() : new Date().toLocaleString();
-    const transactionId = receipt?.TransactionID || '';
+    const amount = receipt?.amount || receipt?.Amount || '0';
+    const date = receipt?.created_at ? new Date(receipt.created_at).toLocaleString() : new Date().toLocaleString();
+    const receiptNumber = receipt?.receipt_number || receipt?.ReceiptNumber || receipt?.id || '';
     
     modal.innerHTML = `
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -2214,8 +2225,8 @@ async function showTransferReceiptModal(receipt, newPool2Balance, newPool1Balanc
                             <span class="text-text-primary">${date}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-text-muted">Reference</span>
-                            <span class="text-text-primary text-sm font-mono">${transactionId.slice(0, 8)}...</span>
+                            <span class="text-text-muted">Receipt No.</span>
+                            <span class="text-text-primary text-sm font-mono font-bold">${receiptNumber}</span>
                         </div>
                     </div>
                     
@@ -2231,9 +2242,9 @@ async function showTransferReceiptModal(receipt, newPool2Balance, newPool1Balanc
                     </div>
                     
                     <div class="flex gap-3 pt-2">
-                        <button onclick="downloadTransferReceipt('${transactionId}')" class="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl bg-brand text-white font-semibold hover:bg-brand-hover transition-colors">
-                            ${Icons.download()}
-                            Download
+                        <button onclick="copyReceiptNumber('${receiptNumber}')" class="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl bg-brand text-white font-semibold hover:bg-brand-hover transition-colors">
+                            ${Icons.copy()}
+                            Copy Receipt
                         </button>
                         <button onclick="closeTransferReceiptModal()" class="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-border font-semibold hover:bg-surface-soft transition-colors">
                             ${Icons.x()}
@@ -2251,6 +2262,14 @@ async function showTransferReceiptModal(receipt, newPool2Balance, newPool1Balanc
     }, 10);
     document.body.classList.add('overflow-hidden');
     lucide.createIcons();
+}
+
+function copyReceiptNumber(number) {
+    navigator.clipboard.writeText(number).then(() => {
+        showToast('Receipt number copied!', 'success');
+    }).catch(() => {
+        showToast('Failed to copy', 'error');
+    });
 }
 
 function closeTransferReceiptModal() {

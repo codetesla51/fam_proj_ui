@@ -15,6 +15,7 @@ function normalizeItem(item) {
         description: item.Description || item.description,
         rejection_reason: item.RejectionReason || item.rejection_reason,
         receipt_url: item.ReceiptURL || item.receipt_url,
+        receipt_number: item.ReceiptNumber || item.receipt_number,
         read: item.Read || item.read || false,
         message: item.Message || item.message,
         created_at: item.CreatedAt || item.created_at,
@@ -138,11 +139,15 @@ const store = {
             if (!this.isAdmin()) {
                 const receipts = await member.getReceipts();
                 const receiptMap = {};
-                receipts.forEach(r => { receiptMap[r.TransactionID] = r; });
+                receipts.forEach(r => {
+                    const txId = r.TransactionID || r.transaction_id || r.ID;
+                    receiptMap[txId] = r;
+                });
                 raw.forEach(tx => {
-                    if (receiptMap[tx.ID]) {
-                        tx.receiptData = receiptMap[tx.ID].ReceiptData;
-                        tx.receiptType = receiptMap[tx.ID].ReceiptType;
+                    const txId = tx.ID || tx.id;
+                    if (receiptMap[txId]) {
+                        tx.receiptData = receiptMap[txId].ReceiptNumber || receiptMap[txId].receipt_number;
+                        tx.receiptType = 'transfer';
                     }
                 });
             }
@@ -160,7 +165,16 @@ const store = {
     async loadReceipts() {
         try {
             const receipts = await member.getReceipts();
-            this.data.receipts = receipts || [];
+            // Normalize keys
+            this.data.receipts = receipts.map(r => ({
+                id: r.ID || r.id,
+                receipt_number: r.ReceiptNumber || r.receipt_number,
+                amount: r.Amount || r.amount,
+                description: r.Description || r.description,
+                transaction_id: r.TransactionID || r.transaction_id,
+                member_id: r.MemberID || r.member_id,
+                created_at: r.CreatedAt || r.created_at
+            }));
             return this.data.receipts;
         } catch (e) {
             console.error('Failed to load receipts:', e);
