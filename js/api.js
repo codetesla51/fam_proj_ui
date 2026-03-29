@@ -42,8 +42,8 @@ async function apiFetch(endpoint, options = {}) {
             headers
         });
         
-        // Handle 401 - token expired
-        if (response.status === 401 && endpoint !== '/auth/admin/login') {
+        // Handle 401 - token expired (but not for login endpoints)
+        if (response.status === 401 && endpoint !== '/auth/admin/login' && endpoint !== '/login') {
             // Admin tokens cannot be refreshed - just logout
             if (tokens.isAdmin) {
                 tokens.clear();
