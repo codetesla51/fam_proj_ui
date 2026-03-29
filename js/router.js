@@ -1,4 +1,14 @@
 // Router - Smart routing with query params and loading states
+
+// Configure NProgress
+if (typeof NProgress !== 'undefined') {
+    NProgress.configure({ 
+        showSpinner: false,
+        trickleSpeed: 200,
+        minimum: 0.1
+    });
+}
+
 const router = {
     routes: {
         '/': 'home',
@@ -101,6 +111,10 @@ const router = {
             history.replaceState(null, '', path);
         } else {
             history.pushState(null, '', path);
+        }
+        // Start NProgress loading bar
+        if (typeof NProgress !== 'undefined') {
+            NProgress.start();
         }
         this.render();
     },
@@ -292,6 +306,23 @@ const router = {
             }
         } catch(e) {
             console.log('Icon init error:', e);
+        }
+        
+        // Stop NProgress loading bar
+        if (typeof NProgress !== 'undefined') {
+            NProgress.done();
+        }
+        
+        // Use Idiomorph for smooth DOM updates
+        if (typeof Idiomorph !== 'undefined') {
+            Idiomorph.morph(app, app.innerHTML, { morphStyle: 'innerHTML' });
+        }
+        
+        // Initialize date pickers
+        try {
+            initDatePickers();
+        } catch(e) {
+            console.log('Date picker init error:', e);
         }
     },
     

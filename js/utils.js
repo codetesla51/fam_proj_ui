@@ -1,5 +1,126 @@
 // Utilities
 
+// Initialize Day.js plugins
+if (typeof dayjs !== 'undefined') {
+    if (typeof dayjs_plugin_relativeTime !== 'undefined') {
+        dayjs.extend(dayjs_plugin_relativeTime);
+    }
+    if (typeof dayjs_plugin_localizedFormat !== 'undefined') {
+        dayjs.extend(dayjs_plugin_localizedFormat);
+    }
+}
+
+// Day.js date helpers (use via formatDate.smart(), formatDate.relative(), etc.)
+const dayjsHelpers = {
+    full(date) {
+        if (typeof dayjs !== 'undefined') return dayjs(date).format('DD MMM YYYY');
+        return new Date(date).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+    },
+    time(date) {
+        if (typeof dayjs !== 'undefined') return dayjs(date).format('h:mm A');
+        return new Date(date).toLocaleTimeString('en-NG', { hour: 'numeric', minute: '2-digit' });
+    },
+    fullWithTime(date) {
+        if (typeof dayjs !== 'undefined') return dayjs(date).format('DD MMM YYYY, h:mm A');
+        return new Date(date).toLocaleString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+    },
+    relative(date) {
+        if (typeof dayjs !== 'undefined') return dayjs(date).fromNow();
+        return new Date(date).toLocaleDateString('en-NG');
+    },
+    smart(date) {
+        if (typeof dayjs !== 'undefined') {
+            const d = dayjs(date);
+            if (d.isToday()) return 'Today';
+            if (d.isSame(dayjs().subtract(1, 'day'), 'day')) return 'Yesterday';
+            return d.format('DD MMM YYYY');
+        }
+        const d = new Date(date);
+        const today = new Date();
+        if (d.toDateString() === today.toDateString()) return 'Today';
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+        return d.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+};
+
+// Toast helper using Toastify
+const toast = {
+    success(message) {
+        if (typeof Toastify !== 'undefined') {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: 'top',
+                position: 'center',
+                style: {
+                    background: '#059669',
+                    borderRadius: '12px',
+                    fontWeight: '600',
+                    padding: '12px 24px',
+                    fontSize: '14px'
+                }
+            }).showToast();
+        } else {
+            console.log('Success:', message);
+        }
+    },
+    error(message) {
+        if (typeof Toastify !== 'undefined') {
+            Toastify({
+                text: message,
+                duration: 4000,
+                gravity: 'top',
+                position: 'center',
+                style: {
+                    background: '#DC2626',
+                    borderRadius: '12px',
+                    fontWeight: '600',
+                    padding: '12px 24px',
+                    fontSize: '14px'
+                }
+            }).showToast();
+        } else {
+            console.error('Error:', message);
+        }
+    },
+    info(message) {
+        if (typeof Toastify !== 'undefined') {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: 'top',
+                position: 'center',
+                style: {
+                    background: '#0D9488',
+                    borderRadius: '12px',
+                    fontWeight: '600',
+                    padding: '12px 24px',
+                    fontSize: '14px'
+                }
+            }).showToast();
+        } else {
+            console.log('Info:', message);
+        }
+    }
+};
+
+// Initialize Flatpickr for date inputs
+function initDatePickers() {
+    if (typeof flatpickr === 'undefined') return;
+    
+    // General date inputs
+    document.querySelectorAll('input[type="date"]').forEach(input => {
+        if (input._flatpickr) return; // Already initialized
+        flatpickr(input, {
+            dateFormat: 'Y-m-d',
+            allowInput: true,
+            disableMobile: false
+        });
+    });
+}
+
 // Format money with compact option for large amounts
 function formatMoney(amount, options = {}) {
     const { compact = false, signed = false } = options;
