@@ -1430,12 +1430,12 @@ const pages = {
                             </div>
                         </div>
                         ${activeTab === 'pending' ? `
-                        <div class="flex gap-2 mt-3">
-                            <button onclick="acceptRequest('${reqId}')" class="flex-1 flex items-center justify-center gap-1 rounded-lg bg-success px-3 py-2 text-xs font-medium text-white transition-colors active:bg-success/90 select-none">
-                                ${Icons.check()} Accept
+                        <div class="flex gap-2 mt-4 pt-3 border-t border-border">
+                            <button onclick="acceptRequest('${reqId}')" class="flex-1 flex items-center justify-center gap-2 rounded-xl bg-success py-3 text-sm font-semibold text-white transition-all hover:bg-success/90 active:scale-[0.98] select-none shadow-sm">
+                                ${Icons.checkCircle()} ${t('careFund.accepted') || 'Accept'}
                             </button>
-                            <button onclick="showDeclineForm('${reqId}')" class="flex-1 flex items-center justify-center gap-1 rounded-lg border border-error px-3 py-2 text-xs font-medium text-error transition-colors active:bg-error/5 select-none">
-                                ${Icons.x()} Decline
+                            <button onclick="showDeclineForm('${reqId}')" class="flex-1 flex items-center justify-center gap-2 rounded-xl border-2 border-error py-3 text-sm font-semibold text-error transition-all hover:bg-error/5 active:scale-[0.98] select-none">
+                                ${Icons.xCircle()} ${t('careFund.notApproved') || 'Decline'}
                             </button>
                         </div>
                         ` : ''}
