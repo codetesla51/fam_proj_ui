@@ -467,6 +467,6 @@ const store = {
     get profile() { return this.data.profile; },
     
     get unreadCount() {
-        return (this.data.notifications || []).filter(n => !n.read).length;
+        return (this.data.notifications || []).filter(n => !n.read && !n.Read).length;
     }
 };

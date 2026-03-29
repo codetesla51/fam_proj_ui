@@ -1471,9 +1471,12 @@ const pages = {
     },
     
     notifications: async () => {
-        const notifications = await store.loadNotifications();
-        const unread = notifications.filter(n => !n.read);
-        const read = notifications.filter(n => n.read);
+        const notifications = await store.loadNotifications().catch(e => {
+            console.warn('notifications load failed:', e);
+            return [];
+        });
+        const unread = (notifications || []).filter(n => !n.read);
+        const read = (notifications || []).filter(n => n.read);
         
         function item(n, isUnread) {
             return `
