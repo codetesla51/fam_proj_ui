@@ -76,6 +76,7 @@ const store = {
         // Clear absolutely everything first
         authState.clear();
         localStorage.clear();
+        sessionStorage.clear();
         
         // Restore language
         if (lang) localStorage.setItem('language', lang);
@@ -98,9 +99,10 @@ const store = {
         // Save language preference before clearing
         const lang = localStorage.getItem('language');
         
-        // Clear absolutely everything
+        // Clear absolutely everything - localStorage, sessionStorage, and auth state
         authState.clear();
         localStorage.clear();
+        sessionStorage.clear();
         
         // Restore language
         if (lang) localStorage.setItem('language', lang);
@@ -129,6 +131,7 @@ const store = {
         // Clear absolutely everything first
         authState.clear();
         localStorage.clear();
+        sessionStorage.clear();
         
         // Restore language
         if (lang) localStorage.setItem('language', lang);
