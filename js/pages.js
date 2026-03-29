@@ -508,23 +508,15 @@ const pages = {
             let rawTx = result?.transactions || result?.data || [];
             // Normalize field names from API (Pool, Type, Amount, CreatedAt)
             transactions = rawTx.map(tx => ({
-                id: tx.ID,
-                pool: tx.Pool,
-                type: tx.Type,
-                amount: tx.Amount,
-                reason: tx.Reason,
-                created_at: tx.CreatedAt,
-                receipt_url: tx.ReceiptURL
+                id: tx.ID || tx.id,
+                pool: tx.Pool || tx.pool,
+                type: tx.Type || tx.type,
+                amount: tx.Amount || tx.amount,
+                reason: tx.Reason || tx.reason,
+                created_at: tx.CreatedAt || tx.created_at,
+                member_name: tx.MemberName || tx.member_name || 'Family member',
+                receipt_url: tx.ReceiptURL || tx.receipt_url
             }));
-            const receipts = await memberApi.getReceipts();
-            const receiptMap = {};
-            receipts.forEach(r => { receiptMap[r.TransactionID] = r; });
-            transactions.forEach(tx => {
-                if (receiptMap[tx.id]) {
-                    tx.receiptData = receiptMap[tx.id].ReceiptData;
-                    tx.receiptType = receiptMap[tx.id].ReceiptType;
-                }
-            });
         } catch (e) {
             console.error('Failed to load savings:', e);
         }
@@ -566,11 +558,13 @@ const pages = {
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-semibold text-text-primary">${cleanReason(tx.reason, tx.type)}</p>
-                                    <p class="text-xs text-text-muted mt-1">${formatDate(tx.created_at)}</p>
+                                    <p class="text-xs text-text-muted mt-1">${tx.member_name || 'Family member'} • ${formatDate(tx.created_at)}</p>
                                 </div>
-                                <div class="text-right">
-                                    <p class="text-lg font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}</p>
-                                    ${tx.receiptData ? `<button onclick="showTransferReceiptData('${tx.id}', '${encodeURIComponent(tx.receiptData)}')" class="text-xs text-brand font-medium mt-1 block">View Receipt</button>` : ''}
+                                <div class="text-right flex items-center gap-2">
+                                    <div>
+                                        <p class="text-lg font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}</p>
+                                        ${tx.receipt_url ? `<button onclick="showReceiptImage('${tx.receipt_url}')" class="text-xs text-brand font-medium mt-1 block">View Receipt</button>` : ''}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2172,6 +2166,39 @@ function closeReceiptModal() {
             document.body.classList.remove('overflow-hidden');
         }, 200);
     }
+}
+
+function showReceiptImage(url) {
+    const modal = document.getElementById('receipt-modal');
+    if (!modal) return;
+    
+    modal.innerHTML = `
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/50" onclick="closeReceiptModal()"></div>
+            <div class="relative w-full max-w-lg rounded-2xl bg-surface shadow-2xl transform transition-all scale-95 opacity-0" id="receipt-image-content">
+                <div class="flex items-center justify-between border-b border-border p-4">
+                    <h2 class="text-lg font-bold text-text-primary">Payment Receipt</h2>
+                    <button onclick="closeReceiptModal()" class="rounded-lg p-2 hover:bg-surface-soft">
+                        ${Icons.x()}
+                    </button>
+                </div>
+                <div class="p-4">
+                    <img src="${url}" alt="Receipt" class="w-full rounded-lg" onerror="this.parentElement.innerHTML='<div class=\\'text-center p-8\\'><p class=\\'text-text-muted\\'>Could not load receipt image</p></div>'">
+                    <a href="${url}" target="_blank" download class="mt-4 flex items-center justify-center gap-2 h-12 rounded-xl bg-brand text-white font-semibold hover:bg-brand-hover transition-colors">
+                        ${Icons.download()}
+                        Open Full Image
+                    </a>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.querySelector('#receipt-image-content')?.classList.remove('scale-95', 'opacity-0');
+    }, 10);
+    document.body.classList.add('overflow-hidden');
+    lucide.createIcons();
 }
 
 // Transfer Receipt Modal
