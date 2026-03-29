@@ -407,9 +407,9 @@ const pages = {
     // Member Pages
     memberDashboard: async () => {
         // Load dashboard and transactions if not already loaded
-        const [dashboard, transactions] = await Promise.all([
+        const [dashboard, recentTx] = await Promise.all([
             store.data.dashboard ? Promise.resolve(store.data.dashboard) : store.loadDashboard(),
-            store.data.transactions?.length ? Promise.resolve(store.data.transactions) : store.loadTransactions()
+            member.getAllTransactions({ limit: 10 })
         ]);
         
         const d = dashboard || {};
@@ -417,8 +417,8 @@ const pages = {
         // Get pool2 balance from dashboard
         let pool2Balance = d.my_pool2_contributions;
         
-        // Get recent transactions
-        let recent = (transactions || []).slice(0, 10);
+        // Get recent transactions - use all family transactions for recent activity
+        let recent = (recentTx?.transactions || []).slice(0, 10);
         
         const name = store.user?.name?.split(' ')[0] || 'Friend';
         return `
