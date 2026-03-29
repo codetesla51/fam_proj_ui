@@ -909,7 +909,12 @@ const pages = {
     },
     
     adminDashboard: async () => {
-        const dashboard = await store.loadDashboard();
+        let dashboard;
+        try {
+            dashboard = await store.loadDashboard();
+        } catch (e) {
+            console.warn('dashboard failed', e);
+        }
         const d = dashboard || {};
         return `
             <div class="w-full min-w-0">
