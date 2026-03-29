@@ -15,6 +15,25 @@ function cleanReason(reason, type) {
     return reason.replace(/:\s*\d+(\.\d+)?$/, '').trim() || reason;
 }
 
+// Filter transactions for family view - hides private Pool 2 transactions from other members
+function filterFamilyTransactions(transactions, currentMemberId) {
+    if (!transactions || !currentMemberId) return transactions || [];
+    return transactions.filter(t => {
+        const pool = t.pool || t.Pool;
+        const type = t.type || t.Type;
+        const memberId = t.member_id || t.MemberID;
+        
+        // Always show Pool 1
+        if (pool === 'pool1') return true;
+        // Always show transfers regardless of pool
+        if (type === 'transfer' || type === 'pool_transfer') return true;
+        // Pool 2 — only show if it belongs to current member
+        if (pool === 'pool2') return memberId === currentMemberId;
+        
+        return true;
+    });
+}
+
 const pages = {
     // Auth Pages
     login: () => `
@@ -409,7 +428,7 @@ const pages = {
         // Load dashboard and transactions if not already loaded
         const [dashboard, recentTx] = await Promise.all([
             store.data.dashboard ? Promise.resolve(store.data.dashboard) : store.loadDashboard(),
-            member.getAllTransactions({ limit: 10 })
+            member.getAllTransactions({ limit: 50 })
         ]);
         
         const d = dashboard || {};
@@ -417,8 +436,10 @@ const pages = {
         // Get pool2 balance from dashboard
         let pool2Balance = d.my_pool2_contributions;
         
-        // Get recent transactions - use all family transactions for recent activity
-        let recent = (recentTx?.transactions || []).slice(0, 10);
+        // Get recent transactions - filter to hide other members' Pool 2 transactions
+        const allTransactions = recentTx?.transactions || [];
+        const filteredTransactions = filterFamilyTransactions(allTransactions, store.user?.id);
+        let recent = filteredTransactions.slice(0, 10);
         
         const name = store.user?.name?.split(' ')[0] || 'Friend';
         return `
@@ -785,6 +806,7 @@ const pages = {
             // Normalize PascalCase fields
             transactions = rawTx.map(tx => ({
                 id: tx.ID || tx.id,
+                member_id: tx.MemberID || tx.member_id,
                 member_name: tx.MemberName || tx.member_name,
                 type: tx.Type || tx.type,
                 amount: tx.Amount || tx.amount,
@@ -801,6 +823,9 @@ const pages = {
                 ...p,
                 receiptData: receiptMap[p.id]?.ReceiptData
             }));
+            
+            // Filter to hide other members' Pool 2 transactions
+            transactions = filterFamilyTransactions(transactions, store.user?.id);
         } catch (e) { }
         
         // Paginate
