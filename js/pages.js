@@ -891,9 +891,9 @@ const pages = {
             pool2Balance = String(credits - debits);
         }
         
-        // Group requests by type
-        const careFundRequests = requests.filter(r => r.type === 'care_fund');
-        const withdrawalRequests = requests.filter(r => r.type === 'withdrawal');
+        // Group requests by type - normalize field name
+        const careFundRequests = requests.filter(r => (r.type || r.Type) === 'care_fund');
+        const withdrawalRequests = requests.filter(r => (r.type || r.Type) === 'withdrawal');
         
         return `
             <div class="w-full min-w-0 mb-6">
@@ -1001,19 +1001,25 @@ const pages = {
                     title: 'Family Help Requests',
                     children: careFundRequests.length > 0 ? `
                         <div class="space-y-3">
-                            ${careFundRequests.map(r => `
+                            ${careFundRequests.map(r => {
+                                const amount = r.amount || r.Amount || 0;
+                                const occasion = r.occasion || r.Occasion || '';
+                                const status = r.status || r.Status || '';
+                                const desc = r.description || r.Description || '';
+                                const eventDate = r.event_date || r.EventDate || r.created_at || r.CreatedAt || '';
+                                return `
                                 <div class="rounded-2xl border border-border bg-surface-soft p-4">
                                     <div class="flex items-center justify-between mb-2">
                                         <div>
-                                            <p class="font-bold text-text-primary">${formatCurrency(r.amount)}</p>
-                                            ${r.occasion ? `<p class="text-xs font-medium text-brand mt-1">${r.occasion}</p>` : ''}
+                                            <p class="font-bold text-text-primary">${formatCurrency(amount)}</p>
+                                            ${occasion ? `<p class="text-xs font-medium text-brand mt-1">${occasion}</p>` : ''}
                                         </div>
-                                        ${StatusBadge({ status: r.status })}
+                                        ${StatusBadge({ status: status })}
                                     </div>
-                                    ${r.description ? `<p class="text-xs text-text-secondary mt-2 italic">"${r.description}"</p>` : ''}
-                                    <p class="text-xs text-text-muted mt-2">${r.event_date ? formatDate(r.event_date) : formatDate(r.created_at)}</p>
+                                    ${desc ? `<p class="text-xs text-text-secondary mt-2 italic">"${desc}"</p>` : ''}
+                                    <p class="text-xs text-text-muted mt-2">${eventDate ? formatDate(eventDate) : ''}</p>
                                 </div>
-                            `).join('')}
+                            `}).join('')}
                         </div>
                     ` : EmptyState({ icon: Icons.heartHandshake(), message: 'No family help requests yet' })
                 })}
@@ -1025,19 +1031,25 @@ const pages = {
                     title: 'Withdrawal Requests',
                     children: withdrawalRequests.length > 0 ? `
                         <div class="space-y-3">
-                            ${withdrawalRequests.map(r => `
+                            ${withdrawalRequests.map(r => {
+                                const amount = r.amount || r.Amount || 0;
+                                const occasion = r.occasion || r.Occasion || '';
+                                const status = r.status || r.Status || '';
+                                const desc = r.description || r.Description || '';
+                                const createdAt = r.created_at || r.CreatedAt || '';
+                                return `
                                 <div class="rounded-2xl border border-border bg-surface-soft p-4">
                                     <div class="flex items-center justify-between mb-2">
                                         <div>
-                                            <p class="font-bold text-text-primary">${formatCurrency(r.amount)}</p>
-                                            ${r.occasion ? `<p class="text-xs font-medium text-text-secondary mt-1">${r.occasion}</p>` : ''}
+                                            <p class="font-bold text-text-primary">${formatCurrency(amount)}</p>
+                                            ${occasion ? `<p class="text-xs font-medium text-text-secondary mt-1">${occasion}</p>` : ''}
                                         </div>
-                                        ${StatusBadge({ status: r.status })}
+                                        ${StatusBadge({ status: status })}
                                     </div>
-                                    ${r.description ? `<p class="text-xs text-text-secondary mt-2 italic">"${r.description}"</p>` : ''}
-                                    <p class="text-xs text-text-muted mt-2">${formatDate(r.created_at)}</p>
+                                    ${desc ? `<p class="text-xs text-text-secondary mt-2 italic">"${desc}"</p>` : ''}
+                                    <p class="text-xs text-text-muted mt-2">${formatDate(createdAt)}</p>
                                 </div>
-                            `).join('')}
+                            `}).join('')}
                         </div>
                     ` : EmptyState({ icon: Icons.wallet(), message: 'No withdrawal requests yet' })
                 })}
