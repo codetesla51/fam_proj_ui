@@ -350,7 +350,7 @@ function KpiCard({ label, amount, subtext, highlight, isCurrency = true }) {
                 ${label === 'Overdue' ? `<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-warning/10 text-warning">${Icons.alertTriangle()}</span>` : ''}
                 <span class="text-[11px] font-bold uppercase tracking-wider text-text-muted">${label}</span>
             </div>
-            <div class="text-xl sm:text-2xl font-extrabold text-text-primary">${isCurrency ? formatCurrency(amount) : amount}</div>
+            <div class="text-xl sm:text-2xl font-extrabold text-text-primary">${isCurrency ? formatMoney(amount, { compact: true }) : amount}</div>
             ${subtext ? `<div class="mt-1 text-xs text-text-secondary">${subtext}</div>` : ''}
         </div>
     `;

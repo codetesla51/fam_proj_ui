@@ -730,7 +730,7 @@ const pages = {
             <div class="w-full min-w-0 mb-4 grid grid-cols-2 gap-3">
                 <div class="rounded-2xl bg-success/10 p-3 border border-success/20">
                     <p class="text-xs text-success font-medium">Total Money In</p>
-                    <p class="text-lg font-bold text-success">+${formatMoney(totalIn)}</p>
+                    <p class="text-lg font-bold text-success">+${formatMoney(totalIn, { compact: true })}</p>
                 </div>
                 <div class="rounded-2xl bg-error/10 p-3 border border-error/20">
                     <p class="text-xs text-error font-medium">Total Money Out</p>
@@ -1193,7 +1193,7 @@ const pages = {
             <div class="w-full min-w-0 mb-4 grid grid-cols-3 gap-3">
                 <div class="rounded-2xl bg-success/10 p-3 border border-success/20">
                     <p class="text-xs text-success font-medium">Money In</p>
-                    <p class="text-lg font-bold text-success">+${formatMoney(totalIn)}</p>
+                    <p class="text-lg font-bold text-success">+${formatMoney(totalIn, { compact: true })}</p>
                 </div>
                 <div class="rounded-2xl bg-error/10 p-3 border border-error/20">
                     <p class="text-xs text-error font-medium">Money Out</p>
