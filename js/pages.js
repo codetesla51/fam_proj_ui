@@ -891,6 +891,10 @@ const pages = {
             pool2Balance = String(credits - debits);
         }
         
+        // Group requests by type
+        const careFundRequests = requests.filter(r => r.type === 'care_fund');
+        const withdrawalRequests = requests.filter(r => r.type === 'withdrawal');
+        
         return `
             <div class="w-full min-w-0 mb-6">
                 <h1 class="text-2xl font-bold text-text-primary">${t('nav.personalSavings')}</h1>
@@ -909,6 +913,18 @@ const pages = {
                     title: t('careFund.requestHelp'),
                     children: `
                         <form onsubmit="handleCareFundRequest(event)" class="space-y-5">
+                            <!-- Request Type Toggle -->
+                            <div class="flex gap-2">
+                                <button type="button" onclick="window.requestType='care_fund'; this.closest('form').querySelector('#care-amount').focus()" 
+                                    class="request-type-btn flex-1 py-3 px-4 rounded-xl font-semibold text-sm border-2 border-brand bg-brand text-white" data-type="care_fund">
+                                    Get Money from Family
+                                </button>
+                                <button type="button" onclick="window.requestType='withdrawal'; this.closest('form').querySelector('#care-amount').focus()"
+                                    class="request-type-btn flex-1 py-3 px-4 rounded-xl font-semibold text-sm border-2 border-border text-text-secondary hover:border-brand" data-type="withdrawal">
+                                    Withdraw from Savings
+                                </button>
+                            </div>
+                            <input type="hidden" id="request-type" value="care_fund">
                             <div class="space-y-2">
                                 <label class="block text-sm font-bold text-text-primary">${t('careFund.howMuchNeed')}</label>
                                 <div class="relative">
@@ -916,7 +932,6 @@ const pages = {
                                     <input type="number" id="care-amount" placeholder="0" max="${pool2Balance || 0}"
                                         class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface pl-12 pr-4 text-lg font-bold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                                 </div>
-                                <p class="text-xs text-text-muted">Available: ${formatCurrency(pool2Balance || 0)}</p>
                             </div>
                             <button type="submit" id="care-btn" class="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-brand text-lg font-bold text-white shadow-lg shadow-brand/25 select-none">
                                 ${Icons.heartHandshake()} ${t('careFund.sendRequest')}
@@ -926,13 +941,13 @@ const pages = {
                 })}
             </div>
             
-            <!-- Past Requests -->
-            <div class="w-full min-w-0">
+            <!-- Past Care Fund Requests -->
+            <div class="w-full min-w-0 mb-6">
                 ${Card({
-                    title: t('careFund.pastRequests'),
-                    children: requests.length > 0 ? `
+                    title: 'Family Help Requests',
+                    children: careFundRequests.length > 0 ? `
                         <div class="space-y-3">
-                            ${requests.map(r => `
+                            ${careFundRequests.map(r => `
                                 <div class="rounded-2xl border border-border bg-surface-soft p-4">
                                     <div class="flex items-center justify-between mb-2">
                                         <div>
@@ -946,7 +961,31 @@ const pages = {
                                 </div>
                             `).join('')}
                         </div>
-                    ` : EmptyState({ icon: Icons.heartHandshake(), message: t('careFund.noRequests') })
+                    ` : EmptyState({ icon: Icons.heartHandshake(), message: 'No family help requests yet' })
+                })}
+            </div>
+            
+            <!-- Past Withdrawal Requests -->
+            <div class="w-full min-w-0">
+                ${Card({
+                    title: 'Withdrawal Requests',
+                    children: withdrawalRequests.length > 0 ? `
+                        <div class="space-y-3">
+                            ${withdrawalRequests.map(r => `
+                                <div class="rounded-2xl border border-border bg-surface-soft p-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div>
+                                            <p class="font-bold text-text-primary">${formatCurrency(r.amount)}</p>
+                                            ${r.occasion ? `<p class="text-xs font-medium text-text-secondary mt-1">${r.occasion}</p>` : ''}
+                                        </div>
+                                        ${StatusBadge({ status: r.status })}
+                                    </div>
+                                    ${r.description ? `<p class="text-xs text-text-secondary mt-2 italic">"${r.description}"</p>` : ''}
+                                    <p class="text-xs text-text-muted mt-2">${formatDate(r.created_at)}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : EmptyState({ icon: Icons.wallet(), message: 'No withdrawal requests yet' })
                 })}
             </div>
         `;
@@ -1333,11 +1372,19 @@ const pages = {
     
     adminCareFund: async () => {
         window.careFundPage = window.careFundPage || 1;
+        window.careFundType = window.careFundType || 'all';
         const limit = 10;
         const page = window.careFundPage;
         
+        // Get all requests, then filter by type on frontend
         const allRequests = await store.loadCareFundRequests();
-        const requests = allRequests || store.careFundRequests || [];
+        let requests = allRequests || store.careFundRequests || [];
+        
+        // Filter by type
+        const currentType = window.careFundType;
+        if (currentType !== 'all') {
+            requests = requests.filter(r => (r.Type || r.type) === currentType);
+        }
         
         // Normalize field names and filter by status
         const pending = requests.filter(r => {
@@ -1370,6 +1417,13 @@ const pages = {
             </button>`;
         }
         
+        function typeBtn(type, label) {
+            const isActive = currentType === type;
+            return `<button onclick="window.careFundType='${type}'; window.careFundPage=1; router.refresh()" class="px-3 py-1.5 rounded-lg text-xs font-medium select-none transition-all ${isActive ? 'bg-brand text-white' : 'bg-surface-soft text-text-secondary hover:bg-border'}">
+                ${label}
+            </button>`;
+        }
+        
         let allRequestsToShow = pending;
         if (activeTab === 'accepted') allRequestsToShow = accepted;
         if (activeTab === 'rejected') allRequestsToShow = rejected;
@@ -1394,6 +1448,13 @@ const pages = {
                 ${tabBtn('rejected', t('careFund.notApproved'), rejected.length)}
             </div>
             
+            <!-- Type Filter -->
+            <div class="w-full min-w-0 mb-4 flex gap-2">
+                ${typeBtn('all', 'All Requests')}
+                ${typeBtn('care_fund', 'Family Help')}
+                ${typeBtn('withdrawal', 'Withdrawals')}
+            </div>
+            
             <div class="w-full min-w-0 space-y-3">
                 ${requestsToShow.length > 0 ? requestsToShow.map(r => {
                     const occasion = r.Occasion || r.occasion;
@@ -1415,7 +1476,10 @@ const pages = {
                                     <div class="min-w-0">
                                         <h3 class="font-semibold text-text-primary truncate">${memberName}</h3>
                                         <p class="text-xs text-text-muted flex items-center gap-1">
-                                            ${occasion ? (t('occasions.' + occasion) || occasion) : 'Request'} • ${eventDate ? formatDate(eventDate) : ''}
+                                            <span class="px-1.5 py-0.5 rounded text-[10px] font-medium ${(r.Type || r.type) === 'care_fund' ? 'bg-brand/10 text-brand' : 'bg-pool2/10 text-pool2'}">
+                                                ${(r.Type || r.type) === 'care_fund' ? 'Family Help' : 'Withdrawal'}
+                                            </span>
+                                            ${occasion ? (t('occasions.' + occasion) || occasion) : ''} • ${eventDate ? formatDate(eventDate) : ''}
                                         </p>
                                     </div>
                                     <div class="text-right flex-shrink-0">
@@ -1488,12 +1552,16 @@ const pages = {
                     </div>
                     <div class="mb-4 space-y-2 rounded-2xl bg-surface-soft p-4">
                         <div class="flex justify-between items-center">
-                            <span class="text-xs text-text-muted">Status</span>
-                            <span class="font-bold ${m.status === 'active' ? 'text-success' : 'text-error'}">${m.status === 'active' ? 'Up to date' : 'Behind'}</span>
+                            <span class="text-xs text-text-muted">Family Savings</span>
+                            <span class="text-xs font-bold text-text-primary">${formatCurrency(m.current_sum || m.CurrentSum || 0)}</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-xs text-text-muted">Started</span>
-                            <span class="text-xs font-medium">${m.start_date ? formatDate(m.start_date) : 'N/A'}</span>
+                            <span class="text-xs text-text-muted">Personal Savings</span>
+                            <span class="text-xs font-bold text-text-primary">${formatCurrency(m.pool2_sum || m.Pool2Sum || 0)}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-text-muted">Status</span>
+                            <span class="font-bold ${m.status === 'active' ? 'text-success' : 'text-error'}">${m.status === 'active' ? 'Up to date' : 'Behind'}</span>
                         </div>
                     </div>
                 </div>
@@ -1964,11 +2032,13 @@ async function handleAddMember(e) {
     btn.innerHTML = '<div class="loader !w-5 !h-5 !border-2"></div> ' + t('common.loading');
     
     try {
+        const requestType = document.getElementById('request-type')?.value || 'care_fund';
         await store.submitCareFundRequest({
             amount: String(parseInt(amount)),
             occasion: 'other',
             event_date: new Date().toISOString().split('T')[0],
-            description: ''
+            description: '',
+            type: requestType
         });
         showToast(t('common.success'), 'success');
         router.refresh();

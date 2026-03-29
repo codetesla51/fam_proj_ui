@@ -328,10 +328,10 @@ const member = {
         }));
     },
     
-    // Submit care fund request
-    async submitCareFundRequest({ amount, occasion, event_date, description }) {
+    // Submit care fund request (type: 'care_fund' or 'withdrawal')
+    async submitCareFundRequest({ amount, occasion, event_date, description, type = 'care_fund' }) {
         // Backend expects amount as string
-        const body = { amount: String(amount) };
+        const body = { amount: String(amount), type };
         if (occasion) body.occasion = occasion;
         if (event_date) body.event_date = event_date;
         if (description) body.description = description;
@@ -341,7 +341,7 @@ const member = {
         }));
     },
     
-    // Get own care fund requests
+    // Get own care fund/withdrawal requests
     async getCareFundRequests() {
         const data = await handleResponse(apiFetch('/carefund/requests/mine'));
         return Array.isArray(data) ? data : [];
@@ -458,9 +458,11 @@ const admin = {
         }));
     },
     
-    // Get all care fund requests
-    async getCareFundRequests(status) {
-        const data = await handleResponse(apiFetch('/carefund/requests'));
+    // Get all care fund/withdrawal requests (type: 'care_fund', 'withdrawal', or '' for all)
+    async getCareFundRequests(status, type = '') {
+        let url = '/carefund/requests';
+        if (type) url += `?type=${type}`;
+        const data = await handleResponse(apiFetch(url));
         // Backend returns direct array
         const requests = Array.isArray(data) ? data : [];
         if (status) return requests.filter(r => r.status === status);
