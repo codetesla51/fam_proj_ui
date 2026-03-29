@@ -49,7 +49,7 @@ const store = {
     isStale(key) {
         const timestamp = this._dataTimestamps[key];
         if (!timestamp) return true;
-        return Date.now() - timestamp > 30000;
+        return Date.now() - timestamp > 8000;
     },
     
     // Mark data as fetched (update timestamp)
@@ -562,7 +562,7 @@ const store = {
             } catch {
                 this._pollFailures++;
             }
-        }, 30000);
+        }, 8000);
         
         // Poll dashboard every 30 seconds
         this._dashboardInterval = setInterval(async () => {
@@ -573,7 +573,7 @@ const store = {
             } catch {
                 this._pollFailures++;
             }
-        }, 30000);
+        }, 8000);
         
         // Poll transactions every 30 seconds
         this._txInterval = setInterval(async () => {
@@ -584,7 +584,7 @@ const store = {
             } catch {
                 this._pollFailures++;
             }
-        }, 30000);
+        }, 8000);
     },
     
     // Stop polling
