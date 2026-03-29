@@ -183,17 +183,13 @@ const router = {
         // Show loading for protected routes
         if (isProtectedRoute) {
             store.startPolling();
-            try {
-                await Promise.all([
-                    store.loadDashboard(),
-                    store.loadNotifications(),
-                    store.loadTransactions(),
-                    store.loadCareFundRequests()
-                ]);
-                store.updateNotifBadge();
-            } catch (e) {
-                console.error('Prefetch error:', e);
-            }
+            await Promise.allSettled([
+                store.loadDashboard().catch(e => console.warn('dashboard failed', e)),
+                store.loadNotifications().catch(e => console.warn('notifications failed', e)),
+                store.loadTransactions().catch(e => console.warn('transactions failed', e)),
+                store.loadCareFundRequests().catch(e => console.warn('carefund failed', e))
+            ]);
+            store.updateNotifBadge();
         }
         
         // Show loading spinner for protected routes only
