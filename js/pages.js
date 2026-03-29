@@ -34,7 +34,7 @@ const pages = {
                 </div>
                 <div class="relative z-10 text-center max-w-lg">
                     <h1 class="text-5xl lg:text-6xl font-extrabold text-white mb-5 tracking-tight">${t('app.name')}</h1>
-                    <p class="text-xl text-white/90 leading-relaxed">Your family savings, all in one place. Simple, secure, together.</p>
+                    <p class="text-xl text-white/90 leading-relaxed">${t('app.tagline')}</p>
                     <div class="mt-14 grid grid-cols-3 gap-8">
                         <div class="flex flex-col items-center gap-3">
                             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
@@ -76,12 +76,12 @@ const pages = {
                         <!-- Mobile Brand -->
                         <div class="lg:hidden mb-10 text-center">
                             <h1 class="text-3xl font-extrabold text-brand tracking-tight">${t('app.name')}</h1>
-                            <p class="mt-2 text-sm text-text-muted">Your family savings, all in one place</p>
+                            <p class="mt-2 text-sm text-text-muted">${t('app.tagline')}</p>
                         </div>
                         
                         <!-- Welcome Text -->
                         <div class="mb-8">
-                            <h2 class="text-2xl sm:text-3xl font-bold text-text-primary">Welcome back</h2>
+                            <h2 class="text-2xl sm:text-3xl font-bold text-text-primary">${t('auth.welcomeBack') || 'Welcome back'}</h2>
                             <p class="mt-2 text-sm text-text-muted">Sign in to see your family savings</p>
                         </div>
                         
