@@ -1685,10 +1685,6 @@ async function handleAdminLogin(e) {
         if (btn) btn.disabled = false;
     }
 }
-    }).finally(() => {
-        if (btn) btn.disabled = false;
-    });
-}
 
 function handleMarkAllRead() {
     store.markAllRead();
