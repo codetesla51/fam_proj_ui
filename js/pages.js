@@ -910,42 +910,64 @@ const pages = {
             <!-- Request Form -->
             <div class="w-full min-w-0 mb-6">
                 ${Card({
-                    title: t('careFund.requestHelp'),
+                    title: 'Make a Request',
                     children: `
                         <form onsubmit="handleCareFundRequest(event)" class="space-y-5">
-                            <!-- Request Type Toggle -->
-                            <div class="flex gap-2">
-                                <button type="button" onclick="window.requestType='care_fund'; document.getElementById('care-fund-fields').classList.remove('hidden'); this.classList.add('bg-brand','text-white'); this.classList.remove('border-border','text-text-secondary'); this.nextElementSibling.classList.remove('bg-brand','text-white'); this.nextElementSibling.classList.add('border-border','text-text-secondary')" 
-                                    class="request-type-btn flex-1 py-3 px-4 rounded-xl font-semibold text-sm border-2 border-brand bg-brand text-white" data-type="care_fund">
-                                    Get Money from Family
-                                </button>
-                                <button type="button" onclick="window.requestType='withdrawal'; document.getElementById('care-fund-fields').classList.add('hidden'); this.classList.add('bg-brand','text-white'); this.classList.remove('border-border','text-text-secondary'); this.previousElementSibling.classList.remove('bg-brand','text-white'); this.previousElementSibling.classList.add('border-border','text-text-secondary')"
-                                    class="request-type-btn flex-1 py-3 px-4 rounded-xl font-semibold text-sm border-2 border-border text-text-secondary hover:border-brand" data-type="withdrawal">
-                                    Withdraw from Savings
-                                </button>
+                            <!-- Request Type Toggle - Clear and Simple -->
+                            <div class="space-y-3">
+                                <label class="text-sm font-bold text-text-primary">What would you like to do?</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <button type="button" onclick="selectRequestType('care_fund')" 
+                                        id="type-care_fund"
+                                        class="request-type-btn p-4 rounded-2xl border-2 border-brand bg-brand-light text-left transition-all hover:shadow-md">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white">
+                                                ${Icons.heartHandshake()}
+                                            </div>
+                                            <span class="font-bold text-text-primary">Get Money from Family</span>
+                                        </div>
+                                        <p class="text-xs text-text-muted ml-13">Ask the family for financial help</p>
+                                    </button>
+                                    <button type="button" onclick="selectRequestType('withdrawal')" 
+                                        id="type-withdrawal"
+                                        class="request-type-btn p-4 rounded-2xl border-2 border-border bg-surface text-left transition-all hover:border-brand hover:shadow-md">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-pool2 text-white">
+                                                ${Icons.wallet()}
+                                            </div>
+                                            <span class="font-bold text-text-primary">Withdraw from Savings</span>
+                                        </div>
+                                        <p class="text-xs text-text-muted ml-13">Take money from your personal savings</p>
+                                    </button>
+                                </div>
                             </div>
                             <input type="hidden" id="request-type" value="care_fund">
+                            
+                            <!-- Amount Field -->
                             <div class="space-y-2">
-                                <label class="block text-sm font-bold text-text-primary">${t('careFund.howMuchNeed')}</label>
+                                <label class="block text-sm font-bold text-text-primary">How much?</label>
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
-                                    <input type="number" id="care-amount" placeholder="0" max="${pool2Balance || 0}"
+                                    <input type="number" id="care-amount" placeholder="0" 
                                         class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface pl-12 pr-4 text-lg font-bold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                                 </div>
                             </div>
                             
-                            <!-- Care Fund Fields -->
+                            <!-- Care Fund Extra Fields -->
                             <div id="care-fund-fields" class="space-y-4">
+                                <div class="p-3 rounded-xl bg-brand-light border border-brand/20">
+                                    <p class="text-xs text-brand font-medium mb-2">This request will be sent to your family members</p>
+                                </div>
                                 <div class="space-y-2">
-                                    <label class="block text-sm font-bold text-text-primary">What is this for?</label>
+                                    <label class="block text-sm font-bold text-text-primary">What do you need the money for?</label>
                                     <select id="care-occasion" class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                                        <option value="">Select occasion</option>
-                                        <option value="birthday">Birthday</option>
-                                        <option value="wedding">Wedding</option>
-                                        <option value="newBaby">New Baby</option>
-                                        <option value="graduation">Graduation</option>
-                                        <option value="medical">Medical</option>
-                                        <option value="other">Other</option>
+                                        <option value="">Select a reason</option>
+                                        <option value="birthday">${Icons.cake()} Birthday</option>
+                                        <option value="wedding">${Icons.ring()} Wedding</option>
+                                        <option value="newBaby">${Icons.baby()} New Baby</option>
+                                        <option value="graduation">${Icons.graduationCap()} Graduation</option>
+                                        <option value="medical">${Icons.stethoscope()} Medical Emergency</option>
+                                        <option value="other">${Icons.helpCircle()} Other</option>
                                     </select>
                                 </div>
                                 <div class="space-y-2">
@@ -960,8 +982,13 @@ const pages = {
                                 </div>
                             </div>
                             
+                            <!-- Withdrawal Info -->
+                            <div id="withdrawal-info" class="hidden p-3 rounded-xl bg-surface-soft border border-border">
+                                <p class="text-xs text-text-muted">This will withdraw from your personal savings balance of <span class="font-bold text-text-primary">${formatCurrency(pool2Balance || 0)}</span></p>
+                            </div>
+                            
                             <button type="submit" id="care-btn" class="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-brand text-lg font-bold text-white shadow-lg shadow-brand/25 select-none">
-                                ${Icons.heartHandshake()} ${t('careFund.sendRequest')}
+                                ${Icons.send()} <span id="btn-text">Send Request</span>
                             </button>
                         </form>
                     `
@@ -2022,6 +2049,50 @@ async function handleAddMember(e) {
     } finally {
         btn.disabled = false;
         btn.innerHTML = t('members.addMember');
+    }
+}
+
+// Helper to select request type
+function selectRequestType(type) {
+    window.requestType = type;
+    document.getElementById('request-type').value = type;
+    
+    const careFundBtn = document.getElementById('type-care_fund');
+    const withdrawalBtn = document.getElementById('type-withdrawal');
+    const careFundFields = document.getElementById('care-fund-fields');
+    const withdrawalInfo = document.getElementById('withdrawal-info');
+    const btnText = document.getElementById('btn-text');
+    
+    if (type === 'care_fund') {
+        // Style care fund button
+        careFundBtn.className = 'request-type-btn p-4 rounded-2xl border-2 border-brand bg-brand-light text-left transition-all hover:shadow-md';
+        careFundBtn.querySelector('span').className = 'font-bold text-brand';
+        
+        // Reset withdrawal button
+        withdrawalBtn.className = 'request-type-btn p-4 rounded-2xl border-2 border-border bg-surface text-left transition-all hover:border-brand hover:shadow-md';
+        withdrawalBtn.querySelector('span').className = 'font-bold text-text-primary';
+        
+        // Show care fund fields
+        careFundFields.classList.remove('hidden');
+        withdrawalInfo.classList.add('hidden');
+        
+        // Update button text
+        btnText.textContent = 'Send Request to Family';
+    } else {
+        // Style withdrawal button
+        withdrawalBtn.className = 'request-type-btn p-4 rounded-2xl border-2 border-brand bg-brand-light text-left transition-all hover:shadow-md';
+        withdrawalBtn.querySelector('span').className = 'font-bold text-brand';
+        
+        // Reset care fund button
+        careFundBtn.className = 'request-type-btn p-4 rounded-2xl border-2 border-border bg-surface text-left transition-all hover:border-brand hover:shadow-md';
+        careFundBtn.querySelector('span').className = 'font-bold text-text-primary';
+        
+        // Hide care fund fields
+        careFundFields.classList.add('hidden');
+        withdrawalInfo.classList.remove('hidden');
+        
+        // Update button text
+        btnText.textContent = 'Withdraw from Savings';
     }
 }
 
