@@ -917,22 +917,27 @@ const pages = {
                     ${KpiCard({ label: 'Overdue', amount: d.overdue_count || 0, subtext: t('member.behind'), isCurrency: false })}
                 </div>
                 
-                ${d.underfunded_members && d.underfunded_members.length > 0 ? `
-                    <div class="w-full min-w-0 mb-6 rounded-2xl border border-error/20 bg-error/5 p-5">
-                        <div class="mb-4 flex items-center gap-2">${Icons.alertTriangle()}<p class="text-sm font-bold text-error">${t('admin.behindTitle')}</p></div>
-                        <div class="w-full min-w-0 space-y-3">
-                            ${d.underfunded_members.map(m => `
-                                <div class="flex items-center justify-between rounded-xl bg-surface p-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-error/10 text-sm font-bold text-error">${m.name?.charAt(0) || '?'}</div>
-                                        <span class="text-sm font-semibold truncate">${m.name}</span>
+                ${d.underfunded && d.underfunded.length > 0 ? `
+                    <div class="w-full min-w-0 mb-6 rounded-2xl border border-error/20 bg-error/5 p-4 overflow-x-hidden">
+                        <div class="mb-3 flex items-center gap-2">${Icons.alertTriangle()}<p class="text-sm font-bold text-error">${t('admin.behindTitle')}</p></div>
+                        <div class="w-full min-w-0 space-y-2 overflow-x-hidden">
+                            ${d.underfunded.map(m => {
+                                const name = m.Name || m.name || '?';
+                                const committed = parseFloat(m.CommittedAmount || m.committed_amount || 0);
+                                const current = parseFloat(m.CurrentSum || m.current_sum || 0);
+                                const gap = committed - current;
+                                return `
+                                <div class="flex items-center justify-between gap-2 rounded-lg bg-surface p-3 min-w-0">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-error/10 text-xs font-bold text-error flex-shrink-0">${name.charAt(0)}</div>
+                                        <span class="text-sm font-medium text-text-primary truncate min-w-0">${name}</span>
                                     </div>
-                                    <span class="text-sm font-bold text-error whitespace-nowrap">${formatCurrency(m.committed_amount - m.current_sum)} ${t('member.behind')}</span>
+                                    <span class="text-xs font-bold text-error whitespace-nowrap flex-shrink-0">${formatCurrency(gap)} behind</span>
                                 </div>
-                            `).join('')}
+                            `}).join('')}
                         </div>
                     </div>
-                ` : `<div class="w-full min-w-0 mb-6 rounded-2xl border border-success/20 bg-success/5 p-5 flex items-center gap-3">${Icons.checkCircle()}<p class="text-sm font-semibold text-success">${t('admin.allUpToDate')}</p></div>`}
+                ` : `<div class="w-full min-w-0 mb-6 rounded-2xl border border-success/20 bg-success/5 p-4 flex items-center gap-2">${Icons.checkCircle()}<p class="text-sm font-semibold text-success">${t('admin.allUpToDate')}</p></div>`}
                 
                 <!-- Quick Actions -->
                 <div class="w-full min-w-0">
@@ -1259,10 +1264,21 @@ const pages = {
     
     adminCareFund: async () => {
         const allRequests = await store.loadCareFundRequests();
-        const requests = allRequests || store.careFundRequests;
-        const pending = requests.filter(r => r.status === 'pending');
-        const accepted = requests.filter(r => r.status === 'approved' || r.status === 'accepted');
-        const rejected = requests.filter(r => r.status === 'rejected');
+        const requests = allRequests || store.careFundRequests || [];
+        
+        // Normalize field names and filter by status
+        const pending = requests.filter(r => {
+            const status = r.Status || r.status || '';
+            return status === 'pending' || status === 'Pending';
+        });
+        const accepted = requests.filter(r => {
+            const status = r.Status || r.status || '';
+            return status === 'approved' || status === 'accepted';
+        });
+        const rejected = requests.filter(r => {
+            const status = r.Status || r.status || '';
+            return status === 'rejected';
+        });
         const activeTab = window.careFundTab || 'pending';
         
         const occasionIcons = {
@@ -1300,46 +1316,50 @@ const pages = {
                 ${tabBtn('rejected', t('careFund.notApproved'), rejected.length)}
             </div>
             
-            <div class="w-full min-w-0 space-y-4">
-                ${requestsToShow.length > 0 ? requestsToShow.map(r => `
-                    <div id="request-card-${r.id}" class="w-full min-w-0 rounded-2xl border border-border bg-surface p-5 shadow-sm hover:shadow-md transition-all">
-                        <div class="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-brand/10 text-brand flex-shrink-0">
-                                    ${occasionIcons[r.occasion] ? occasionIcons[r.occasion]() : Icons.helpCircle()}
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-text-primary">${r.member_name || 'Member'}</h3>
-                                    <p class="text-sm text-text-muted flex items-center gap-1">
-                                        ${r.occasion ? (t('occasions.' + r.occasion) || r.occasion) : 'Request'} • ${r.event_date ? formatDate(r.event_date) : 'No date'}
-                                    </p>
-                                </div>
+            <div class="w-full min-w-0 space-y-3">
+                ${requestsToShow.length > 0 ? requestsToShow.map(r => {
+                    const occasion = r.Occasion || r.occasion;
+                    const memberName = r.MemberName || r.member_name || 'Member';
+                    const amount = r.Amount || r.amount;
+                    const eventDate = r.EventDate || r.event_date || r.CreatedAt || r.created_at;
+                    const desc = r.Description || r.description;
+                    const reqId = r.ID || r.id;
+                    const status = r.Status || r.status;
+                    
+                    return `
+                    <div id="request-card-${reqId}" class="w-full min-w-0 rounded-xl border border-border bg-surface p-4 shadow-sm hover:shadow-md transition-all">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand/10 text-brand flex-shrink-0">
+                                ${occasionIcons[occasion] ? occasionIcons[occasion]() : Icons.helpCircle()}
                             </div>
-                            <div class="text-left sm:text-right">
-                                <p class="text-xl sm:text-2xl font-bold">${formatCurrency(r.amount)}</p>
-                                ${StatusBadge({ status: r.status })}
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0">
+                                        <h3 class="font-semibold text-text-primary truncate">${memberName}</h3>
+                                        <p class="text-xs text-text-muted flex items-center gap-1">
+                                            ${occasion ? (t('occasions.' + occasion) || occasion) : 'Request'} • ${eventDate ? formatDate(eventDate) : ''}
+                                        </p>
+                                    </div>
+                                    <div class="text-right flex-shrink-0">
+                                        <p class="font-bold text-text-primary">${formatCurrency(amount)}</p>
+                                        ${StatusBadge({ status: status })}
+                                    </div>
+                                </div>
+                                ${desc ? `<p class="text-xs text-text-muted mt-1 truncate">${desc}</p>` : ''}
                             </div>
                         </div>
-                        ${r.description ? `
-                            <div class="mb-4 rounded-xl bg-surface-soft p-3">
-                                <p class="text-sm flex items-center gap-2">
-                                    ${Icons.messageSquare()}
-                                    ${r.description}
-                                </p>
-                            </div>
-                        ` : ''}
                         ${activeTab === 'pending' ? `
-                        <div class="flex gap-3">
-                            <button onclick="acceptRequest('${r.id}')" class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-success py-3 font-medium text-white transition-colors active:bg-success/90 select-none">
-                                ${Icons.check()} ${t('careFund.accepted')}
+                        <div class="flex gap-2 mt-3">
+                            <button onclick="acceptRequest('${reqId}')" class="flex-1 flex items-center justify-center gap-1 rounded-lg bg-success px-3 py-2 text-xs font-medium text-white transition-colors active:bg-success/90 select-none">
+                                ${Icons.check()} Accept
                             </button>
-                            <button onclick="showDeclineForm('${r.id}')" class="flex flex-1 items-center justify-center gap-2 rounded-xl border border-error py-3 font-medium text-error transition-colors active:bg-error/5 select-none">
-                                ${Icons.x()} ${t('careFund.notApproved')}
+                            <button onclick="showDeclineForm('${reqId}')" class="flex-1 flex items-center justify-center gap-1 rounded-lg border border-error px-3 py-2 text-xs font-medium text-error transition-colors active:bg-error/5 select-none">
+                                ${Icons.x()} Decline
                             </button>
                         </div>
                         ` : ''}
                     </div>
-                `).join('') : EmptyState({ icon: Icons.heartHandshake(), message: activeTab === 'pending' ? 'No pending requests' : activeTab === 'accepted' ? 'No accepted requests yet' : 'No declined requests' })}
+                `}).join('') : EmptyState({ icon: Icons.heartHandshake(), message: activeTab === 'pending' ? 'No pending requests' : activeTab === 'accepted' ? 'No accepted requests yet' : 'No declined requests' })}
             </div>
         `;
     },

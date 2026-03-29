@@ -6,7 +6,7 @@ const translations = {
             home: "Home", mySavings: "My Savings", personalSavings: "Personal Savings",
             myHistory: "My History", settings: "Settings", notifications: "Alerts",
             recordPayment: "Record Payment", familySavings: "Family Savings",
-            helpRequests: "Withdraw Requests", familyMembers: "Family Members"
+            helpRequests: "Withdrawals", familyMembers: "Family Members"
         },
         auth: {
             yourName: "Your Name", yourNamePlaceholder: "e.g. Taiwo Odelade",
