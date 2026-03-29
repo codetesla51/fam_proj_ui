@@ -161,21 +161,27 @@ const router = {
             const isAdminRoute = path.startsWith('/admin');
             const isAdmin = localStorage.getItem('is_admin') === 'true';
             
+            console.log('[Router] Protected route check:', { path, hasToken: !!hasToken, isAdminRoute, isAdmin });
+            
             if (!hasToken) {
+                console.log('[Router] No token, redirecting to', isAdminRoute ? '/admin/login' : '/login');
                 this.navigate(isAdminRoute ? '/admin/login' : '/login');
                 return;
             }
             
             // Admin trying to access member pages -> redirect to admin dashboard
             if (path.startsWith('/member') && isAdmin) {
+                console.log('[Router] Member route but admin, redirecting to /admin/dashboard');
                 this.navigate('/admin/dashboard');
                 return;
             }
             // Member trying to access admin pages -> redirect to member dashboard
             if (isAdminRoute && !isAdmin) {
+                console.log('[Router] Admin route but member, redirecting to /member/dashboard');
                 this.navigate('/member/dashboard');
                 return;
             }
+            console.log('[Router] Access granted, loading page...');
             // Start polling when logged in
             store.startPolling();
             

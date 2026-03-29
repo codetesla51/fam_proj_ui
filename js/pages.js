@@ -1637,11 +1637,15 @@ async function handleAdminLogin(e) {
     try {
         // Set is_admin FIRST before any API calls
         localStorage.setItem('is_admin', 'true');
+        console.log('[AdminLogin] is_admin set to true');
         
         await store.adminLogin(password);
+        console.log('[AdminLogin] Login successful, navigating to /admin/dashboard');
         showToast(t('common.success'), 'success');
         router.navigate('/admin/dashboard');
+        console.log('[AdminLogin] Navigate called');
     } catch(err) {
+        console.error('[AdminLogin] Login failed:', err);
         // Clear is_admin on error
         localStorage.removeItem('is_admin');
         
