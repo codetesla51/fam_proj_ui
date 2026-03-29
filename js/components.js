@@ -225,11 +225,14 @@ function Nav({ currentPath }) {
     }
     
     function bottomNavItems() {
-        return nav.slice(0, 4).map(item => {
+        return nav.slice(0, 5).map(item => {
             const active = currentPath === item.href;
             return `
-                <a href="${item.href}" class="flex flex-1 flex-col items-center justify-center gap-1 py-2 select-none active:opacity-70 ${active ? 'text-brand' : 'text-text-muted'}">
-                    <span class="w-6 h-6">${item.icon()}</span>
+                <a href="${item.href}" class="flex flex-1 flex-col items-center justify-center gap-1 py-3 select-none active:scale-95 transition-transform ${active ? 'text-brand' : 'text-text-muted hover:text-text-secondary'}">
+                    <span class="relative">
+                        <span class="w-6 h-6 block">${item.icon()}</span>
+                        ${item.href === '/member/dashboard' && unread > 0 ? `<span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-error rounded-full animate-pulse"></span>` : ''}
+                    </span>
                     <span class="text-[11px] font-medium">${item.label}</span>
                     ${active ? '<span class="w-8 h-1 rounded-full bg-brand mx-auto mt-1"></span>' : ''}
                 </a>
@@ -255,8 +258,10 @@ function Nav({ currentPath }) {
                     </div>
                     <div class="flex items-center gap-1">
                         <button onclick="openNotifModal()" class="relative flex h-11 w-11 items-center justify-center rounded-xl hover:bg-surface-soft transition-colors select-none">
-                            ${Icons.bell()}
-                            <span id="notif-badge" class="${unread > 0 ? '' : 'hidden'} absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-error text-[10px] font-bold text-white ring-2 ring-white">${unread > 9 ? '9+' : unread}</span>
+                            <span class="relative">
+                                ${Icons.bell()}
+                                <span id="notif-badge" class="${unread > 0 ? '' : 'hidden'} absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-error text-[10px] font-bold text-white ring-2 ring-white ${unread > 0 ? 'animate-pulse' : ''}">${unread > 9 ? '9+' : unread}</span>
+                            </span>
                         </button>
                         <button onclick="openLangModal()" class="flex h-10 items-center gap-1.5 rounded-xl px-2.5 text-text-secondary active:bg-surface-soft sm:px-3 select-none">
                             ${Icons.globe()}
@@ -301,8 +306,8 @@ function Nav({ currentPath }) {
             </div>
         `,
         bottomNav: `
-            <div class="bg-surface border-t border-border shadow-[0_-2px_20px_rgba(0,0,0,0.06)]">
-                <div class="flex h-16 items-center justify-around">
+            <div class="bg-surface/95 backdrop-blur-lg border-t border-border shadow-[0_-4px_30px_rgba(0,0,0,0.08)]">
+                <div class="flex h-16 items-center justify-around max-w-lg mx-auto">
                     ${bottomNavItems()}
                 </div>
             </div>
