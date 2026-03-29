@@ -182,15 +182,14 @@ const store = {
         }
     },
     
-    // Load notifications
     async loadNotifications() {
         try {
             const data = await member.getNotifications();
             const raw = Array.isArray(data.notifications) ? data.notifications : (Array.isArray(data) ? data : []);
             this.data.notifications = normalizeArray(raw);
         } catch (e) {
-            console.warn('notifications unavailable:', e);
-            this.data.notifications = [];
+            console.warn('notifications unavailable, skipping');
+            this.data.notifications = this.data.notifications || [];
         }
         return this.data.notifications;
     },
