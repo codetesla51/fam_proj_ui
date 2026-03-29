@@ -223,40 +223,7 @@
             animation: moneyUpdate 1s ease-out;
         }
         
-        /* DEV ERROR OVERLAY - remove for production */
-        #error-overlay { position: fixed; inset: 0; background: #0F172A; color: #fff; z-index: 99999; padding: 20px; overflow: auto; font-family: monospace; font-size: 13px; display: none; }
-        /* END DEV ERROR OVERLAY */
     </style>
-    <!-- ERROR CATCHER - remove before production -->
-    <div id="error-overlay" style="display:none;position:fixed;inset:0;background:#0F172A;color:#fff;z-index:99999;padding:20px;overflow:auto;font-family:monospace;font-size:13px;">
-        <div style="background:#DC2626;padding:12px 16px;border-radius:8px;margin-bottom:16px;">
-            <strong>JS Error</strong>
-        </div>
-        <pre id="error-message" style="white-space:pre-wrap;line-height:1.6;color:#FCA5A5;"></pre>
-        <pre id="error-stack" style="white-space:pre-wrap;line-height:1.6;color:#94A3B8;margin-top:12px;font-size:11px;"></pre>
-    </div>
-    <script>
-        // Catch all JS errors and show on screen
-        window.onerror = function(msg, src, line, col, err) {
-            var overlay = document.getElementById('error-overlay');
-            var msgEl = document.getElementById('error-message');
-            var stackEl = document.getElementById('error-stack');
-            overlay.style.display = 'block';
-            msgEl.textContent = msg + '\n\nFile: ' + src + '\nLine: ' + line + ', Col: ' + col;
-            stackEl.textContent = err && err.stack ? err.stack : 'No stack trace';
-            return false;
-        };
-        // Catch unhandled promise rejections (async errors)
-        window.onunhandledrejection = function(e) {
-            var overlay = document.getElementById('error-overlay');
-            var msgEl = document.getElementById('error-message');
-            var stackEl = document.getElementById('error-stack');
-            overlay.style.display = 'block';
-            msgEl.textContent = 'Unhandled Promise: ' + (e.reason && e.reason.message ? e.reason.message : String(e.reason));
-            stackEl.textContent = e.reason && e.reason.stack ? e.reason.stack : 'No stack trace';
-        };
-    </script>
-    <!-- END ERROR CATCHER -->
 </head>
 <body class="bg-surface-soft text-text-primary min-h-screen">
     <div id="app"></div>
@@ -308,6 +275,19 @@
     <script src="/js/router.js"></script>
     
     <script>
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                    .then((registration) => {
+                        console.log('SW registered:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('SW registration failed:', error);
+                    });
+            });
+        }
+        
         // Single initialization point
         function initApp() {
             if (typeof store === 'undefined' || typeof router === 'undefined' || typeof pages === 'undefined') {
@@ -319,12 +299,6 @@
                 renderLangOptions();
             } catch(e) {
                 console.error('Init error:', e);
-                var overlay = document.getElementById('error-overlay');
-                if (overlay) {
-                    overlay.style.display = 'block';
-                    document.getElementById('error-message').textContent = e.message;
-                    document.getElementById('error-stack').textContent = e.stack || 'No stack';
-                }
             }
         }
         
@@ -475,7 +449,7 @@
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted install');
+                        // User installed the app
                     }
                     deferredPrompt = null;
                     document.getElementById('install-banner')?.remove();
