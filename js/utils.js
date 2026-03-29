@@ -356,6 +356,97 @@ function initPullToRefresh(onRefresh) {
         }
     });
     
+// Skeleton Loaders
+function skeletonCard() {
+    return `<div class="animate-pulse rounded-2xl bg-surface-soft h-24"></div>`;
+}
+
+function skeletonCardSmall() {
+    return `<div class="animate-pulse rounded-xl bg-surface-soft h-16"></div>`;
+}
+
+function skeletonListItem() {
+    return `<div class="animate-pulse rounded-xl bg-surface-soft h-20"></div>`;
+}
+
+function skeletonText() {
+    return `<div class="animate-pulse rounded bg-surface-soft h-4 w-24"></div>`;
+}
+
+function skeletonKPICard() {
+    return `<div class="animate-pulse rounded-2xl bg-surface p-5">
+        <div class="h-3 w-16 bg-surface-soft rounded mb-3"></div>
+        <div class="h-8 w-24 bg-surface-soft rounded"></div>
+    </div>`;
+}
+
+function skeletonTable() {
+    return `<div class="animate-pulse space-y-3">
+        <div class="h-12 bg-surface-soft rounded"></div>
+        <div class="h-12 bg-surface-soft rounded"></div>
+        <div class="h-12 bg-surface-soft rounded"></div>
+        <div class="h-12 bg-surface-soft rounded"></div>
+        <div class="h-12 bg-surface-soft rounded"></div>
+    </div>`;
+}
+
+// Live update functions - update specific UI elements without full re-render
+function updateMoneyElement(id, value) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.textContent = formatMoney(value, { compact: true });
+        el.classList.add('money-updated');
+        setTimeout(() => el.classList.remove('money-updated'), 1000);
+    }
+}
+
+function prependTransaction(txHtml) {
+    const list = document.getElementById('tx-list');
+    if (list) {
+        list.insertAdjacentHTML('afterbegin', txHtml);
+    }
+}
+
+function prependNotification(notifHtml) {
+    const list = document.getElementById('notif-list');
+    if (list) {
+        const empty = list.querySelector('.empty-state');
+        if (empty) empty.remove();
+        list.insertAdjacentHTML('afterbegin', notifHtml);
+    }
+}
+
+function updateNotifBadge(count) {
+    const badge = document.getElementById('notif-badge');
+    if (badge) {
+        badge.textContent = count;
+        badge.classList.toggle('hidden', count === 0);
+    }
+}
+
+function showOptimisticItem(type, data) {
+    // Prepend to list without re-render
+    const listId = type + '-list';
+    const list = document.getElementById(listId);
+    if (list) {
+        const html = data; // Pre-rendered HTML
+        list.insertAdjacentHTML('afterbegin', html);
+    }
+}
+
+function removeOptimisticItem(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+}
+
+function highlightElement(id) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.classList.add('money-updated');
+        setTimeout(() => el.classList.remove('money-updated'), 1000);
+    }
+}
+
     main.addEventListener('touchend', (e) => {
         if (!isPulling) return;
         isPulling = false;

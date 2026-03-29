@@ -372,30 +372,28 @@ const store = {
     },
     
     // Submit care fund request - optimistic
-    async submitCareFundRequest({ amount, occasion, event_date, description }) {
-        // Optimistic: add to list immediately
+    async submitCareFundRequest({ amount, occasion, event_date, description, type = 'care_fund' }) {
         const optimisticReq = {
             id: 'temp-' + Date.now(),
             member_id: this.user?.id,
             member_name: this.user?.name || 'You',
-            amount, occasion, event_date, description,
+            amount, occasion, event_date, description, type,
             status: 'pending',
             created_at: new Date().toISOString()
         };
         this.data.careFundRequests.unshift(optimisticReq);
+        window.dispatchEvent(new CustomEvent('dataUpdated', { detail: { type: 'careFundRequests', data: this.data.careFundRequests } }));
         
         try {
-            const result = await member.submitCareFundRequest({ amount, occasion, event_date, description });
-            // Replace optimistic with real
+            const result = await member.submitCareFundRequest({ amount, occasion, event_date, description, type });
             const idx = this.data.careFundRequests.findIndex(r => r.id === optimisticReq.id);
             if (idx !== -1) {
                 this.data.careFundRequests[idx] = normalizeItem(result);
             }
-            // Force reload care fund requests to get fresh data
             await this.loadCareFundRequests(null, true);
+            window.dispatchEvent(new CustomEvent('dataUpdated', { detail: { type: 'careFundRequests', data: this.data.careFundRequests } }));
             return result;
         } catch (e) {
-            // Rollback
             this.data.careFundRequests = this.data.careFundRequests.filter(r => r.id !== optimisticReq.id);
             throw e;
         }
@@ -407,16 +405,16 @@ const store = {
         if (idx !== -1) {
             this.data.careFundRequests[idx].status = status;
             if (rejection_reason) this.data.careFundRequests[idx].rejection_reason = rejection_reason;
+            window.dispatchEvent(new CustomEvent('dataUpdated', { detail: { type: 'careFundRequests', data: this.data.careFundRequests } }));
         }
         try {
             const result = await admin.updateCareFundRequest(id, status, rejection_reason);
-            // Force reload care fund requests and notifications
             await this.loadCareFundRequests(null, true);
             await this.loadNotifications(true);
+            window.dispatchEvent(new CustomEvent('dataUpdated', { detail: { type: 'careFundRequests', data: this.data.careFundRequests } }));
             return result;
         } catch (e) {
             if (idx !== -1) {
-                // Rollback - reload
                 await this.loadCareFundRequests();
             }
             throw e;
@@ -431,12 +429,13 @@ const store = {
             created_at: new Date().toISOString()
         };
         this.data.transactions.unshift(optimisticTx);
+        window.dispatchEvent(new CustomEvent('dataUpdated', { detail: { type: 'transactions', data: this.data.transactions } }));
         
         try {
             const result = await admin.createTransaction(data);
-            // Force reload transactions and dashboard to get fresh data
             await this.loadTransactions({}, true);
             await this.loadDashboard(true);
+            window.dispatchEvent(new CustomEvent('dataUpdated', { detail: { type: 'transactions', data: this.data.transactions } }));
             return result;
         } catch (e) {
             this.data.transactions = this.data.transactions.filter(t => t.id !== optimisticTx.id);
@@ -447,8 +446,8 @@ const store = {
     // Create member
     async createMember(data) {
         const result = await admin.createMember(data);
-        // Force reload members list
         await this.loadAllMembers(true);
+        window.dispatchEvent(new CustomEvent('dataUpdated', { detail: { type: 'members', data: this.data.members } }));
         return result;
     },
     
@@ -551,9 +550,15 @@ const store = {
         // Poll notifications every 30 seconds
         this._notifInterval = setInterval(async () => {
             try {
+                const oldCount = (this.data.notifications || []).filter(n => !n.read).length;
                 await this.loadNotifications();
                 this.updateNotifBadge();
                 this._pollFailures = 0;
+                // Trigger custom event for UI update
+                const newCount = (this.data.notifications || []).filter(n => !n.read).length;
+                if (newCount !== oldCount) {
+                    window.dispatchEvent(new CustomEvent('dataUpdated', { detail: { type: 'notifications', data: this.data.notifications } }));
+                }
             } catch {
                 this._pollFailures++;
             }
@@ -564,6 +569,7 @@ const store = {
             try {
                 await this.loadDashboard();
                 this._pollFailures = 0;
+                window.dispatchEvent(new CustomEvent('dataUpdated', { detail: { type: 'dashboard', data: this.data.dashboard } }));
             } catch {
                 this._pollFailures++;
             }
@@ -574,6 +580,7 @@ const store = {
             try {
                 await this.loadTransactions();
                 this._pollFailures = 0;
+                window.dispatchEvent(new CustomEvent('dataUpdated', { detail: { type: 'transactions', data: this.data.transactions } }));
             } catch {
                 this._pollFailures++;
             }
