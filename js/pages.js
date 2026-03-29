@@ -61,9 +61,9 @@ const pages = {
             
             <!-- Right Panel - Form -->
             <div class="flex w-full lg:w-[45%] flex-col">
-                <!-- Language Switcher - Top Right -->
-                <div class="flex justify-end p-6">
-                    <button onclick="openLangModal()" class="flex h-11 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary hover:bg-surface-soft active:scale-95 transition-all select-none">
+                <!-- Language Switcher - Prominent at Top -->
+                <div class="flex justify-end p-4 sm:p-6">
+                    <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-xl border border-border bg-surface px-4 text-base font-medium text-text-secondary hover:bg-surface-soft hover:border-brand/30 active:scale-95 transition-all select-none shadow-sm">
                         ${Icons.globe()}
                         <span>${getCurrentLangName()}</span>
                         ${Icons.chevronDown()}
@@ -72,7 +72,7 @@ const pages = {
                 
                 <!-- Form Area -->
                 <div class="flex flex-1 items-center justify-center px-6 pb-20">
-                    <div class="w-full max-w-md">
+                    <div class="w-full max-w-md animate-fadeIn">
                         <!-- Mobile Brand -->
                         <div class="lg:hidden mb-10 text-center">
                             <h1 class="text-3xl font-extrabold text-brand tracking-tight">${t('app.name')}</h1>
@@ -82,52 +82,52 @@ const pages = {
                         <!-- Welcome Text -->
                         <div class="mb-8">
                             <h2 class="text-2xl sm:text-3xl font-bold text-text-primary">${t('auth.welcomeBack') || 'Welcome back'}</h2>
-                            <p class="mt-2 text-sm text-text-muted">Sign in to see your family savings</p>
+                            <p class="mt-2 text-base text-text-muted">${t('auth.signInDesc') || 'Sign in to see your family savings'}</p>
                         </div>
                         
-                        <div id="login-error" class="mb-5 hidden rounded-xl border border-error/20 bg-error/5 p-4 text-sm text-error flex items-center gap-2">
+                        <div id="login-error" class="mb-5 hidden rounded-xl border border-error/20 bg-error/5 p-4 text-base text-error flex items-center gap-3">
                             ${Icons.alertCircle()}
                             <span></span>
                         </div>
                         
-                        <form onsubmit="handleLogin(event)" class="space-y-5">
-                            <div class="space-y-2">
-                                <label class="block text-sm font-semibold text-text-primary">${t('auth.yourName')}</label>
+                        <form onsubmit="handleLogin(event)" class="space-y-6">
+                            <div class="space-y-3">
+                                <label class="block text-base font-semibold text-text-primary">${t('auth.yourName')}</label>
                                 <input type="text" id="login-name" placeholder="${t('auth.yourNamePlaceholder')}"
                                     onblur="this.classList.toggle('border-error', !this.value.trim())"
-                                    class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                    class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-5 text-lg transition-all focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/15 hover:border-brand/40">
                             </div>
                             
-                            <div class="space-y-2">
-                                <label class="block text-sm font-semibold text-text-primary">${t('auth.password')}</label>
+                            <div class="space-y-3">
+                                <label class="block text-base font-semibold text-text-primary">${t('auth.password')}</label>
                                 <div class="relative">
                                     <input type="password" id="login-password" 
                                         onblur="this.classList.toggle('border-error', !this.value.trim())"
-                                        class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
-                                    <button type="button" onclick="togglePassword('login-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
+                                        class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-5 pr-16 text-lg transition-all focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/15 hover:border-brand/40">
+                                    <button type="button" onclick="togglePassword('login-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-12 w-12 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
                                         ${Icons.eye()}
                                     </button>
                                 </div>
                             </div>
                             
                             <button type="submit" id="login-btn"
-                                class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-brand text-base font-bold text-white shadow-lg shadow-brand/25 transition-all hover:bg-brand-hover hover:shadow-xl hover:shadow-brand/35 active:scale-[0.98] select-none">
+                                class="flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-brand text-lg font-bold text-white shadow-lg shadow-brand/25 transition-all hover:bg-brand-hover hover:shadow-xl hover:shadow-brand/35 active:scale-[0.98] select-none">
                                 ${Icons.logIn()}
-                                ${t('auth.signIn')}
+                                <span>${t('auth.signIn')}</span>
                             </button>
                         </form>
                         
                         <!-- Divider -->
                         <div class="my-8 flex items-center gap-4">
                             <div class="flex-1 h-px bg-border"></div>
-                            <span class="text-xs text-text-muted uppercase tracking-wider">New here?</span>
+                            <span class="text-sm text-text-muted uppercase tracking-wider">${t('auth.newHere') || 'New here?'}</span>
                             <div class="flex-1 h-px bg-border"></div>
                         </div>
                         
                         <!-- Join CTA -->
-                        <a href="/register" class="flex h-14 w-full items-center justify-center gap-3 rounded-xl border-2 border-brand/30 bg-brand-light/30 text-base font-bold text-brand transition-all hover:bg-brand-light hover:border-brand active:scale-[0.98] select-none">
+                        <a href="/register" class="flex h-14 w-full items-center justify-center gap-3 rounded-xl border-2 border-brand/30 bg-brand-light/30 text-lg font-bold text-brand transition-all hover:bg-brand-light hover:border-brand active:scale-[0.98] select-none">
                             ${Icons.userPlus()}
-                            Join the Odelade Family
+                            <span>${t('auth.joinFamily') || 'Join the Odelade Family'}</span>
                         </a>
                     </div>
                 </div>
