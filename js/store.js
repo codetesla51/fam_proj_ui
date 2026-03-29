@@ -70,6 +70,11 @@ const store = {
     
     // Login member - always use real API
     async login(name, password) {
+        // Clear ALL tokens first
+        tokens.clear();
+        localStorage.removeItem('user_data');
+        this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [] };
+        
         await auth.login(name, password);
         this.user = { name };
         this.data.profile = await member.getProfile();
@@ -78,34 +83,38 @@ const store = {
     
     // Register member - always use real API
     async register({ name, password, interval, committed_amount, start_date }) {
+        // Clear ALL tokens first
+        tokens.clear();
+        localStorage.removeItem('user_data');
+        this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [] };
+        
         await auth.register({ name, password, interval, committed_amount, start_date });
         await this.login(name, password);
     },
     
     // Admin login - always use real API
     async adminLogin(password) {
+        // Clear ALL tokens first
+        tokens.clear();
+        localStorage.removeItem('user_data');
+        this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [] };
+        
         await auth.adminLogin(password);
         this.user = { name: 'Admin', isAdmin: true };
     },
     
-    // Logout
+    // Logout - clear EVERYTHING
     async logout() {
-        if (this.usingMock()) {
-            localStorage.removeItem('mock_logged_in');
-            localStorage.removeItem('mock_is_admin');
-        } else {
-            if (this.isAdmin()) {
-                await auth.adminLogout();
-            } else {
-                await auth.logout();
-            }
-        }
-        this.user = null;
-        localStorage.removeItem('user_data');
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('is_admin');
-        this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [] };
+        // Stop polling
+        this.stopPolling();
+        
+        // Clear all localStorage
+        localStorage.clear();
+        
+        // Reset all data
+        this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [], receipts: [] };
+        
+        // Navigate to login
         router.navigate('/login');
     },
     
