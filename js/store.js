@@ -189,7 +189,7 @@ const store = {
             const raw = Array.isArray(data.notifications) ? data.notifications : (Array.isArray(data) ? data : []);
             this.data.notifications = normalizeArray(raw);
         } catch (e) {
-            console.error('Failed to load notifications:', e);
+            console.warn('notifications unavailable:', e);
             this.data.notifications = [];
         }
         return this.data.notifications;
