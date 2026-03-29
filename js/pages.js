@@ -467,7 +467,7 @@ const pages = {
                                         ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? Icons.arrowUpRight() : Icons.arrowDownRight()}
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-semibold text-text-primary truncate">${p.reason || 'Transaction'}</p>
+                                        <p class="text-sm font-semibold text-text-primary truncate">${cleanReason(p.reason, p.type)}</p>
                                         <p class="text-xs text-text-muted">${p.member_name || 'Family member'} • ${formatDate(p.created_at)}</p>
                                     </div>
                                     <div class="flex items-center gap-2">
@@ -829,7 +829,7 @@ const pages = {
                                     ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? Icons.arrowUpRight() : Icons.arrowDownRight()}
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-semibold text-text-primary truncate">${p.reason || 'Transaction'}</p>
+                                    <p class="text-sm font-semibold text-text-primary truncate">${cleanReason(p.reason, p.type)}</p>
                                     <p class="text-xs text-text-muted">${p.member_name || 'Family member'} • ${formatDate(p.created_at)}</p>
                                 </div>
                                 <div class="flex items-center gap-2">
