@@ -305,7 +305,7 @@ const pages = {
                 <div class="relative z-10 text-center">
                     <div class="mb-8 flex justify-center">
                         <div class="flex h-28 w-28 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm text-white shadow-2xl">
-                            ${Icons.shieldCheck()}
+                            ${Icons.shield()}
                         </div>
                     </div>
                     <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">${t('common.familyManager')}</h1>
@@ -334,7 +334,7 @@ const pages = {
                     <!-- Mobile Logo -->
                     <div class="lg:hidden mb-8 flex flex-col items-center gap-4">
                         <div class="flex h-20 w-20 items-center justify-center rounded-full bg-brand text-white shadow-xl">
-                            ${Icons.shieldCheck()}
+                            ${Icons.shield()}
                         </div>
                         <span class="text-2xl font-bold text-text-primary">${t('common.familyManager')}</span>
                     </div>
