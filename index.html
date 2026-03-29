@@ -387,6 +387,12 @@
                 router.init();
                 renderLangOptions();
             } catch(e) {
+                // Init error
+            }
+            try {
+                router.init();
+                renderLangOptions();
+            } catch(e) {
                 console.error('Init error:', e);
                 var overlay = document.getElementById('error-overlay');
                 if (overlay) {
@@ -497,10 +503,10 @@
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/sw.js')
                     .then(function(registration) {
-                        console.log('SW registered:', registration.scope);
+                        // Service worker registered
                     })
                     .catch(function(error) {
-                        console.log('SW registration failed:', error);
+                        // Service worker registration failed
                     });
             });
         }
@@ -587,24 +593,5 @@
         });
     </script>
     
-    <!-- Debug Log Panel -->
-    <script>
-    const _logs = [];
-    const _origLog = console.log.bind(console);
-    const _origError = console.error.bind(console);
-    console.log = (...args) => { _origLog(...args); _logs.push('[LOG] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')); updatePanel(); };
-    console.error = (...args) => { _origError(...args); _logs.push('[ERR] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')); updatePanel(); };
-    function updatePanel() {
-        let panel = document.getElementById('_debug_panel');
-        if (!panel) {
-            panel = document.createElement('div');
-            panel.id = '_debug_panel';
-            panel.style.cssText = 'position:fixed;bottom:0;left:0;right:0;max-height:40vh;overflow-y:auto;background:#000;color:#0f0;font-size:11px;font-family:monospace;z-index:99999;padding:8px;';
-            document.body.appendChild(panel);
-        }
-        panel.innerHTML = _logs.slice(-30).join('<br>') + '<br><button onclick="navigator.clipboard.writeText(_logs.join(\'\\n\'))" style="color:yellow;margin-top:4px;">Copy</button>';
-        panel.scrollTop = panel.scrollHeight;
-    }
-    </script>
 </body>
 </html>
