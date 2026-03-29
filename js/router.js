@@ -156,32 +156,29 @@ const router = {
         const isProtected = (path.startsWith('/member') || path.startsWith('/admin')) && path !== '/admin/login';
         
         if (isProtected) {
-            // Check if logged in (either admin or member)
+            // Read fresh from localStorage each time
             const hasToken = localStorage.getItem('access_token');
             const isAdminRoute = path.startsWith('/admin');
             const isAdmin = localStorage.getItem('is_admin') === 'true';
             
-            console.log('[Router] Protected route check:', { path, hasToken: !!hasToken, isAdminRoute, isAdmin });
-            
             if (!hasToken) {
-                console.log('[Router] No token, redirecting to', isAdminRoute ? '/admin/login' : '/login');
-                this.navigate(isAdminRoute ? '/admin/login' : '/login');
+                this.navigate(isAdminRoute ? '/admin/login' : '/login', true);
                 return;
             }
             
             // Admin trying to access member pages -> redirect to admin dashboard
             if (path.startsWith('/member') && isAdmin) {
-                console.log('[Router] Member route but admin, redirecting to /admin/dashboard');
-                this.navigate('/admin/dashboard');
+                this.navigate('/admin/dashboard', true);
                 return;
             }
-            // Member trying to access admin pages -> redirect to member dashboard
+            // Member trying to access admin pages -> double-check before redirect
             if (isAdminRoute && !isAdmin) {
-                console.log('[Router] Admin route but member, redirecting to /member/dashboard');
-                this.navigate('/member/dashboard');
-                return;
+                const doubleCheck = localStorage.getItem('is_admin') === 'true';
+                if (!doubleCheck) {
+                    this.navigate('/member/dashboard', true);
+                    return;
+                }
             }
-            console.log('[Router] Access granted, loading page...');
             // Start polling when logged in
             store.startPolling();
             
