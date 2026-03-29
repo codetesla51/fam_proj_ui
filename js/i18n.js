@@ -121,6 +121,11 @@ const translations = {
             recordPayment: "Record Payment", addMember: "Add Member",
             reviewRequests: "Review Requests", allUpToDate: "All members are up to date"
         },
+        transaction: {
+            history: "Transaction History",
+            all: "All Transactions",
+            noTransactions: "No transactions yet",
+            noTransactionsDesc: "Your transactions will appear here"
         ui: {
             mySavings: "My Savings",
             myHistory: "My History",

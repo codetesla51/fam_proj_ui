@@ -719,54 +719,59 @@ const pages = {
         });
         
         return `
-            <div class="w-full min-w-0 mb-4">
+            <div class="w-full min-w-0 mb-6 animate-fadeIn">
                 <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                     ${Icons.history()}
-                    My Transaction History
+                    ${t('transaction.history') || 'My Transaction History'}
                 </h1>
-                <p class="text-xs sm:text-sm text-text-muted">A complete record of your activity across Family Savings and Personal Savings</p>
+                <p class="text-sm text-text-muted mt-1">${t('member.historyDesc') || 'A complete record of your activity'}</p>
             </div>
             
             <!-- Summary Bar -->
             <div class="w-full min-w-0 mb-4 grid grid-cols-2 gap-3">
-                <div class="rounded-xl bg-success/10 p-3 border border-success/20">
-                    <p class="text-xs text-success font-medium">Total Deposited</p>
-                    <p class="text-lg font-bold text-success">+${formatCurrency(totalIn)}</p>
+                <div class="rounded-xl bg-success/10 p-4 border border-success/20">
+                    <p class="text-xs text-success font-semibold uppercase tracking-wide">${t('table.totalIn') || 'Total Deposited'}</p>
+                    <p class="text-xl font-bold text-success">+${formatCurrency(totalIn)}</p>
                 </div>
-                <div class="rounded-xl bg-error/10 p-3 border border-error/20">
-                    <p class="text-xs text-error font-medium">Total Withdrawn</p>
-                    <p class="text-lg font-bold text-error">-${formatCurrency(totalOut)}</p>
+                <div class="rounded-xl bg-error/10 p-4 border border-error/20">
+                    <p class="text-xs text-error font-semibold uppercase tracking-wide">${t('table.totalOut') || 'Total Withdrawn'}</p>
+                    <p class="text-xl font-bold text-error">-${formatCurrency(totalOut)}</p>
                 </div>
             </div>
             ${totalTransfers > 0 ? `
             <div class="w-full min-w-0 mb-4">
-                <div class="rounded-xl bg-pool2/10 p-3 border border-pool2/20">
-                    <p class="text-xs text-pool2 font-medium">Internal Transfers</p>
-                    <p class="text-lg font-bold text-pool2">${formatCurrency(totalTransfers)}</p>
+                <div class="rounded-xl bg-pool2/10 p-4 border border-pool2/20">
+                    <p class="text-xs text-pool2 font-semibold uppercase tracking-wide">${t('transfer.internal') || 'Internal Transfers'}</p>
+                    <p class="text-xl font-bold text-pool2">${formatCurrency(totalTransfers)}</p>
                 </div>
             </div>
             ` : ''}
             
-            <!-- Filters -->
-            <div class="w-full min-w-0 mb-4 flex flex-wrap gap-2">
-                <div class="flex rounded-lg border border-border overflow-hidden">
-                    <button onclick="window.historyFilters.fund='all';window.historyFilters.type='all';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='all' && filters.type==='all' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">All</button>
+            <!-- Sticky Filter Tabs -->
+            <div class="w-full min-w-0 mb-4 -mx-4 px-4 overflow-x-auto bg-surface-soft py-2">
+                <div class="flex gap-2 min-w-max">
+                    <button onclick="window.historyFilters={fund:'all',type:'all'};router.refresh()" class="px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${filters.fund==='all' && filters.type==='all' ? 'bg-brand text-white shadow-md' : 'bg-surface text-text-secondary border border-border'}">
+                        ${t('table.all') || 'All'}
+                    </button>
+                    <button onclick="window.historyFilters={fund:'pool1',type:'all'};router.refresh()" class="px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${filters.fund==='pool1' ? 'bg-brand text-white shadow-md' : 'bg-surface text-text-secondary border border-border'}">
+                        ${t('member.familySavings') || 'Family Savings'}
+                    </button>
+                    <button onclick="window.historyFilters={fund:'pool2',type:'all'};router.refresh()" class="px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${filters.fund==='pool2' ? 'bg-brand text-white shadow-md' : 'bg-surface text-text-secondary border border-border'}">
+                        ${t('member.personalSavings') || 'Personal Savings'}
+                    </button>
+                    <button onclick="window.historyFilters={fund:'all',type:'credit'};router.refresh()" class="px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${filters.type==='credit' ? 'bg-success text-white shadow-md' : 'bg-surface text-text-secondary border border-border'}">
+                        ${t('table.moneyIn') || 'Money In'}
+                    </button>
+                    <button onclick="window.historyFilters={fund:'all',type:'debit'};router.refresh()" class="px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${filters.type==='debit' ? 'bg-error text-white shadow-md' : 'bg-surface text-text-secondary border border-border'}">
+                        ${t('table.moneyOut') || 'Money Out'}
+                    </button>
                 </div>
-                <div class="flex rounded-lg border border-border overflow-hidden">
-                    <button onclick="window.historyFilters.fund='pool1';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='pool1' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">Family Savings</button>
-                    <button onclick="window.historyFilters.fund='pool2';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='pool2' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">Personal Savings</button>
-                </div>
-                <div class="flex rounded-lg border border-border overflow-hidden">
-                    <button onclick="window.historyFilters.type='credit';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.type==='credit' ? 'bg-success text-white' : 'bg-surface text-text-secondary'}">Money In</button>
-                    <button onclick="window.historyFilters.type='debit';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.type==='debit' ? 'bg-error text-white' : 'bg-surface text-text-secondary'}">Money Out</button>
-                </div>
-                ${(filters.fund !== 'all' || filters.type !== 'all') ? `<button onclick="window.historyFilters={fund:'all',type:'all'};router.refresh()" class="px-3 py-2 text-xs font-medium text-brand">Clear</button>` : ''}
             </div>
             
             <!-- Transactions -->
             <div class="w-full min-w-0">
                 ${filtered.length > 0 ? `
-                    <div class="w-full min-w-0 space-y-2">
+                    <div class="w-full min-w-0 space-y-3">
                         ${filtered.map((tx, i) => `
                             <div class="rounded-xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
                                 <div class="flex items-start gap-3">
