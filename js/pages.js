@@ -457,6 +457,7 @@ const pages = {
                                 const pCreated = p.created_at || p.CreatedAt || '';
                                 const pMemberName = p.member_name || p.MemberName || 'Family member';
                                 const pReceiptUrl = p.receipt_url || p.ReceiptURL || '';
+                                const pReceiptData = p.receiptData || p.ReceiptData || '';
                                 return `
                                 <div class="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3 hover:shadow-md transition-shadow">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${pType === 'credit' || pReason.includes('Transfer from pool2') ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
@@ -467,7 +468,8 @@ const pages = {
                                         <p class="text-xs text-text-muted">${pMemberName} • ${formatDate(pCreated)}</p>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        ${pReceiptUrl ? `<button onclick="showReceiptImage('${pReceiptUrl}')" class="text-xs text-brand font-medium">View</button>` : ''}
+                                        ${pReceiptUrl ? `<button onclick="showReceiptImage('${pReceiptUrl}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
+                                        ${!pReceiptUrl && pReceiptData ? `<button onclick="showTransferReceiptData('${p.id || p.ID}', '${encodeURIComponent(pReceiptData)}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                         <p class="text-sm font-bold whitespace-nowrap ${pType === 'credit' || pReason.includes('Transfer from pool2') ? 'text-success' : 'text-error'}">
                                             ${pType === 'credit' || pReason.includes('Transfer from pool2') ? '+' : '-'}${formatCurrency(pAmount)}
                                         </p>
@@ -536,6 +538,7 @@ const pages = {
                         const txCreated = tx.created_at || tx.CreatedAt || '';
                         const txMemberName = tx.member_name || tx.MemberName || 'Family member';
                         const txReceiptUrl = tx.receipt_url || tx.ReceiptURL || '';
+                        const txReceiptData = tx.receiptData || tx.ReceiptData || '';
                         return `
                         <div class="rounded-xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
                             <div class="flex items-start gap-3">
@@ -549,7 +552,8 @@ const pages = {
                                 <div class="text-right flex items-center gap-2">
                                     <div>
                                         <p class="text-lg font-bold ${txType === 'credit' ? 'text-success' : 'text-error'}">${txType === 'credit' ? '+' : '-'}${formatCurrency(txAmount)}</p>
-                                        ${txReceiptUrl ? `<a href="${txReceiptUrl}" target="_blank" class="text-xs text-brand font-medium mt-1 block">View Receipt</a>` : ''}
+                                        ${txReceiptUrl ? `<button onclick="showReceiptImage('${txReceiptUrl}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
+                                        ${!txReceiptUrl && txReceiptData ? `<button onclick="showTransferReceiptData('${tx.id || tx.ID}', '${encodeURIComponent(txReceiptData)}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                     </div>
                                 </div>
                             </div>
@@ -743,10 +747,10 @@ const pages = {
                                         <p class="text-sm font-semibold text-text-primary">${cleanReason(tx.reason, tx.type)}</p>
                                         <p class="text-xs text-text-muted mt-1">${formatDate(tx.created_at)}</p>
                                     </div>
-                                    <div class="text-right">
+                                    <div class="text-right flex items-center gap-2">
                                         <p class="text-lg font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}</p>
-                                        ${tx.receipt_url ? `<a href="${tx.receipt_url}" target="_blank" class="text-xs text-brand font-medium mt-1 block">View Receipt</a>` : ''}
-                                        ${tx.receiptData && !tx.receipt_url ? `<button onclick="showTransferReceiptData('${tx.id}', '${encodeURIComponent(tx.receiptData)}')" class="text-xs text-brand font-medium mt-1 block">View Receipt</button>` : ''}
+                                        ${tx.receipt_url ? `<button onclick="showReceiptImage('${tx.receipt_url}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
+                                        ${tx.receiptData && !tx.receipt_url ? `<button onclick="showTransferReceiptData('${tx.id}', '${encodeURIComponent(tx.receiptData)}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                     </div>
                                 </div>
                             </div>
@@ -1082,10 +1086,11 @@ const pages = {
                                                     <span class="text-xs font-medium px-2 py-0.5 rounded-full ${tx.pool === 'pool1' ? 'bg-brand/10 text-brand' : 'bg-pool2/10 text-pool2'}">${tx.pool === 'pool1' ? 'Family Savings' : 'Personal Savings'}</span>
                                                 </div>
                                             </div>
-                                            <div class="text-right">
+                                            <div class="text-right flex flex-col items-end gap-2">
                                                 <p class="text-xl font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}</p>
-                                                <p class="text-xs text-text-muted mt-1">${formatDate(tx.created_at)}</p>
-                                                ${tx.receipt_url ? `<button onclick="showReceiptImage('${tx.receipt_url}')" class="text-xs text-brand font-medium mt-1 block">View Receipt</button>` : ''}
+                                                <div class="flex items-center gap-2">
+                                                    ${tx.receipt_url ? `<button onclick="showReceiptImage('${tx.receipt_url}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
