@@ -482,11 +482,6 @@ const admin = {
     // Get dashboard
     async getDashboard() {
         return handleResponse(apiFetch('/dashboard'));
-    },
-    
-    // Get all receipts
-    async getReceipts() {
-        return handleResponse(apiFetch('/receipts'));
     }
 };
 

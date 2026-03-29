@@ -34,7 +34,7 @@ const pages = {
                 </div>
                 <div class="relative z-10 text-center max-w-lg">
                     <h1 class="text-5xl lg:text-6xl font-extrabold text-white mb-5 tracking-tight">${t('app.name')}</h1>
-                    <p class="text-xl text-white/90 leading-relaxed">${t('app.tagline')}</p>
+                    <p class="text-xl text-white/90 leading-relaxed">Your family savings, all in one place. Simple, secure, together.</p>
                     <div class="mt-14 grid grid-cols-3 gap-8">
                         <div class="flex flex-col items-center gap-3">
                             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
@@ -61,9 +61,9 @@ const pages = {
             
             <!-- Right Panel - Form -->
             <div class="flex w-full lg:w-[45%] flex-col">
-                <!-- Language Switcher - Prominent at Top -->
-                <div class="flex justify-end p-4 sm:p-6">
-                    <button onclick="openLangModal()" class="flex h-12 items-center gap-2 rounded-xl border border-border bg-surface px-4 text-base font-medium text-text-secondary hover:bg-surface-soft hover:border-brand/30 active:scale-95 transition-all select-none shadow-sm">
+                <!-- Language Switcher - Top Right -->
+                <div class="flex justify-end p-6">
+                    <button onclick="openLangModal()" class="flex h-11 items-center gap-2 rounded-xl px-4 text-sm font-medium text-text-secondary hover:bg-surface-soft active:scale-95 transition-all select-none">
                         ${Icons.globe()}
                         <span>${getCurrentLangName()}</span>
                         ${Icons.chevronDown()}
@@ -72,62 +72,62 @@ const pages = {
                 
                 <!-- Form Area -->
                 <div class="flex flex-1 items-center justify-center px-6 pb-20">
-                    <div class="w-full max-w-md animate-fadeIn">
+                    <div class="w-full max-w-md">
                         <!-- Mobile Brand -->
                         <div class="lg:hidden mb-10 text-center">
                             <h1 class="text-3xl font-extrabold text-brand tracking-tight">${t('app.name')}</h1>
-                            <p class="mt-2 text-sm text-text-muted">${t('app.tagline')}</p>
+                            <p class="mt-2 text-sm text-text-muted">Your family savings, all in one place</p>
                         </div>
                         
                         <!-- Welcome Text -->
                         <div class="mb-8">
-                            <h2 class="text-2xl sm:text-3xl font-bold text-text-primary">${t('auth.welcomeBack') || 'Welcome back'}</h2>
-                            <p class="mt-2 text-base text-text-muted">${t('auth.signInDesc') || 'Sign in to see your family savings'}</p>
+                            <h2 class="text-2xl sm:text-3xl font-bold text-text-primary">Welcome back</h2>
+                            <p class="mt-2 text-sm text-text-muted">Sign in to see your family savings</p>
                         </div>
                         
-                        <div id="login-error" class="mb-5 hidden rounded-xl border border-error/20 bg-error/5 p-4 text-base text-error flex items-center gap-3">
+                        <div id="login-error" class="mb-5 hidden rounded-xl border border-error/20 bg-error/5 p-4 text-sm text-error flex items-center gap-2">
                             ${Icons.alertCircle()}
                             <span></span>
                         </div>
                         
-                        <form onsubmit="handleLogin(event)" class="space-y-6">
-                            <div class="space-y-3">
-                                <label class="block text-base font-semibold text-text-primary">${t('auth.yourName')}</label>
+                        <form onsubmit="handleLogin(event)" class="space-y-5">
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-text-primary">${t('auth.yourName')}</label>
                                 <input type="text" id="login-name" placeholder="${t('auth.yourNamePlaceholder')}"
                                     onblur="this.classList.toggle('border-error', !this.value.trim())"
-                                    class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-5 text-lg transition-all focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/15 hover:border-brand/40">
+                                    class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                             </div>
                             
-                            <div class="space-y-3">
-                                <label class="block text-base font-semibold text-text-primary">${t('auth.password')}</label>
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-text-primary">${t('auth.password')}</label>
                                 <div class="relative">
                                     <input type="password" id="login-password" 
                                         onblur="this.classList.toggle('border-error', !this.value.trim())"
-                                        class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-5 pr-16 text-lg transition-all focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/15 hover:border-brand/40">
-                                    <button type="button" onclick="togglePassword('login-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-12 w-12 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
+                                        class="h-14 w-full min-w-0 rounded-xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                    <button type="button" onclick="togglePassword('login-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
                                         ${Icons.eye()}
                                     </button>
                                 </div>
                             </div>
                             
                             <button type="submit" id="login-btn"
-                                class="flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-brand text-lg font-bold text-white shadow-lg shadow-brand/25 transition-all hover:bg-brand-hover hover:shadow-xl hover:shadow-brand/35 active:scale-[0.98] select-none">
+                                class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-brand text-base font-bold text-white shadow-lg shadow-brand/25 transition-all hover:bg-brand-hover hover:shadow-xl hover:shadow-brand/35 active:scale-[0.98] select-none">
                                 ${Icons.logIn()}
-                                <span>${t('auth.signIn')}</span>
+                                ${t('auth.signIn')}
                             </button>
                         </form>
                         
                         <!-- Divider -->
                         <div class="my-8 flex items-center gap-4">
                             <div class="flex-1 h-px bg-border"></div>
-                            <span class="text-sm text-text-muted uppercase tracking-wider">${t('auth.newHere') || 'New here?'}</span>
+                            <span class="text-xs text-text-muted uppercase tracking-wider">New here?</span>
                             <div class="flex-1 h-px bg-border"></div>
                         </div>
                         
                         <!-- Join CTA -->
-                        <a href="/register" class="flex h-14 w-full items-center justify-center gap-3 rounded-xl border-2 border-brand/30 bg-brand-light/30 text-lg font-bold text-brand transition-all hover:bg-brand-light hover:border-brand active:scale-[0.98] select-none">
+                        <a href="/register" class="flex h-14 w-full items-center justify-center gap-3 rounded-xl border-2 border-brand/30 bg-brand-light/30 text-base font-bold text-brand transition-all hover:bg-brand-light hover:border-brand active:scale-[0.98] select-none">
                             ${Icons.userPlus()}
-                            <span>${t('auth.joinFamily') || 'Join the Odelade Family'}</span>
+                            Join the Odelade Family
                         </a>
                     </div>
                 </div>
@@ -163,7 +163,7 @@ const pages = {
                                 ${Icons.wallet()}
                             </div>
                             <span class="text-2xl font-bold text-white">₦500K+</span>
-                            <span class="text-xs text-white/60">${t('common.savedTogether') || 'Saved Together'}</span>
+                            <span class="text-xs text-white/60">Saved Together</span>
                         </div>
                         <div class="flex flex-col items-center gap-3">
                             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
@@ -344,7 +344,7 @@ const pages = {
                             ${Icons.shield()}
                             ${t('common.familyManagerAccess')}
                         </div>
-                        <h2 class="text-2xl sm:text-3xl font-bold text-text-primary">${t('auth.welcomeBack') || 'Welcome Back'}</h2>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-text-primary">Welcome Back</h2>
                         <p class="text-text-muted mt-2">Enter your manager password to continue</p>
                     </div>
                     
@@ -384,14 +384,14 @@ const pages = {
                             <button type="submit" id="admin-submit-btn"
                                 class="flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-brand px-6 text-base font-bold text-white shadow-lg shadow-brand/30 transition-all hover:bg-brand-hover hover:shadow-xl hover:shadow-brand/40 active:scale-[0.98] select-none">
                                 ${Icons.logIn()}
-                                ${t('auth.signInAsManager')}
+                                Sign In as Manager
                             </button>
                         </form>
                         
                         <div class="mt-8 pt-6 border-t border-border">
                             <a href="/login" class="flex items-center justify-center gap-2 text-sm font-medium text-text-muted hover:text-brand transition-colors select-none">
                                 ${Icons.arrowLeft()}
-                                ${t('auth.backToFamily')}
+                                Back to family login
                             </a>
                         </div>
                     </div>
@@ -422,7 +422,7 @@ const pages = {
         
         const name = store.user?.name?.split(' ')[0] || 'Friend';
         return `
-            <div class="w-full min-w-0 animate-fadeIn">
+            <div class="w-full min-w-0">
                 <!-- Greeting -->
                 <div class="mb-6 flex items-center gap-4">
                     <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-white text-xl font-bold shadow-lg shadow-brand/30">
@@ -434,40 +434,12 @@ const pages = {
                     </div>
                 </div>
                 
-                <!-- Hero Card - Family Savings -->
-                <div class="mb-6 rounded-3xl bg-gradient-to-br from-brand via-brand-hover to-brand-700 text-white p-6 shadow-xl shadow-brand/30">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-white/80 font-medium">${t('member.familySavings') || 'Family Savings'}</span>
-                        <span class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">${Icons.piggyBank()}</span>
-                    </div>
-                    <div class="text-4xl font-extrabold mb-2 tracking-tight">${formatCurrency(d.pool1_balance || 0)}</div>
-                    <div class="text-white/70 text-sm">${d.my_contributions ? formatCurrency(d.my_contributions) + ' ' + (t('common.yourContributions') || 'your contribution') : ''}</div>
-                </div>
-                
-                <!-- Quick Stats Grid -->
+                <!-- KPI Grid -->
                 <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-4">
-                    <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.wallet()}</span>
-                            <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">${t('member.mySavings') || 'My Savings'}</span>
-                        </div>
-                        <div class="text-xl font-bold text-text-primary">${formatCurrency(d.my_contributions || 0)}</div>
-                    </div>
-                    <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.heartHandshake()}</span>
-                            <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">${t('member.personalSavings') || 'Personal Savings'}</span>
-                        </div>
-                        <div class="text-xl font-bold text-text-primary">${formatCurrency(pool2Balance || 0)}</div>
-                    </div>
-                </div>
-                
-                <!-- Quick Action -->
-                <div class="mb-6">
-                    <a href="/member/transfer" class="flex items-center justify-center gap-3 rounded-2xl bg-brand p-4 font-bold text-white shadow-lg shadow-brand/25 select-none hover:bg-brand-hover hover:shadow-xl hover:shadow-brand/30 transition-all active:scale-[0.98]">
-                        ${Icons.arrowRightLeft()}
-                        ${t('common.transferNow') || 'Transfer to Family Savings'}
-                    </a>
+                    ${KpiCard({ label: 'Family Savings', amount: d.pool1_balance || 0, subtext: t('common.totalPool1'), highlight: true })}
+                    ${KpiCard({ label: 'My Savings', amount: d.my_contributions || 0, subtext: t('common.yourContributions') })}
+                    ${KpiCard({ label: 'Personal Savings', amount: pool2Balance || 0, subtext: t('common.yourBalance') })}
+                    ${KpiCard({ label: 'Alerts', amount: store.unreadCount || 0, subtext: 'Unread', isCurrency: false })}
                 </div>
                 
                 <!-- Recent Activity -->
@@ -504,6 +476,7 @@ const pages = {
                             `}).join('')}
                         </div>
                     ` : `
+                        <div class="rounded-2xl border border-border bg-surface p-8 text-center">
                             <div class="mb-3 flex justify-center">${Icons.wallet()}</div>
                             <p class="text-sm text-text-muted">${t('member.noPayments')}</p>
                         </div>
@@ -705,11 +678,9 @@ const pages = {
         
         const filters = window.historyFilters;
         
-        // Calculate summary - exclude transfers from totals
-        const isTransfer = (t) => (t.reason || '').toLowerCase().includes('transfer');
-        const totalIn = transactions.filter(t => t.type === 'credit' && !isTransfer(t)).reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        const totalOut = transactions.filter(t => t.type === 'debit' && !isTransfer(t)).reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        const totalTransfers = transactions.filter(t => isTransfer(t)).reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        // Calculate summary
+        const totalIn = transactions.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        const totalOut = transactions.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
         
         // Apply filters
         let filtered = transactions.filter(tx => {
@@ -719,59 +690,46 @@ const pages = {
         });
         
         return `
-            <div class="w-full min-w-0 mb-6 animate-fadeIn">
+            <div class="w-full min-w-0 mb-4">
                 <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                     ${Icons.history()}
-                    ${t('transaction.history') || 'My Transaction History'}
+                    My Transaction History
                 </h1>
-                <p class="text-sm text-text-muted mt-1">${t('member.historyDesc') || 'A complete record of your activity'}</p>
+                <p class="text-xs sm:text-sm text-text-muted">A complete record of your activity across Family Savings and Personal Savings</p>
             </div>
             
             <!-- Summary Bar -->
             <div class="w-full min-w-0 mb-4 grid grid-cols-2 gap-3">
-                <div class="rounded-xl bg-success/10 p-4 border border-success/20">
-                    <p class="text-xs text-success font-semibold uppercase tracking-wide">${t('table.totalIn') || 'Total Deposited'}</p>
-                    <p class="text-xl font-bold text-success">+${formatCurrency(totalIn)}</p>
+                <div class="rounded-xl bg-success/10 p-3 border border-success/20">
+                    <p class="text-xs text-success font-medium">Total Money In</p>
+                    <p class="text-lg font-bold text-success">+${formatCurrency(totalIn)}</p>
                 </div>
-                <div class="rounded-xl bg-error/10 p-4 border border-error/20">
-                    <p class="text-xs text-error font-semibold uppercase tracking-wide">${t('table.totalOut') || 'Total Withdrawn'}</p>
-                    <p class="text-xl font-bold text-error">-${formatCurrency(totalOut)}</p>
-                </div>
-            </div>
-            ${totalTransfers > 0 ? `
-            <div class="w-full min-w-0 mb-4">
-                <div class="rounded-xl bg-pool2/10 p-4 border border-pool2/20">
-                    <p class="text-xs text-pool2 font-semibold uppercase tracking-wide">${t('transfer.internal') || 'Internal Transfers'}</p>
-                    <p class="text-xl font-bold text-pool2">${formatCurrency(totalTransfers)}</p>
+                <div class="rounded-xl bg-error/10 p-3 border border-error/20">
+                    <p class="text-xs text-error font-medium">Total Money Out</p>
+                    <p class="text-lg font-bold text-error">-${formatCurrency(totalOut)}</p>
                 </div>
             </div>
-            ` : ''}
             
-            <!-- Sticky Filter Tabs -->
-            <div class="w-full min-w-0 mb-4 -mx-4 px-4 overflow-x-auto bg-surface-soft py-2">
-                <div class="flex gap-2 min-w-max">
-                    <button onclick="window.historyFilters={fund:'all',type:'all'};router.refresh()" class="px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${filters.fund==='all' && filters.type==='all' ? 'bg-brand text-white shadow-md' : 'bg-surface text-text-secondary border border-border'}">
-                        ${t('table.all') || 'All'}
-                    </button>
-                    <button onclick="window.historyFilters={fund:'pool1',type:'all'};router.refresh()" class="px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${filters.fund==='pool1' ? 'bg-brand text-white shadow-md' : 'bg-surface text-text-secondary border border-border'}">
-                        ${t('member.familySavings') || 'Family Savings'}
-                    </button>
-                    <button onclick="window.historyFilters={fund:'pool2',type:'all'};router.refresh()" class="px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${filters.fund==='pool2' ? 'bg-brand text-white shadow-md' : 'bg-surface text-text-secondary border border-border'}">
-                        ${t('member.personalSavings') || 'Personal Savings'}
-                    </button>
-                    <button onclick="window.historyFilters={fund:'all',type:'credit'};router.refresh()" class="px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${filters.type==='credit' ? 'bg-success text-white shadow-md' : 'bg-surface text-text-secondary border border-border'}">
-                        ${t('table.moneyIn') || 'Money In'}
-                    </button>
-                    <button onclick="window.historyFilters={fund:'all',type:'debit'};router.refresh()" class="px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${filters.type==='debit' ? 'bg-error text-white shadow-md' : 'bg-surface text-text-secondary border border-border'}">
-                        ${t('table.moneyOut') || 'Money Out'}
-                    </button>
+            <!-- Filters -->
+            <div class="w-full min-w-0 mb-4 flex flex-wrap gap-2">
+                <div class="flex rounded-lg border border-border overflow-hidden">
+                    <button onclick="window.historyFilters.fund='all';window.historyFilters.type='all';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='all' && filters.type==='all' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">All</button>
                 </div>
+                <div class="flex rounded-lg border border-border overflow-hidden">
+                    <button onclick="window.historyFilters.fund='pool1';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='pool1' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">Family Savings</button>
+                    <button onclick="window.historyFilters.fund='pool2';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='pool2' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">Personal Savings</button>
+                </div>
+                <div class="flex rounded-lg border border-border overflow-hidden">
+                    <button onclick="window.historyFilters.type='credit';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.type==='credit' ? 'bg-success text-white' : 'bg-surface text-text-secondary'}">Money In</button>
+                    <button onclick="window.historyFilters.type='debit';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.type==='debit' ? 'bg-error text-white' : 'bg-surface text-text-secondary'}">Money Out</button>
+                </div>
+                ${(filters.fund !== 'all' || filters.type !== 'all') ? `<button onclick="window.historyFilters={fund:'all',type:'all'};router.refresh()" class="px-3 py-2 text-xs font-medium text-brand">Clear</button>` : ''}
             </div>
             
             <!-- Transactions -->
             <div class="w-full min-w-0">
                 ${filtered.length > 0 ? `
-                    <div class="w-full min-w-0 space-y-3">
+                    <div class="w-full min-w-0 space-y-2">
                         ${filtered.map((tx, i) => `
                             <div class="rounded-xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
                                 <div class="flex items-start gap-3">
@@ -794,17 +752,7 @@ const pages = {
                             </div>
                         `).join('')}
                     </div>
-                    ${filtered.length >= 20 ? `
-                    <div class="flex items-center justify-between mt-6 pt-4 border-t border-border">
-                        <button onclick="window.historyPage = (window.historyPage || 1) - 1; router.refresh()" class="px-5 py-3 rounded-xl border border-border text-sm font-medium text-text-secondary hover:bg-surface-soft disabled:opacity-50" ${(window.historyPage || 1) <= 1 ? 'disabled' : ''}>
-                            ${Icons.chevronLeft()} Previous
-                        </button>
-                        <span class="text-sm text-text-muted">Page ${window.historyPage || 1}</span>
-                        <button onclick="window.historyPage = (window.historyPage || 1) + 1; router.refresh()" class="px-5 py-3 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand-hover">
-                            Next ${Icons.chevronRight()}
-                        </button>
-                    </div>
-                    ` : ''}
+                    ${filtered.length >= 20 ? `<p class="text-center text-sm text-text-muted mt-4">You have reached the end of your history</p>` : ''}
                 ` : `
                     <div class="rounded-2xl border border-border bg-surface p-8 text-center">
                         <div class="mb-3 flex justify-center">${Icons.history()}</div>
@@ -986,7 +934,7 @@ const pages = {
                     ${KpiCard({ label: 'Family Savings', amount: d.pool1_balance || 0, subtext: t('common.totalPool1'), highlight: true })}
                     ${KpiCard({ label: 'Personal Savings', amount: d.pool2_balance || 0, subtext: 'Total Pool 2' })}
                     ${KpiCard({ label: t('admin.members'), amount: d.member_count || 0, subtext: (d.active_count || 0) + ' ' + t('common.active'), isCurrency: false })}
-                    ${KpiCard({ label: 'Overdue', amount: (d.underfunded_members || []).length || 0, subtext: t('member.behind'), isCurrency: false })}
+                    ${KpiCard({ label: 'Overdue', amount: d.overdue_count || 0, subtext: t('member.behind'), isCurrency: false })}
                 </div>
                 
                 ${d.underfunded_members && d.underfunded_members.length > 0 ? `
@@ -1046,20 +994,8 @@ const pages = {
             amount: tx.amount || tx.Amount,
             reason: tx.Reason || tx.reason,
             created_at: tx.created_at || tx.CreatedAt,
-            receipt_url: tx.receipt_url || tx.ReceiptURL
+            receipt_url: tx.receipt_url || tx.ReceiptURL || tx.receiptData
         }));
-        
-        // Attach receipts from receipts table (for transfers)
-        try {
-            const adminApi = window.admin;
-            const receipts = await adminApi.getReceipts();
-            const receiptMap = {};
-            receipts.forEach(r => { receiptMap[r.TransactionID] = r; });
-            transactions = transactions.map(tx => ({
-                ...tx,
-                receiptData: receiptMap[tx.id]?.ReceiptData
-            }));
-        } catch (e) { console.warn('failed to load receipts', e); }
         
         const filters = window.adminTxFilters;
         
@@ -1070,11 +1006,9 @@ const pages = {
             return true;
         });
         
-        // Summary - exclude transfers from totals
-        const isTransfer = (t) => (t.reason || '').toLowerCase().includes('transfer');
-        const totalIn = filtered.filter(t => t.type === 'credit' && !isTransfer(t)).reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        const totalOut = filtered.filter(t => t.type === 'debit' && !isTransfer(t)).reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        const totalTransfers = filtered.filter(t => isTransfer(t)).reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        // Summary
+        const totalIn = filtered.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        const totalOut = filtered.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
         
         // Group by date
         const grouped = {};
@@ -1103,21 +1037,17 @@ const pages = {
             </div>
             
             <!-- Summary Bar -->
-            <div class="w-full min-w-0 mb-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="w-full min-w-0 mb-4 grid grid-cols-3 gap-3">
                 <div class="rounded-xl bg-success/10 p-3 border border-success/20">
-                    <p class="text-xs text-success font-medium">Total Deposited</p>
+                    <p class="text-xs text-success font-medium">Money In</p>
                     <p class="text-lg font-bold text-success">+${formatCurrency(totalIn)}</p>
                 </div>
                 <div class="rounded-xl bg-error/10 p-3 border border-error/20">
-                    <p class="text-xs text-error font-medium">Total Withdrawn</p>
+                    <p class="text-xs text-error font-medium">Money Out</p>
                     <p class="text-lg font-bold text-error">-${formatCurrency(totalOut)}</p>
                 </div>
-                <div class="rounded-xl bg-pool2/10 p-3 border border-pool2/20">
-                    <p class="text-xs text-pool2 font-medium">Internal Transfers</p>
-                    <p class="text-lg font-bold text-pool2">${formatCurrency(totalTransfers)}</p>
-                </div>
                 <div class="rounded-xl bg-brand/10 p-3 border border-brand/20">
-                    <p class="text-xs text-brand font-medium">Net</p>
+                    <p class="text-xs text-brand font-medium">Net Balance</p>
                     <p class="text-lg font-bold text-brand">${formatCurrency(totalIn - totalOut)}</p>
                 </div>
             </div>
@@ -1155,8 +1085,7 @@ const pages = {
                                             <div class="text-right">
                                                 <p class="text-xl font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}</p>
                                                 <p class="text-xs text-text-muted mt-1">${formatDate(tx.created_at)}</p>
-                                                ${tx.receipt_url ? `<a href="${tx.receipt_url}" target="_blank" class="text-xs text-brand font-medium mt-1 block">View Receipt</a>` : ''}
-                                                ${!tx.receipt_url && tx.receiptData ? `<button onclick="showTransferReceiptData('${tx.id}', '${encodeURIComponent(tx.receiptData)}')" class="text-xs text-brand font-medium mt-1 block">View Receipt</button>` : ''}
+                                                ${tx.receipt_url ? `<button onclick="showReceiptImage('${tx.receipt_url}')" class="text-xs text-brand font-medium mt-1 block">View Receipt</button>` : ''}
                                             </div>
                                         </div>
                                     </div>
@@ -1440,12 +1369,12 @@ const pages = {
                             </div>
                         </div>
                         ${activeTab === 'pending' ? `
-                        <div class="flex gap-2 mt-4 pt-3 border-t border-border">
-                            <button onclick="acceptRequest('${reqId}')" class="flex-1 flex items-center justify-center gap-2 rounded-xl bg-success py-3 text-sm font-semibold text-white transition-all hover:bg-success/90 active:scale-[0.98] select-none shadow-sm">
-                                ${Icons.checkCircle()} ${t('careFund.accepted') || 'Accept'}
+                        <div class="flex gap-2 mt-3">
+                            <button onclick="acceptRequest('${reqId}')" class="flex-1 flex items-center justify-center gap-1 rounded-lg bg-success px-3 py-2 text-xs font-medium text-white transition-colors active:bg-success/90 select-none">
+                                ${Icons.check()} Accept
                             </button>
-                            <button onclick="showDeclineForm('${reqId}')" class="flex-1 flex items-center justify-center gap-2 rounded-xl border-2 border-error py-3 text-sm font-semibold text-error transition-all hover:bg-error/5 active:scale-[0.98] select-none">
-                                ${Icons.xCircle()} ${t('careFund.notApproved') || 'Decline'}
+                            <button onclick="showDeclineForm('${reqId}')" class="flex-1 flex items-center justify-center gap-1 rounded-lg border border-error px-3 py-2 text-xs font-medium text-error transition-colors active:bg-error/5 select-none">
+                                ${Icons.x()} Decline
                             </button>
                         </div>
                         ` : ''}
@@ -1561,9 +1490,9 @@ const pages = {
         
         function item(n, isUnread) {
             return `
-                <button onclick="${isUnread ? `handleMarkRead('${n.id}')` : ''}" class="w-full text-left flex items-start gap-4 p-4 rounded-2xl ${isUnread ? 'bg-brand-light/30 border-l-4 border-l-brand' : 'bg-surface-soft border border-transparent'} hover:shadow-md transition-all select-none">
+                <button onclick="${isUnread ? `handleMarkRead('${n.id}')` : ''}" class="w-full text-left flex items-start gap-4 p-4 rounded-2xl ${isUnread ? 'bg-brand-light/50 border border-brand/30' : 'bg-surface-soft border border-transparent'} hover:shadow-md transition-all select-none">
                     <div class="flex-shrink-0 mt-1">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl ${isUnread ? 'bg-brand text-white shadow-lg shadow-brand/30' : 'bg-surface-raised text-text-muted'}">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl ${isUnread ? 'bg-brand text-white shadow-md shadow-brand/30' : 'bg-surface-raised text-text-muted'}">
                             ${Icons.bell()}
                         </div>
                     </div>
@@ -1573,7 +1502,7 @@ const pages = {
                     </div>
                     ${isUnread ? `
                         <div class="flex-shrink-0 mt-1">
-                            <span class="flex h-3 w-3 rounded-full bg-brand animate-pulse"></span>
+                            <span class="flex h-3 w-3 rounded-full bg-brand"></span>
                         </div>
                     ` : ''}
                 </button>
@@ -1581,14 +1510,14 @@ const pages = {
         }
         
         return `
-            <div class="w-full min-w-0 px-4 animate-fadeIn">
+            <div class="w-full min-w-0 px-4">
                 <div class="mb-6 flex items-center justify-between">
                     <div>
                         <h1 class="text-xl font-bold text-text-primary">${t('nav.notifications')}</h1>
-                        <p class="text-sm text-text-muted mt-0.5">${unread.length > 0 ? unread.length + ' ' + (t('common.unread') || 'unread') : t('common.allCaughtUp')}</p>
+                        <p class="text-sm text-text-muted mt-0.5">${unread.length > 0 ? unread.length + ' unread' : t('common.allCaughtUp')}</p>
                     </div>
                     ${unread.length > 0 ? `
-                        <button onclick="handleMarkAllRead()" class="h-12 px-5 rounded-xl bg-brand text-white text-sm font-semibold shadow-lg shadow-brand/25 hover:bg-brand-hover active:scale-[0.98] transition-all select-none">
+                        <button onclick="handleMarkAllRead()" class="h-10 px-4 rounded-xl bg-brand text-white text-sm font-semibold shadow-md shadow-brand/25 select-none">
                             ${t('common.markAllRead')}
                         </button>
                     ` : ''}
@@ -1596,11 +1525,11 @@ const pages = {
                 
                 ${notifications.length === 0 ? `
                     <div class="flex flex-col items-center justify-center py-20">
-                        <div class="mb-5 flex h-24 w-24 items-center justify-center rounded-2xl bg-surface-soft text-text-muted">
+                        <div class="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-surface-soft text-3xl">
                             ${Icons.bell()}
                         </div>
-                        <h3 class="text-xl font-bold text-text-primary mb-2">${t('common.allCaughtUp')}</h3>
-                        <p class="text-base text-text-muted text-center">${t('common.noNewNotifications')}</p>
+                        <h3 class="text-lg font-semibold text-text-primary mb-1">${t('common.allCaughtUp')}</h3>
+                        <p class="text-sm text-text-muted">${t('common.noNewNotifications')}</p>
                     </div>
                 ` : `
                     <div class="space-y-3">

@@ -82,65 +82,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230D9488' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m2 9 10-5 10 5-10 5-10-5z'/><path d='m2 14 10 5 10-5'/><path d='m2 19 10 5 10-5'/></svg>">
     
     <style>
-        /* ===== DESIGN SYSTEM ===== */
-        :root {
-            /* Typography Scale */
-            --font-display: 2rem;      /* 32px - Hero numbers */
-            --font-h1: 1.75rem;        /* 28px - Page titles */
-            --font-h2: 1.375rem;       /* 22px - Section headers */
-            --font-h3: 1.125rem;       /* 18px - Card titles */
-            --font-body-lg: 1.0625rem; /* 17px - Important text */
-            --font-body: 1rem;         /* 16px - Body text */
-            --font-body-sm: 0.9375rem;  /* 15px - Secondary text */
-            --font-caption: 0.8125rem;  /* 13px - Labels */
-            --font-tiny: 0.75rem;      /* 12px - Timestamps */
-
-            /* Font Weights */
-            --font-regular: 400;
-            --font-medium: 500;
-            --font-semibold: 600;
-            --font-bold: 700;
-
-            /* Spacing Scale */
-            --space-1: 0.25rem;   /* 4px */
-            --space-2: 0.5rem;    /* 8px */
-            --space-3: 0.75rem;   /* 12px */
-            --space-4: 1rem;      /* 16px */
-            --space-5: 1.25rem;    /* 20px */
-            --space-6: 1.5rem;     /* 24px */
-            --space-8: 2rem;       /* 32px */
-            --space-10: 2.5rem;    /* 40px */
-            --space-12: 3rem;      /* 48px */
-
-            /* Border Radius */
-            --radius-sm: 0.5rem;   /* 8px - buttons */
-            --radius-md: 0.75rem;   /* 12px - inputs */
-            --radius-lg: 1rem;      /* 16px - cards */
-            --radius-xl: 1.25rem;   /* 20px - modals */
-            --radius-2xl: 1.5rem;   /* 24px - hero cards */
-            --radius-full: 9999px;  /* circles */
-
-            /* Shadows */
-            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -1px rgba(0,0,0,0.04);
-            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
-            --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
-
-            /* Animation Tokens */
-            --duration-fast: 150ms;
-            --duration-normal: 200ms;
-            --duration-slow: 300ms;
-            --duration-page: 400ms;
-            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-            --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-
-            /* Touch targets */
-            --touch-min: 48px;
-        }
-
         html { overflow-x: hidden; scroll-behavior: smooth; font-size: 16px; }
-        html[dir="rtl"] { direction: rtl; }
-        
         body { 
             overflow-x: hidden;
             font-family: 'Plus Jakarta Sans', system-ui, sans-serif; 
@@ -148,70 +90,12 @@
             -webkit-tap-highlight-color: transparent;
             margin: 0;
             padding: 0;
-            font-size: var(--font-body);
+            font-size: 15px;
             line-height: 1.6;
         }
-        h1 { font-size: var(--font-h1); font-weight: var(--font-bold); }
-        h2 { font-size: var(--font-h2); font-weight: var(--font-semibold); }
-        h3 { font-size: var(--font-h3); font-weight: var(--font-semibold); }
-        
-        /* Premium button styles */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: var(--space-2);
-            min-height: var(--touch-min);
-            padding: var(--space-3) var(--space-6);
-            font-size: var(--font-body-sm);
-            font-weight: var(--font-semibold);
-            border-radius: var(--radius-md);
-            border: none;
-            cursor: pointer;
-            transition: all var(--duration-fast) var(--ease-out);
-        }
-        .btn:active { transform: scale(0.97); }
-        .btn-primary {
-            background: var(--color-brand, #0D9488);
-            color: white;
-            box-shadow: var(--shadow-md);
-        }
-        .btn-primary:hover { 
-            background: var(--color-brand-hover, #0F766E);
-            box-shadow: var(--shadow-lg);
-        }
-        
-        /* Premium input styles */
-        .input {
-            width: 100%;
-            min-height: var(--touch-min);
-            padding: var(--space-3) var(--space-4);
-            font-size: var(--font-body);
-            border: 1px solid var(--color-border, #CCFBF1);
-            border-radius: var(--radius-md);
-            background: white;
-            transition: all var(--duration-fast) var(--ease-out);
-        }
-        .input:focus {
-            outline: none;
-            border-color: var(--color-brand, #0D9488);
-            box-shadow: 0 0 0 3px rgba(13,148,136,0.15);
-        }
-        
-        /* Premium card styles */
-        .card {
-            background: white;
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--color-border, #CCFBF1);
-            box-shadow: var(--shadow-sm);
-            transition: all var(--duration-normal) var(--ease-out);
-        }
-        .card-interactive:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
-        }
-        
-        /* Loader */
+        h1 { font-size: 1.5rem; }
+        h2 { font-size: 1.25rem; }
+        h3 { font-size: 1.125rem; }
         .loader {
             width: 48px;
             height: 48px;
@@ -223,8 +107,6 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        
-        /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -233,32 +115,14 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes countUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        @keyframes slideInTop {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .animate-fadeIn { animation: fadeIn var(--duration-slow) var(--ease-out); }
-        .animate-slideUp { animation: slideUp var(--duration-page) var(--ease-out); }
-        .animate-pulse { animation: pulse 2s ease-in-out infinite; }
-        .animate-slideInTop { animation: slideInTop var(--duration-normal) var(--ease-out); }
-        
-        a, button { transition: all var(--duration-fast) var(--ease-out); }
-        a:active, button:active { transform: scale(0.97); }
-        
+        .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+        .animate-slideUp { animation: slideUp 0.4s ease-out; }
+        a, button { transition: all 0.15s ease; }
         .icon { display: inline-flex; width: 1em; height: 1em; }
         .icon-sm { width: 16px; height: 16px; }
         .icon-md { width: 20px; height: 20px; }
         .icon-lg { width: 24px; height: 24px; }
-        .touch-target { min-height: var(--touch-min); min-width: var(--touch-min); }
+        .touch-target { min-height: 48px; min-width: 48px; }
         
         /* Premium card styles */
         .card-premium {
@@ -333,9 +197,8 @@
         <div class="absolute inset-0 bg-black/50" onclick="closeLangModal()"></div>
         <div class="absolute bottom-0 left-0 right-0 max-h-[70vh] overflow-y-auto rounded-t-3xl bg-surface p-4">
             <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
-            <h3 class="mb-4 text-center font-bold text-xl">Select Language</h3>
+            <h3 class="mb-4 text-center font-semibold text-lg">Choose Language</h3>
             <div class="space-y-2" id="lang-options"></div>
-            <button onclick="closeLangModal()" class="w-full mt-4 py-4 text-brand font-semibold text-lg">Cancel</button>
         </div>
     </div>
     
@@ -387,12 +250,6 @@
                 router.init();
                 renderLangOptions();
             } catch(e) {
-                // Init error
-            }
-            try {
-                router.init();
-                renderLangOptions();
-            } catch(e) {
                 console.error('Init error:', e);
                 var overlay = document.getElementById('error-overlay');
                 if (overlay) {
@@ -409,26 +266,22 @@
             initApp();
         }
         
-        // Render language options - no emojis
+        // Render language options
         function renderLangOptions() {
             var container = document.getElementById('lang-options');
             if (!container) return;
             var langs = [
-                { code: 'en', name: 'English' },
-                { code: 'yo', name: 'Yoruba' },
-                { code: 'ig', name: 'Igbo' },
-                { code: 'ha', name: 'Hausa' },
-                { code: 'ar', name: 'Arabic' }
+                { code: 'en', name: 'English', flag: '🇬🇧' },
+                { code: 'yo', name: 'Yorùbá', flag: '🇳🇬' },
+                { code: 'ig', name: 'Igbo', flag: '🇳🇬' },
+                { code: 'ha', name: 'Hausa', flag: '🇳🇬' },
+                { code: 'ar', name: 'العربية', flag: '🇸🇦' }
             ];
             container.innerHTML = langs.map(function(lang) {
-                return '<button onclick="setLang(\'' + lang.code + '\')" data-lang="' + lang.code + '" class="lang-btn flex w-full items-center justify-between rounded-xl px-4 py-4 text-left border border-transparent hover:bg-surface-soft transition-all">' +
-                    '<span class="flex items-center gap-3"><span class="font-medium text-base">' + lang.name + '</span></span>' +
-                    '<span class="check hidden text-brand font-bold">✓</span></button>';
+                return '<button onclick="setLang(\'' + lang.code + '\')" class="flex w-full items-center justify-between rounded-xl px-4 py-4 text-left hover:bg-surface-soft">' +
+                    '<span class="flex items-center gap-3"><span class="font-medium">' + lang.name + '</span></span>' +
+                    '<span class="check hidden text-brand">✓</span></button>';
             }).join('');
-            // Update buttons after rendering
-            if (typeof updateLangButtons === 'function') {
-                setTimeout(updateLangButtons, 0);
-            }
         }
         
         // Notifications Modal
@@ -503,10 +356,10 @@
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/sw.js')
                     .then(function(registration) {
-                        // Service worker registered
+                        console.log('SW registered:', registration.scope);
                     })
                     .catch(function(error) {
-                        // Service worker registration failed
+                        console.log('SW registration failed:', error);
                     });
             });
         }
@@ -593,5 +446,24 @@
         });
     </script>
     
+    <!-- Debug Log Panel -->
+    <script>
+    const _logs = [];
+    const _origLog = console.log.bind(console);
+    const _origError = console.error.bind(console);
+    console.log = (...args) => { _origLog(...args); _logs.push('[LOG] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')); updatePanel(); };
+    console.error = (...args) => { _origError(...args); _logs.push('[ERR] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')); updatePanel(); };
+    function updatePanel() {
+        let panel = document.getElementById('_debug_panel');
+        if (!panel) {
+            panel = document.createElement('div');
+            panel.id = '_debug_panel';
+            panel.style.cssText = 'position:fixed;bottom:0;left:0;right:0;max-height:40vh;overflow-y:auto;background:#000;color:#0f0;font-size:11px;font-family:monospace;z-index:99999;padding:8px;';
+            document.body.appendChild(panel);
+        }
+        panel.innerHTML = _logs.slice(-30).join('<br>') + '<br><button onclick="navigator.clipboard.writeText(_logs.join(\'\\n\'))" style="color:yellow;margin-top:4px;">Copy</button>';
+        panel.scrollTop = panel.scrollHeight;
+    }
+    </script>
 </body>
 </html>
