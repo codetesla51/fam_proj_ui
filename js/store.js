@@ -70,10 +70,24 @@ const store = {
     
     // Login member - always use real API
     async login(name, password) {
+        // Save language preference before clearing
+        const lang = localStorage.getItem('language');
+        
+        // Clear absolutely everything first
         authState.clear();
+        localStorage.clear();
+        
+        // Restore language
+        if (lang) localStorage.setItem('language', lang);
+        
+        // Reset all in-memory store data
         this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [] };
+        
+        // Login
         await auth.login(name, password);
         authState.set(tokens.access, false);
+        
+        // Store new user and load fresh profile
         this.user = { name };
         this.data.profile = await member.getProfile();
         this.user = { ...this.user, ...this.data.profile };
@@ -81,23 +95,52 @@ const store = {
     
     // Register member - always use real API
     async register({ name, password, interval, committed_amount, start_date }) {
-        // Clear ALL tokens first
-        tokens.clear();
-        localStorage.removeItem('user_data');
+        // Save language preference before clearing
+        const lang = localStorage.getItem('language');
+        
+        // Clear absolutely everything
+        authState.clear();
+        localStorage.clear();
+        
+        // Restore language
+        if (lang) localStorage.setItem('language', lang);
+        
+        // Reset all in-memory store data
         this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [] };
         
+        // Register
         await auth.register({ name, password, interval, committed_amount, start_date });
-        await this.login(name, password);
+        
+        // Auto login with new credentials
+        await auth.login(name, password);
+        authState.set(tokens.access, false);
+        
+        // Store new user and load fresh profile
+        this.user = { name };
+        this.data.profile = await member.getProfile();
+        this.user = { ...this.user, ...this.data.profile };
     },
     
     // Admin login - always use real API
     async adminLogin(password) {
+        // Save language preference before clearing
+        const lang = localStorage.getItem('language');
+        
+        // Clear absolutely everything first
         authState.clear();
+        localStorage.clear();
+        
+        // Restore language
+        if (lang) localStorage.setItem('language', lang);
+        
+        // Reset all in-memory store data
         this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [] };
+        
+        // Admin login
         const data = await auth.adminLogin(password);
-        console.log('[store.adminLogin] auth.adminLogin returned:', data);
         authState.set(data.access_token, true);
-        console.log('[store.adminLogin] authState after set — isLoggedIn:', authState.isLoggedIn, 'isAdmin:', authState.isAdmin);
+        
+        // Store admin user
         this.user = { name: 'Admin', isAdmin: true };
     },
     
