@@ -177,36 +177,41 @@ const router = {
             return;
         }
         
-        // Start polling when logged in
-        store.startPolling();
+        // Check if this is a protected route
+        const isProtectedRoute = (path.startsWith('/member') || path.startsWith('/admin')) && path !== '/admin/login';
         
-        // Prefetch all data in parallel before rendering
-        try {
-            await Promise.all([
-                store.loadDashboard(),
-                store.loadNotifications(),
-                store.loadTransactions(),
-                store.loadCareFundRequests()
-            ]);
-            // Update notification badge after prefetch
-            store.updateNotifBadge();
-        } catch (e) {
-            console.error('Prefetch error:', e);
+        // Show loading for protected routes
+        if (isProtectedRoute) {
+            store.startPolling();
+            try {
+                await Promise.all([
+                    store.loadDashboard(),
+                    store.loadNotifications(),
+                    store.loadTransactions(),
+                    store.loadCareFundRequests()
+                ]);
+                store.updateNotifBadge();
+            } catch (e) {
+                console.error('Prefetch error:', e);
+            }
         }
-        const hasCachedData = store.dashboard || store.transactions?.length || store.notifications?.length || store.careFundRequests?.length;
-        app.innerHTML = `
-            <div class="min-h-screen flex flex-col items-center justify-center bg-surface-soft">
-                <div class="mb-6">
-                    <svg class="w-16 h-16 text-brand animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                        <path d="M2 17l10 5 10-5"/>
-                        <path d="M2 12l10 5 10-5"/>
-                    </svg>
+        
+        // Show loading spinner for protected routes only
+        if (isProtectedRoute) {
+            app.innerHTML = `
+                <div class="min-h-screen flex flex-col items-center justify-center bg-surface-soft">
+                    <div class="mb-6">
+                        <svg class="w-16 h-16 text-brand animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M2 17l10 5 10-5"/>
+                            <path d="M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <div class="loader mx-auto mb-4"></div>
+                    <p class="text-sm text-text-muted">Loading...</p>
                 </div>
-                <div class="loader mx-auto mb-4"></div>
-                <p class="text-sm text-text-muted">Loading...</p>
-            </div>
-        `;
+            `;
+        }
         
         // Load page content (async)
         try {
