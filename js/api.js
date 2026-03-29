@@ -387,14 +387,16 @@ const admin = {
     // Get all members (with full details)
     async getAllMembers() {
         const data = await handleResponse(apiFetch('/members/all'));
-        // Normalize keys
+        // Normalize keys - include pool balances
         return (Array.isArray(data) ? data : []).map(m => ({
             id: m.ID || m.id,
             name: m.Name || m.name,
             interval: m.Interval || m.interval,
             committed_amount: m.CommittedAmount || m.committed_amount,
             start_date: m.StartDate || m.start_date,
-            status: m.Status || m.status
+            status: m.Status || m.status,
+            current_sum: m.CurrentSum || m.current_sum || '0',
+            pool2_sum: m.Pool2Sum || m.pool2_sum || '0'
         }));
     },
     
