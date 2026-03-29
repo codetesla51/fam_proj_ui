@@ -516,14 +516,10 @@ const pages = {
             </div>
             
             <!-- Summary -->
-            <div class="w-full min-w-0 mb-4 grid grid-cols-2 gap-3">
-                <div class="rounded-xl bg-success/10 p-3 border border-success/20">
+            <div class="w-full min-w-0 mb-4">
+                <div class="rounded-xl bg-success/10 p-4 border border-success/20">
                     <p class="text-xs text-success font-medium">Total Saved</p>
-                    <p class="text-lg font-bold text-success">+${formatCurrency(totalIn)}</p>
-                </div>
-                <div class="rounded-xl bg-error/10 p-3 border border-error/20">
-                    <p class="text-xs text-error font-medium">Total Withdrawn</p>
-                    <p class="text-lg font-bold text-error">-${formatCurrency(totalOut)}</p>
+                    <p class="text-xl font-bold text-success">+${formatCurrency(totalIn)}</p>
                 </div>
             </div>
             
