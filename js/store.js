@@ -31,6 +31,9 @@ function normalizeArray(arr) {
 
 // Store - State management with real API only
 const store = {
+    _justLoggedIn: false,
+    _dataTimestamps: {},
+    
     data: {
         user: null,
         profile: null,
@@ -38,7 +41,25 @@ const store = {
         notifications: [],
         careFundRequests: [],
         dashboard: null,
-        members: []
+        members: [],
+        receipts: []
+    },
+    
+    // Check if data is stale (older than 30 seconds)
+    isStale(key) {
+        const timestamp = this._dataTimestamps[key];
+        if (!timestamp) return true;
+        return Date.now() - timestamp > 30000;
+    },
+    
+    // Mark data as fetched (update timestamp)
+    _markFresh(key) {
+        this._dataTimestamps[key] = Date.now();
+    },
+    
+    // Clear all data timestamps (on logout)
+    _clearTimestamps() {
+        this._dataTimestamps = {};
     },
     
     // Always use real API - no mock fallback
@@ -81,8 +102,12 @@ const store = {
         // Restore language
         if (lang) localStorage.setItem('language', lang);
         
-        // Reset all in-memory store data
-        this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [] };
+        // Reset all in-memory store data and clear timestamps
+        this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [], receipts: [] };
+        this._clearTimestamps();
+        
+        // Mark as just logged in to force fresh fetch
+        this._justLoggedIn = true;
         
         // Login
         await auth.login(name, password);
@@ -92,6 +117,9 @@ const store = {
         this.user = { name };
         this.data.profile = await member.getProfile();
         this.user = { ...this.user, ...this.data.profile };
+        
+        // Mark data as fresh
+        this._markFresh('profile');
     },
     
     // Register member - always use real API
@@ -107,8 +135,12 @@ const store = {
         // Restore language
         if (lang) localStorage.setItem('language', lang);
         
-        // Reset all in-memory store data
-        this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [] };
+        // Reset all in-memory store data and clear timestamps
+        this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [], receipts: [] };
+        this._clearTimestamps();
+        
+        // Mark as just logged in to force fresh fetch
+        this._justLoggedIn = true;
         
         // Register
         await auth.register({ name, password, interval, committed_amount, start_date });
@@ -121,6 +153,9 @@ const store = {
         this.user = { name };
         this.data.profile = await member.getProfile();
         this.user = { ...this.user, ...this.data.profile };
+        
+        // Mark data as fresh
+        this._markFresh('profile');
     },
     
     // Admin login - always use real API
@@ -136,8 +171,12 @@ const store = {
         // Restore language
         if (lang) localStorage.setItem('language', lang);
         
-        // Reset all in-memory store data
-        this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [] };
+        // Reset all in-memory store data and clear timestamps
+        this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [], receipts: [] };
+        this._clearTimestamps();
+        
+        // Mark as just logged in to force fresh fetch
+        this._justLoggedIn = true;
         
         // Admin login
         const data = await auth.adminLogin(password);
@@ -149,20 +188,45 @@ const store = {
     
     // Logout - clear EVERYTHING
     async logout() {
+        // Save language preference before clearing
+        const lang = localStorage.getItem('language');
+        
+        // Stop all polling first
         this.stopPolling();
+        
+        // Clear auth state
         authState.clear();
+        
+        // Clear all localStorage except language
+        localStorage.clear();
+        
+        // Restore language
+        if (lang) localStorage.setItem('language', lang);
+        
+        // Clear session storage
+        sessionStorage.clear();
+        
+        // Clear all data and timestamps
         this.data = { user: null, profile: null, transactions: [], notifications: [], careFundRequests: [], dashboard: null, members: [], receipts: [] };
+        this._clearTimestamps();
+        this._justLoggedIn = false;
+        
         router.navigate('/login');
     },
     
     // Load dashboard
-    async loadDashboard() {
+    async loadDashboard(force = false) {
+        // Check if stale unless forced
+        if (!force && !this.isStale('dashboard')) {
+            return this.data.dashboard || {};
+        }
         try {
             if (this.isAdmin()) {
                 this.data.dashboard = await admin.getDashboard();
             } else {
                 this.data.dashboard = await member.getDashboard();
             }
+            this._markFresh('dashboard');
         } catch (e) {
             console.error('Failed to load dashboard:', e);
             this.data.dashboard = {};
@@ -171,7 +235,11 @@ const store = {
     },
     
     // Load transactions
-    async loadTransactions(options = {}) {
+    async loadTransactions(options = {}, force = false) {
+        // Check if stale unless forced
+        if (!force && !this.isStale('transactions')) {
+            return this.data.transactions || [];
+        }
         try {
             let result;
             if (this.isAdmin()) {
@@ -191,6 +259,7 @@ const store = {
             }
             
             this.data.transactions = normalizeArray(raw);
+            this._markFresh('transactions');
             return this.data.transactions;
         } catch (e) {
             this.data.transactions = [];
@@ -227,11 +296,16 @@ const store = {
         }
     },
     
-    async loadNotifications() {
+    async loadNotifications(force = false) {
+        // Check if stale unless forced
+        if (!force && !this.isStale('notifications')) {
+            return this.data.notifications || [];
+        }
         try {
             const data = await member.getNotifications();
             const raw = Array.isArray(data.notifications) ? data.notifications : (Array.isArray(data) ? data : []);
             this.data.notifications = normalizeArray(raw);
+            this._markFresh('notifications');
         } catch (e) {
             console.warn('notifications unavailable, skipping');
             this.data.notifications = this.data.notifications || [];
@@ -268,7 +342,14 @@ const store = {
     },
     
     // Load care fund requests
-    async loadCareFundRequests(status) {
+    async loadCareFundRequests(status, force = false) {
+        // Check if stale unless forced
+        if (!force && !this.isStale('careFundRequests')) {
+            if (status) {
+                return (this.data.careFundRequests || []).filter(r => r.status === status);
+            }
+            return this.data.careFundRequests || [];
+        }
         try {
             let result;
             if (this.isAdmin()) {
@@ -282,6 +363,7 @@ const store = {
             if (status) {
                 this.data.careFundRequests = this.data.careFundRequests.filter(r => r.status === status);
             }
+            this._markFresh('careFundRequests');
         } catch (e) {
             console.error('Failed to load care fund requests:', e);
             this.data.careFundRequests = [];
@@ -309,6 +391,8 @@ const store = {
             if (idx !== -1) {
                 this.data.careFundRequests[idx] = normalizeItem(result);
             }
+            // Force reload care fund requests to get fresh data
+            await this.loadCareFundRequests(null, true);
             return result;
         } catch (e) {
             // Rollback
@@ -325,7 +409,11 @@ const store = {
             if (rejection_reason) this.data.careFundRequests[idx].rejection_reason = rejection_reason;
         }
         try {
-            return await admin.updateCareFundRequest(id, status, rejection_reason);
+            const result = await admin.updateCareFundRequest(id, status, rejection_reason);
+            // Force reload care fund requests and notifications
+            await this.loadCareFundRequests(null, true);
+            await this.loadNotifications(true);
+            return result;
         } catch (e) {
             if (idx !== -1) {
                 // Rollback - reload
@@ -346,8 +434,9 @@ const store = {
         
         try {
             const result = await admin.createTransaction(data);
-            // Reload transactions to get real data
-            await this.loadTransactions();
+            // Force reload transactions and dashboard to get fresh data
+            await this.loadTransactions({}, true);
+            await this.loadDashboard(true);
             return result;
         } catch (e) {
             this.data.transactions = this.data.transactions.filter(t => t.id !== optimisticTx.id);
@@ -357,7 +446,10 @@ const store = {
     
     // Create member
     async createMember(data) {
-        return admin.createMember(data);
+        const result = await admin.createMember(data);
+        // Force reload members list
+        await this.loadAllMembers(true);
+        return result;
     },
     
     // Reset password
@@ -366,9 +458,14 @@ const store = {
     },
     
     // Load all members (admin)
-    async loadAllMembers() {
+    async loadAllMembers(force = false) {
+        // Check if stale unless forced
+        if (!force && !this.isStale('members')) {
+            return this.data.members || [];
+        }
         try {
             this.data.members = await admin.getAllMembers();
+            this._markFresh('members');
         } catch (e) {
             console.error('Failed to load all members:', e);
             this.data.members = [];
@@ -382,10 +479,15 @@ const store = {
     },
     
     // Load profile
-    async loadProfile() {
+    async loadProfile(force = false) {
+        // Check if stale unless forced
+        if (!force && !this.isStale('profile')) {
+            return this.data.profile;
+        }
         try {
             this.data.profile = await member.getProfile();
             this.user = { ...this.user, ...this.data.profile };
+            this._markFresh('profile');
         } catch (e) {
             console.error('Failed to load profile:', e);
         }
@@ -414,7 +516,11 @@ const store = {
     
     // Transfer pool
     async transferPool(amount) {
-        return member.transferPool(amount);
+        const result = await member.transferPool(amount);
+        // Force reload dashboard and transactions
+        await this.loadDashboard(true);
+        await this.loadTransactions({}, true);
+        return result;
     },
     
     // Get receipt by transaction ID
