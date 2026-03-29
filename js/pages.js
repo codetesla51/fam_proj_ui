@@ -541,7 +541,7 @@ const pages = {
             <div class="w-full min-w-0 mb-4">
                 <div class="rounded-2xl bg-success/10 p-4 border border-success/20">
                     <p class="text-xs text-success font-medium">Total Saved</p>
-                    <p class="text-xl font-bold text-success">+${formatCurrency(totalIn)}</p>
+                    <p class="text-xl font-bold text-success">+${formatMoney(totalIn, { compact: true })}</p>
                 </div>
             </div>
             
@@ -620,12 +620,12 @@ const pages = {
             <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-3">
                 <div class="rounded-2xl border border-border bg-surface p-4">
                     <p class="text-xs font-bold uppercase tracking-wider text-text-muted mb-1">${t('member.personalSavings')}</p>
-                    <p class="text-2xl font-bold text-brand">${formatCurrency(pool2Balance || 0)}</p>
+                    <p class="text-2xl font-bold text-brand">${formatMoney(pool2Balance || 0, { compact: true })}</p>
                     <p class="text-xs text-text-muted mt-1">${t('transfer.available')}</p>
                 </div>
                 <div class="rounded-2xl border border-border bg-surface p-4">
                     <p class="text-xs font-bold uppercase tracking-wider text-text-muted mb-1">${t('member.familySavings')}</p>
-                    <p class="text-2xl font-bold text-text-primary">${formatCurrency(pool1Balance)}</p>
+                    <p class="text-2xl font-bold text-text-primary">${formatMoney(pool1Balance, { compact: true })}</p>
                     <p class="text-xs text-text-muted mt-1">${t('transfer.currentBalance')}</p>
                 </div>
             </div>
@@ -643,7 +643,7 @@ const pages = {
                                     <input type="number" id="transfer-amount" placeholder="0" max="${pool2Balance || 0}"
                                         class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface py-3 pl-12 pr-4 text-lg font-semibold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                                 </div>
-                                <p class="text-xs text-text-muted">${t('transfer.maximum')}: ${formatCurrency(pool2Balance || 0)}</p>
+                                <p class="text-xs text-text-muted">${t('transfer.maximum')}: ${formatMoney(pool2Balance || 0, { compact: true })}</p>
                             </div>
                             
                             <button type="submit" id="transfer-btn" class="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-brand px-4 font-bold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/40 hover:-translate-y-0.5 transition-all select-none">
@@ -734,7 +734,7 @@ const pages = {
                 </div>
                 <div class="rounded-2xl bg-error/10 p-3 border border-error/20">
                     <p class="text-xs text-error font-medium">Total Money Out</p>
-                    <p class="text-lg font-bold text-error">-${formatCurrency(totalOut)}</p>
+                    <p class="text-lg font-bold text-error">-${formatMoney(totalOut, { compact: true })}</p>
                 </div>
             </div>
             
@@ -904,7 +904,7 @@ const pages = {
             <!-- Balance -->
             <div class="w-full min-w-0 mb-6 rounded-2xl border-2 border-brand/20 bg-gradient-to-br from-brand-light to-white p-5 shadow-lg shadow-brand/10">
                 <p class="text-sm font-bold text-brand mb-1">Personal Savings Balance</p>
-                <p class="text-3xl font-bold text-brand">${formatCurrency(pool2Balance || 0)}</p>
+                <p class="text-3xl font-bold text-brand">${formatMoney(pool2Balance || 0, { compact: true })}</p>
             </div>
             
             <!-- Request Form -->
@@ -984,7 +984,7 @@ const pages = {
                             
                             <!-- Withdrawal Info -->
                             <div id="withdrawal-info" class="hidden p-3 rounded-xl bg-surface-soft border border-border">
-                                <p class="text-xs text-text-muted">This will withdraw from your personal savings balance of <span class="font-bold text-text-primary">${formatCurrency(pool2Balance || 0)}</span></p>
+                                <p class="text-xs text-text-muted">This will withdraw from your personal savings balance of <span class="font-bold text-text-primary">${formatMoney(pool2Balance || 0, { compact: true })}</span></p>
                             </div>
                             
                             <button type="submit" id="care-btn" class="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-brand text-lg font-bold text-white shadow-lg shadow-brand/25 select-none">
@@ -1096,7 +1096,7 @@ const pages = {
                                         <div class="flex h-8 w-8 items-center justify-center rounded-full bg-error/10 text-xs font-bold text-error flex-shrink-0">${name.charAt(0)}</div>
                                         <span class="text-sm font-medium text-text-primary truncate min-w-0">${name}</span>
                                     </div>
-                                    <span class="text-xs font-bold text-error whitespace-nowrap flex-shrink-0">${formatCurrency(gap)} behind</span>
+                                    <span class="text-xs font-bold text-error whitespace-nowrap flex-shrink-0">${formatMoney(gap, { compact: true })} behind</span>
                                 </div>
                             `}).join('')}
                         </div>
@@ -1197,11 +1197,11 @@ const pages = {
                 </div>
                 <div class="rounded-2xl bg-error/10 p-3 border border-error/20">
                     <p class="text-xs text-error font-medium">Money Out</p>
-                    <p class="text-lg font-bold text-error">-${formatCurrency(totalOut)}</p>
+                    <p class="text-lg font-bold text-error">-${formatMoney(totalOut, { compact: true })}</p>
                 </div>
                 <div class="rounded-2xl bg-brand/10 p-3 border border-brand/20">
                     <p class="text-xs text-brand font-medium">Net Balance</p>
-                    <p class="text-lg font-bold text-brand">${formatCurrency(totalIn - totalOut)}</p>
+                    <p class="text-lg font-bold text-brand">${formatMoney(totalIn - totalOut, { compact: true })}</p>
                 </div>
             </div>
             
@@ -1619,11 +1619,11 @@ const pages = {
                     <div class="mb-4 space-y-2 rounded-2xl bg-surface-soft p-4">
                         <div class="flex justify-between items-center">
                             <span class="text-xs text-text-muted">Family Savings</span>
-                            <span class="text-xs font-bold text-text-primary">${formatCurrency(m.current_sum || m.CurrentSum || 0)}</span>
+                            <span class="text-xs font-bold text-text-primary">${formatMoney(m.current_sum || m.CurrentSum || 0, { compact: true })}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-xs text-text-muted">Personal Savings</span>
-                            <span class="text-xs font-bold text-text-primary">${formatCurrency(m.pool2_sum || m.Pool2Sum || 0)}</span>
+                            <span class="text-xs font-bold text-text-primary">${formatMoney(m.pool2_sum || m.Pool2Sum || 0, { compact: true })}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-xs text-text-muted">Status</span>
@@ -2137,7 +2137,7 @@ function selectRequestType(type) {
     
     // Only check balance for withdrawal requests
     if (requestType === 'withdrawal' && requested > balance) {
-        showToast('Not enough money in your personal savings. You have ' + formatCurrency(balance), 'error');
+        showToast('Not enough money in your personal savings. You have ' + formatMoney(balance), 'error');
         return;
     }
     
@@ -2330,7 +2330,7 @@ async function handlePoolTransfer() {
     const requested = parseInt(amount);
     
     if (requested > balance) {
-        showToast('Not enough money. You have ' + formatCurrency(balance) + ' available', 'error');
+        showToast('Not enough money. You have ' + formatMoney(balance) + ' available', 'error');
         return;
     }
     
