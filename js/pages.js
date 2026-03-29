@@ -361,6 +361,11 @@ const pages = {
                             <span></span>
                         </div>
                         
+                        <div id="admin-success" class="mb-4 hidden rounded-xl border border-success/20 bg-success/10 p-4 text-sm text-success flex items-center gap-3">
+                            ${Icons.checkCircle()}
+                            <span></span>
+                        </div>
+                        
                         <form onsubmit="handleAdminLogin(event)" class="space-y-6">
                             <div class="space-y-3">
                                 <label class="block text-sm font-semibold text-text-primary flex items-center gap-2">
@@ -1650,39 +1655,45 @@ async function handleAdminLogin(e) {
     e.preventDefault();
     const password = document.getElementById('admin-password').value;
     const errorEl = document.getElementById('admin-error');
+    const successEl = document.getElementById('admin-success');
     const btn = e.target.querySelector('button[type="submit"]');
     
+    errorEl.classList.add('hidden');
+    successEl.classList.add('hidden');
+    
     if (!password) {
-        errorEl.querySelector('span:last-child').textContent = t('validation.required');
+        errorEl.querySelector('span:last-child').textContent = 'Password is required';
         errorEl.classList.remove('hidden');
         return;
     }
     
-    if (btn) btn.disabled = true;
-    errorEl.classList.add('hidden');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span> Signing in...';
+    }
     
     try {
         await store.adminLogin(password);
-        // Small tick to let localStorage writes settle
-        await new Promise(r => setTimeout(r, 50));
+        successEl.querySelector('span:last-child').textContent = 'Login successful! Redirecting...';
+        successEl.classList.remove('hidden');
+        await new Promise(r => setTimeout(r, 300));
         router.navigate('/admin/dashboard');
     } catch(err) {
-        // Clear is_admin on error
-        localStorage.removeItem('is_admin');
-        
-        let msg = err.message || 'errors.wrongPassword';
+        let msg = err.message || 'Wrong password. Please try again.';
         if (msg.includes('.')) {
             msg = t(msg) || t('errors.tryAgain');
         } else {
             msg = msg.replace(/[{}"\[\]]/g, '').trim();
-            if (!msg || msg === 'Request failed') {
-                msg = t('errors.wrongPassword');
+            if (!msg || msg === 'Request failed' || msg === 'Network Error') {
+                msg = 'Wrong password. Please try again.';
             }
         }
         errorEl.querySelector('span:last-child').textContent = msg;
         errorEl.classList.remove('hidden');
-    } finally {
-        if (btn) btn.disabled = false;
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `${Icons.shield()} Sign In as Manager`;
+        }
     }
 }
 
