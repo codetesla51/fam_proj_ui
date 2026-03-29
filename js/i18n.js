@@ -97,6 +97,7 @@ const translations = {
             back: "Back", viewReceipt: "View receipt", justNow: "Just now",
             yesterday: "Yesterday", confirm: "Confirm", delete: "Delete",
             edit: "Edit", close: "Close", search: "Search", noData: "No data",
+            active: "Active",
             upToDate: "Up to date", new: "New", earlier: "Earlier",
             noNewNotifications: "No new notifications",
             alertsCaughtUp: "You're all caught up!",

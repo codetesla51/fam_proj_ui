@@ -944,7 +944,7 @@ const pages = {
                     ${KpiCard({ label: 'Family Savings', amount: d.pool1_balance || 0, subtext: t('common.totalPool1'), highlight: true })}
                     ${KpiCard({ label: 'Personal Savings', amount: d.pool2_balance || 0, subtext: 'Total Pool 2' })}
                     ${KpiCard({ label: t('admin.members'), amount: d.member_count || 0, subtext: (d.active_count || 0) + ' ' + t('common.active'), isCurrency: false })}
-                    ${KpiCard({ label: 'Overdue', amount: d.overdue_count || 0, subtext: t('member.behind'), isCurrency: false })}
+                    ${KpiCard({ label: 'Overdue', amount: (d.underfunded_members || []).length || 0, subtext: t('member.behind'), isCurrency: false })}
                 </div>
                 
                 ${d.underfunded_members && d.underfunded_members.length > 0 ? `
