@@ -138,6 +138,7 @@ const store = {
     
     // Load transactions
     async loadTransactions(options = {}) {
+        console.log('[Store] loadTransactions called, isAdmin:', this.isAdmin());
         try {
             let result;
             if (this.isAdmin()) {
@@ -145,6 +146,8 @@ const store = {
             } else {
                 result = await member.getTransactions(options);
             }
+            console.log('[Store] getTransactions result:', result);
+            
             // Handle both array and object response formats
             let raw = [];
             if (Array.isArray(result)) {
@@ -154,32 +157,14 @@ const store = {
             } else if (result?.data && Array.isArray(result.data)) {
                 raw = result.data;
             }
+            console.log('[Store] raw transactions:', raw.length);
             
-            // For members, fetch receipts and attach to transactions
-            if (!this.isAdmin() && raw.length > 0) {
-                try {
-                    const receipts = await member.getReceipts();
-                    const receiptMap = {};
-                    receipts.forEach(r => {
-                        const txId = r.TransactionID || r.transaction_id || r.ID;
-                        receiptMap[txId] = r;
-                    });
-                    raw.forEach(tx => {
-                        const txId = tx.ID || tx.id;
-                        if (receiptMap[txId]) {
-                            tx.receiptData = receiptMap[txId].ReceiptNumber || receiptMap[txId].receipt_number;
-                            tx.receiptType = 'transfer';
-                        }
-                    });
-                } catch (receiptErr) {
-                    console.warn('Failed to load receipts:', receiptErr);
-                }
-            }
-            
+            // Skip receipts for now to simplify
             this.data.transactions = normalizeArray(raw);
+            console.log('[Store] normalized transactions:', this.data.transactions.length);
             return this.data.transactions;
         } catch (e) {
-            console.error('Failed to load transactions:', e);
+            console.error('[Store] Failed to load transactions:', e);
             this.data.transactions = [];
             return [];
         }
