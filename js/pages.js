@@ -425,9 +425,9 @@ const pages = {
     
     // Member Pages
     memberDashboard: async () => {
-        // Load dashboard and transactions if not already loaded
+        // Load dashboard and transactions (loadDashboard handles staleness)
         const [dashboard, recentTx] = await Promise.all([
-            store.data.dashboard ? Promise.resolve(store.data.dashboard) : store.loadDashboard(),
+            store.loadDashboard(),
             member.getAllTransactions({ limit: 50 })
         ]);
         
@@ -520,8 +520,9 @@ const pages = {
     },
     
     memberSavings: async () => {
-        // Use cached transactions from store, filter by pool1
-        let transactions = (store.data.transactions || []).filter(t => t.pool === 'pool1' || t.Pool === 'pool1');
+        // Load transactions (handles staleness)
+        const allTx = await store.loadTransactions();
+        let transactions = (allTx || []).filter(t => t.pool === 'pool1' || t.Pool === 'pool1');
         
         // Calculate summary
         const totalIn = transactions.filter(t => t.type === 'credit' || t.Type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || t.Amount || 0), 0);
