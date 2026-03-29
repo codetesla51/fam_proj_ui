@@ -265,12 +265,17 @@ const member = {
         params.set('offset', (page - 1) * limit);
         const data = await handleResponse(apiFetch(`/transactions/mine?${params}`));
         // Backend returns { data: [...], total, limit, offset }
-        // We filter by pool on frontend if needed (API uses Pool, not pool)
-        let transactions = data.data || data || [];
+        // Handle case where data.data might be null
+        let transactions = [];
+        if (Array.isArray(data?.data)) {
+            transactions = data.data;
+        } else if (Array.isArray(data)) {
+            transactions = data;
+        }
         if (pool) {
             transactions = transactions.filter(t => t.Pool === pool || t.pool === pool);
         }
-        return { transactions, total: data.total || transactions.length };
+        return { transactions, total: data?.total || transactions.length };
     },
     
     // Transfer pool2 to pool1
@@ -397,8 +402,13 @@ const admin = {
         if (pool) params.set('pool', pool);
         const data = await handleResponse(apiFetch(`/transactions?${params}`));
         // Backend returns { data: [...], total, limit, offset }
-        const transactions = data.data || data || [];
-        return { transactions, total: data.total || transactions.length };
+        let transactions = [];
+        if (Array.isArray(data?.data)) {
+            transactions = data.data;
+        } else if (Array.isArray(data)) {
+            transactions = data;
+        }
+        return { transactions, total: data?.total || transactions.length };
     },
     
     // Get general ledger

@@ -2241,14 +2241,16 @@ async function showTransferReceiptModal(receipt, newPool2Balance, newPool1Balanc
                         </div>
                     </div>
                     
-                    <div class="flex gap-3 pt-2">
-                        <button onclick="copyReceiptNumber('${receiptNumber}')" class="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl bg-brand text-white font-semibold hover:bg-brand-hover transition-colors">
-                            ${Icons.copy()}
-                            Copy Receipt
+                    <div class="flex gap-2 pt-2">
+                        <button onclick="downloadReceiptFromModal()" class="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl bg-brand text-white font-semibold hover:bg-brand-hover transition-colors">
+                            ${Icons.download()}
+                            Download
                         </button>
-                        <button onclick="closeTransferReceiptModal()" class="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-border font-semibold hover:bg-surface-soft transition-colors">
+                        <button onclick="copyReceiptNumber('${receiptNumber}')" class="flex items-center justify-center gap-2 h-12 px-4 rounded-xl bg-surface-soft border border-border font-semibold hover:bg-surface-raised transition-colors">
+                            ${Icons.copy()}
+                        </button>
+                        <button onclick="closeTransferReceiptModal()" class="flex items-center justify-center gap-2 h-12 px-4 rounded-xl border-2 border-border font-semibold hover:bg-surface-soft transition-colors">
                             ${Icons.x()}
-                            Close
                         </button>
                     </div>
                 </div>
@@ -2286,18 +2288,87 @@ function closeTransferReceiptModal() {
     }
 }
 
-function downloadTransferReceipt(transactionId) {
-    const receiptData = localStorage.getItem('last_receipt_data');
-    if (receiptData) {
-        const data = JSON.parse(receiptData);
-        const blob = new Blob([data.ReceiptData], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `receipt-${transactionId}-${new Date().toISOString().split('T')[0]}.txt`;
-        a.click();
-        URL.revokeObjectURL(url);
-    }
+function downloadTransferReceipt(receiptNumber, amount, memberName) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 400;
+    const ctx = canvas.getContext('2d');
+    
+    // Background
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, 600, 400);
+    
+    // Border
+    ctx.strokeStyle = '#0D9488';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(10, 10, 580, 380);
+    
+    // Header
+    ctx.fillStyle = '#0D9488';
+    ctx.fillRect(10, 10, 580, 60);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('TRANSFER RECEIPT', 300, 50);
+    
+    // Checkmark
+    ctx.beginPath();
+    ctx.arc(300, 120, 30, 0, Math.PI * 2);
+    ctx.fillStyle = '#059669';
+    ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 30px Arial';
+    ctx.fillText('✓', 300, 132);
+    
+    // Success text
+    ctx.fillStyle = '#059669';
+    ctx.font = 'bold 18px Arial';
+    ctx.fillText('Transfer Successful!', 300, 175);
+    
+    // Details
+    ctx.fillStyle = '#333333';
+    ctx.font = '14px Arial';
+    const details = [
+        ['Receipt Number:', receiptNumber || 'N/A'],
+        ['Member:', memberName || 'Member'],
+        ['Amount:', '₦' + parseFloat(amount || 0).toLocaleString()],
+        ['From:', 'Personal Savings (Pool 2)'],
+        ['To:', 'Family Savings (Pool 1)'],
+        ['Date:', new Date().toLocaleDateString()],
+        ['Time:', new Date().toLocaleTimeString()]
+    ];
+    
+    let y = 210;
+    details.forEach(([label, value]) => {
+        ctx.fillStyle = '#666666';
+        ctx.textAlign = 'left';
+        ctx.fillText(label, 100, y);
+        ctx.fillStyle = '#333333';
+        ctx.font = 'bold 14px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillText(value, 500, y);
+        y += 25;
+    });
+    
+    // Footer
+    ctx.fillStyle = '#94A3B8';
+    ctx.font = '10px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Odelade Family Ledger', 300, 375);
+    
+    // Download
+    const link = document.createElement('a');
+    link.download = `Receipt-${receiptNumber || 'transfer'}-${new Date().toISOString().split('T')[0]}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+}
+
+function downloadReceiptFromModal() {
+    const modal = document.getElementById('transfer-receipt-modal');
+    const receiptNo = modal?.querySelector('.font-mono.font-bold')?.textContent || 'RCP';
+    const amount = modal?.querySelector('.text-brand.font-bold')?.textContent?.replace(/[₦,]/g, '') || '0';
+    const member = store.user?.name || 'Member';
+    downloadTransferReceipt(receiptNo, amount, member);
 }
 
 function showTransferReceiptData(transactionId, receiptData) {

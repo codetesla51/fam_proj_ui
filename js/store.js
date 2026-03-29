@@ -133,23 +133,35 @@ const store = {
             } else {
                 result = await member.getTransactions(options);
             }
-            const raw = Array.isArray(result) ? result : (result?.transactions || result?.data || []);
+            // Handle both array and object response formats
+            let raw = [];
+            if (Array.isArray(result)) {
+                raw = result;
+            } else if (result?.transactions && Array.isArray(result.transactions)) {
+                raw = result.transactions;
+            } else if (result?.data && Array.isArray(result.data)) {
+                raw = result.data;
+            }
             
             // For members, fetch receipts and attach to transactions
-            if (!this.isAdmin()) {
-                const receipts = await member.getReceipts();
-                const receiptMap = {};
-                receipts.forEach(r => {
-                    const txId = r.TransactionID || r.transaction_id || r.ID;
-                    receiptMap[txId] = r;
-                });
-                raw.forEach(tx => {
-                    const txId = tx.ID || tx.id;
-                    if (receiptMap[txId]) {
-                        tx.receiptData = receiptMap[txId].ReceiptNumber || receiptMap[txId].receipt_number;
-                        tx.receiptType = 'transfer';
-                    }
-                });
+            if (!this.isAdmin() && raw.length > 0) {
+                try {
+                    const receipts = await member.getReceipts();
+                    const receiptMap = {};
+                    receipts.forEach(r => {
+                        const txId = r.TransactionID || r.transaction_id || r.ID;
+                        receiptMap[txId] = r;
+                    });
+                    raw.forEach(tx => {
+                        const txId = tx.ID || tx.id;
+                        if (receiptMap[txId]) {
+                            tx.receiptData = receiptMap[txId].ReceiptNumber || receiptMap[txId].receipt_number;
+                            tx.receiptType = 'transfer';
+                        }
+                    });
+                } catch (receiptErr) {
+                    console.warn('Failed to load receipts:', receiptErr);
+                }
             }
             
             this.data.transactions = normalizeArray(raw);
@@ -165,8 +177,15 @@ const store = {
     async loadReceipts() {
         try {
             const receipts = await member.getReceipts();
+            // Handle both array and object responses
+            let recArray = [];
+            if (Array.isArray(receipts)) {
+                recArray = receipts;
+            } else if (receipts?.data && Array.isArray(receipts.data)) {
+                recArray = receipts.data;
+            }
             // Normalize keys
-            this.data.receipts = receipts.map(r => ({
+            this.data.receipts = recArray.map(r => ({
                 id: r.ID || r.id,
                 receipt_number: r.ReceiptNumber || r.receipt_number,
                 amount: r.Amount || r.amount,
