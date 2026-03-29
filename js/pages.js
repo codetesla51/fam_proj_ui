@@ -401,14 +401,19 @@ const pages = {
     
     // Member Pages
     memberDashboard: async () => {
-        const dashboard = store.data.dashboard || await store.loadDashboard();
+        // Load dashboard and transactions if not already loaded
+        const [dashboard, transactions] = await Promise.all([
+            store.data.dashboard ? Promise.resolve(store.data.dashboard) : store.loadDashboard(),
+            store.data.transactions?.length ? Promise.resolve(store.data.transactions) : store.loadTransactions()
+        ]);
+        
         const d = dashboard || {};
         
         // Get pool2 balance from dashboard
         let pool2Balance = d.my_pool2_contributions;
         
-        // Use cached transactions from store
-        let recent = store.data.transactions?.slice(0, 10) || [];
+        // Get recent transactions
+        let recent = (transactions || []).slice(0, 10);
         
         const name = store.user?.name?.split(' ')[0] || 'Friend';
         return `

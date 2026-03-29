@@ -260,21 +260,17 @@ const member = {
     
     // Get own transactions
     async getTransactions({ pool, page = 1, limit = 20 } = {}) {
-        console.log('[Member.getTransactions] Fetching transactions, limit:', limit);
         const params = new URLSearchParams();
         params.set('limit', limit);
         params.set('offset', (page - 1) * limit);
         const data = await handleResponse(apiFetch(`/transactions/mine?${params}`));
-        console.log('[Member.getTransactions] Raw response:', data);
         // Backend returns { data: [...], total, limit, offset }
-        // Handle case where data.data might be null
         let transactions = [];
         if (Array.isArray(data?.data)) {
             transactions = data.data;
         } else if (Array.isArray(data)) {
             transactions = data;
         }
-        console.log('[Member.getTransactions] Parsed transactions:', transactions.length);
         if (pool) {
             transactions = transactions.filter(t => t.Pool === pool || t.pool === pool);
         }

@@ -138,7 +138,6 @@ const store = {
     
     // Load transactions
     async loadTransactions(options = {}) {
-        console.log('[Store] loadTransactions called, isAdmin:', this.isAdmin());
         try {
             let result;
             if (this.isAdmin()) {
@@ -146,7 +145,6 @@ const store = {
             } else {
                 result = await member.getTransactions(options);
             }
-            console.log('[Store] getTransactions result:', result);
             
             // Handle both array and object response formats
             let raw = [];
@@ -157,14 +155,11 @@ const store = {
             } else if (result?.data && Array.isArray(result.data)) {
                 raw = result.data;
             }
-            console.log('[Store] raw transactions:', raw.length);
             
-            // Skip receipts for now to simplify
             this.data.transactions = normalizeArray(raw);
-            console.log('[Store] normalized transactions:', this.data.transactions.length);
             return this.data.transactions;
         } catch (e) {
-            console.error('[Store] Failed to load transactions:', e);
+            console.error('Failed to load transactions:', e);
             this.data.transactions = [];
             return [];
         }
