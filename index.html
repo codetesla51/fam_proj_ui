@@ -393,16 +393,6 @@
             store.updateNotifBadge();
         }
         
-        // PWA - Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js')
-                    .catch(function(error) {
-                        // SW registration failed
-                    });
-            });
-        }
-        
         // PWA - Install Prompt
         let deferredPrompt;
         const installBanner = document.getElementById('install-banner');
