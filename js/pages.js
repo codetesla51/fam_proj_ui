@@ -986,7 +986,8 @@ const pages = {
         // Reset filters
         window.adminTxFilters = window.adminTxFilters || { fund: 'all', type: 'all' };
         
-        const txData = await store.loadTransactions();
+        // Load fresh data with higher limit
+        const txData = await store.loadTransactions({ limit: 100 });
         let transactions = Array.isArray(txData) ? txData : (txData?.transactions || []);
         
         // Normalize fields
