@@ -126,8 +126,6 @@ const router = {
         const pageName = this.routes[path];
         const app = document.getElementById('app');
         
-        console.log('[router.render] path:', path, 'authState.isLoggedIn:', authState.isLoggedIn, 'authState.isAdmin:', authState.isAdmin);
-        
         // Set page title
         this.setPageTitle(path);
         
