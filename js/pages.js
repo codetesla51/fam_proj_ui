@@ -956,7 +956,7 @@ const pages = {
                             <!-- Care Fund Extra Fields -->
                             <div id="care-fund-fields" class="space-y-4">
                                 <div class="p-3 rounded-xl bg-brand-light border border-brand/20">
-                                    <p class="text-xs text-brand font-medium mb-2">This request will be sent to your family members</p>
+                                    <p class="text-xs text-brand font-medium mb-2">This request will be sent to your family manager</p>
                                 </div>
                                 <div class="space-y-2">
                                     <label class="block text-sm font-bold text-text-primary">What do you need the money for?</label>
