@@ -138,14 +138,12 @@ function formatMoney(amount, options = {}) {
     
     let formatted;
     
-    // Use compact format for large numbers
-    if (compact && num >= 1000) {
+    // Use compact format only for amounts >= ₦1,000,000
+    if (compact && num >= 1_000_000) {
         if (num >= 1_000_000_000) {
             formatted = '₦' + (num / 1_000_000_000).toFixed(1) + 'B';
         } else if (num >= 1_000_000) {
             formatted = '₦' + (num / 1_000_000).toFixed(1) + 'M';
-        } else if (num >= 1_000) {
-            formatted = '₦' + (num / 1_000).toFixed(1) + 'K';
         }
     } else {
         formatted = '₦' + num.toLocaleString('en-NG', {
