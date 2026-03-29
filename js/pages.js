@@ -644,8 +644,11 @@ const pages = {
     },
     
     memberHistory: async () => {
-        // Reset filters for fresh page load
-        window.historyFilters = { fund: 'all', type: 'all' };
+        // Reset filters and pagination for fresh page load
+        window.historyFilters = window.historyFilters || { fund: 'all', type: 'all' };
+        window.historyPage = window.historyPage || 1;
+        const limit = 20;
+        const page = window.historyPage;
         
         // Load transactions and receipts
         let transactions = [];
@@ -672,9 +675,7 @@ const pages = {
                     tx.receiptData = receipts[tx.id].ReceiptData;
                 }
             });
-        } catch (e) {
-            console.error('Failed to load:', e);
-        }
+        } catch (e) { }
         
         const filters = window.historyFilters;
         
@@ -688,6 +689,11 @@ const pages = {
             if (filters.type !== 'all' && tx.type !== filters.type) return false;
             return true;
         });
+        
+        // Paginate
+        const start = (page - 1) * limit;
+        const end = start + limit;
+        const paginatedTransactions = filtered.slice(start, end);
         
         return `
             <div class="w-full min-w-0 mb-4">
@@ -713,24 +719,24 @@ const pages = {
             <!-- Filters -->
             <div class="w-full min-w-0 mb-4 flex flex-wrap gap-2">
                 <div class="flex rounded-lg border border-border overflow-hidden">
-                    <button onclick="window.historyFilters.fund='all';window.historyFilters.type='all';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='all' && filters.type==='all' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">All</button>
+                    <button onclick="window.historyFilters={fund:'all',type:'all'};window.historyPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='all' && filters.type==='all' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">All</button>
                 </div>
                 <div class="flex rounded-lg border border-border overflow-hidden">
-                    <button onclick="window.historyFilters.fund='pool1';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='pool1' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">Family Savings</button>
-                    <button onclick="window.historyFilters.fund='pool2';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='pool2' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">Personal Savings</button>
+                    <button onclick="window.historyFilters.fund='pool1';window.historyPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='pool1' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">Family Savings</button>
+                    <button onclick="window.historyFilters.fund='pool2';window.historyPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='pool2' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">Personal Savings</button>
                 </div>
                 <div class="flex rounded-lg border border-border overflow-hidden">
-                    <button onclick="window.historyFilters.type='credit';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.type==='credit' ? 'bg-success text-white' : 'bg-surface text-text-secondary'}">Money In</button>
-                    <button onclick="window.historyFilters.type='debit';router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.type==='debit' ? 'bg-error text-white' : 'bg-surface text-text-secondary'}">Money Out</button>
+                    <button onclick="window.historyFilters.type='credit';window.historyPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.type==='credit' ? 'bg-success text-white' : 'bg-surface text-text-secondary'}">Money In</button>
+                    <button onclick="window.historyFilters.type='debit';window.historyPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.type==='debit' ? 'bg-error text-white' : 'bg-surface text-text-secondary'}">Money Out</button>
                 </div>
-                ${(filters.fund !== 'all' || filters.type !== 'all') ? `<button onclick="window.historyFilters={fund:'all',type:'all'};router.refresh()" class="px-3 py-2 text-xs font-medium text-brand">Clear</button>` : ''}
+                ${(filters.fund !== 'all' || filters.type !== 'all') ? `<button onclick="window.historyFilters={fund:'all',type:'all'};window.historyPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium text-brand">Clear</button>` : ''}
             </div>
             
             <!-- Transactions -->
             <div class="w-full min-w-0">
                 ${filtered.length > 0 ? `
                     <div class="w-full min-w-0 space-y-2">
-                        ${filtered.map((tx, i) => `
+                        ${paginatedTransactions.map((tx, i) => `
                             <div class="rounded-xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
                                 <div class="flex items-start gap-3">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${tx.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
@@ -752,7 +758,7 @@ const pages = {
                             </div>
                         `).join('')}
                     </div>
-                    ${filtered.length >= 20 ? `<p class="text-center text-sm text-text-muted mt-4">You have reached the end of your history</p>` : ''}
+                    ${renderPagination('history', page, filtered.length, limit)}
                 ` : `
                     <div class="rounded-2xl border border-border bg-surface p-8 text-center">
                         <div class="mb-3 flex justify-center">${Icons.history()}</div>
@@ -766,11 +772,15 @@ const pages = {
     
     // Family Activity - All Pool 1 transactions from all members
     memberActivity: async () => {
+        window.activityPage = window.activityPage || 1;
+        const limit = 20;
+        const page = window.activityPage;
+        
         // Fetch all pool1 transactions from API
         let transactions = [];
         try {
             const memberApi = window.member;
-            const result = await memberApi.getAllTransactions({ limit: 50 });
+            const result = await memberApi.getAllTransactions({ limit: 100 });
             let rawTx = result?.transactions || result?.data || [];
             // Normalize PascalCase fields
             transactions = rawTx.map(tx => ({
@@ -793,6 +803,11 @@ const pages = {
             }));
         } catch (e) { }
         
+        // Paginate
+        const start = (page - 1) * limit;
+        const end = start + limit;
+        const paginatedTransactions = transactions.slice(start, end);
+        
         return `
             <div class="w-full min-w-0 mb-6">
                 <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
@@ -805,7 +820,7 @@ const pages = {
             <div class="w-full min-w-0">
                 ${transactions.length > 0 ? `
                     <div class="w-full min-w-0 space-y-3">
-                        ${transactions.map(p => `
+                        ${paginatedTransactions.map(p => `
                             <div class="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
                                 <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
                                     ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? Icons.arrowUpRight() : Icons.arrowDownRight()}
@@ -824,9 +839,7 @@ const pages = {
                             </div>
                         `).join('')}
                     </div>
-                    ${transactions.length >= 20 ? `
-                        <p class="text-center text-sm text-text-muted mt-4">You have reached the end of the family activity</p>
-                    ` : ''}
+                    ${renderPagination('activity', page, transactions.length, limit)}
                 ` : `
                     <div class="rounded-2xl border border-border bg-surface p-8 text-center">
                         <div class="mb-3 flex justify-center">${Icons.users()}</div>
@@ -979,11 +992,12 @@ const pages = {
     },
     
     adminTransactions: async () => {
-        // Reset filters
+        // Reset filters and pagination
         window.adminTxFilters = window.adminTxFilters || { fund: 'all', type: 'all' };
+        window.adminTxPage = window.adminTxPage || 1;
         
-        // Load fresh data with higher limit
-        const txData = await store.loadTransactions({ limit: 100 });
+        // Load fresh data
+        const txData = await store.loadTransactions({ limit: 500 });
         let transactions = Array.isArray(txData) ? txData : (txData?.transactions || []);
         
         // Normalize fields
@@ -1007,13 +1021,20 @@ const pages = {
             return true;
         });
         
+        // Pagination
+        const limit = 20;
+        const page = window.adminTxPage;
+        const start = (page - 1) * limit;
+        const end = start + limit;
+        const paginatedTransactions = filtered.slice(start, end);
+        
         // Summary
         const totalIn = filtered.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
         const totalOut = filtered.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
         
-        // Group by date
+        // Group by date (use paginated data)
         const grouped = {};
-        filtered.forEach(tx => {
+        paginatedTransactions.forEach(tx => {
             const date = new Date(tx.created_at);
             const today = new Date();
             today.setHours(0,0,0,0);
@@ -1055,11 +1076,11 @@ const pages = {
             
             <!-- Filters -->
             <div class="w-full min-w-0 mb-4 flex flex-wrap gap-2">
-                <button onclick="window.adminTxFilters.fund='all';window.adminTxFilters.type='all';router.refresh()" class="px-3 py-2 text-xs font-medium rounded-lg ${filters.fund==='all' && filters.type==='all' ? 'bg-brand text-white' : 'bg-surface text-text-secondary border border-border'}">All</button>
-                <button onclick="window.adminTxFilters.fund='pool1';router.refresh()" class="px-3 py-2 text-xs font-medium rounded-lg ${filters.fund==='pool1' ? 'bg-brand text-white' : 'bg-surface text-text-secondary border border-border'}">Family Savings</button>
-                <button onclick="window.adminTxFilters.fund='pool2';router.refresh()" class="px-3 py-2 text-xs font-medium rounded-lg ${filters.fund==='pool2' ? 'bg-brand text-white' : 'bg-surface text-text-secondary border border-border'}">Personal Savings</button>
-                <button onclick="window.adminTxFilters.type='credit';router.refresh()" class="px-3 py-2 text-xs font-medium rounded-lg ${filters.type==='credit' ? 'bg-success text-white' : 'bg-surface text-text-secondary border border-border'}">Money In</button>
-                <button onclick="window.adminTxFilters.type='debit';router.refresh()" class="px-3 py-2 text-xs font-medium rounded-lg ${filters.type==='debit' ? 'bg-error text-white' : 'bg-surface text-text-secondary border border-border'}">Money Out</button>
+                <button onclick="window.adminTxFilters={fund:'all',type:'all'};window.adminTxPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium rounded-lg ${filters.fund==='all' && filters.type==='all' ? 'bg-brand text-white' : 'bg-surface text-text-secondary border border-border'}">All</button>
+                <button onclick="window.adminTxFilters.fund='pool1';window.adminTxPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium rounded-lg ${filters.fund==='pool1' ? 'bg-brand text-white' : 'bg-surface text-text-secondary border border-border'}">Family Savings</button>
+                <button onclick="window.adminTxFilters.fund='pool2';window.adminTxPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium rounded-lg ${filters.fund==='pool2' ? 'bg-brand text-white' : 'bg-surface text-text-secondary border border-border'}">Personal Savings</button>
+                <button onclick="window.adminTxFilters.type='credit';window.adminTxPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium rounded-lg ${filters.type==='credit' ? 'bg-success text-white' : 'bg-surface text-text-secondary border border-border'}">Money In</button>
+                <button onclick="window.adminTxFilters.type='debit';window.adminTxPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium rounded-lg ${filters.type==='debit' ? 'bg-error text-white' : 'bg-surface text-text-secondary border border-border'}">Money Out</button>
             </div>
             
             <!-- Transactions -->
@@ -1096,7 +1117,7 @@ const pages = {
                         </div>
                     `).join('')}
                 </div>
-                <p class="text-center text-sm text-text-muted mt-4">${filtered.length} transaction${filtered.length !== 1 ? 's' : ''}</p>
+                ${renderPagination('adminTx', page, filtered.length, limit)}
             ` : `
                 <div class="rounded-2xl border border-border bg-surface p-8 text-center">
                     <div class="mb-3 flex justify-center">${Icons.wallet()}</div>
@@ -1285,6 +1306,10 @@ const pages = {
     },
     
     adminCareFund: async () => {
+        window.careFundPage = window.careFundPage || 1;
+        const limit = 10;
+        const page = window.careFundPage;
+        
         const allRequests = await store.loadCareFundRequests();
         const requests = allRequests || store.careFundRequests || [];
         
@@ -1319,9 +1344,14 @@ const pages = {
             </button>`;
         }
         
-        let requestsToShow = pending;
-        if (activeTab === 'accepted') requestsToShow = accepted;
-        if (activeTab === 'rejected') requestsToShow = rejected;
+        let allRequestsToShow = pending;
+        if (activeTab === 'accepted') allRequestsToShow = accepted;
+        if (activeTab === 'rejected') allRequestsToShow = rejected;
+        
+        // Paginate
+        const start = (page - 1) * limit;
+        const end = start + limit;
+        const requestsToShow = allRequestsToShow.slice(start, end);
         
         return `
             <div class="w-full min-w-0 mb-6">
@@ -1383,13 +1413,23 @@ const pages = {
                     </div>
                 `}).join('') : EmptyState({ icon: Icons.heartHandshake(), message: activeTab === 'pending' ? 'No pending requests' : activeTab === 'accepted' ? 'No accepted requests yet' : 'No declined requests' })}
             </div>
+            ${renderPagination('careFund', page, allRequestsToShow.length, limit)}
         `;
     },
     
     adminMembers: async () => {
+        window.adminMembersPage = window.adminMembersPage || 1;
+        const limit = 12;
+        const page = window.adminMembersPage;
+        
         const dashboard = await store.loadDashboard();
         const memberCount = dashboard?.member_count || 0;
         const allMembers = await store.loadAllMembers();
+        
+        // Paginate
+        const start = (page - 1) * limit;
+        const end = start + limit;
+        const paginatedMembers = allMembers.slice(start, end);
         
         return `
         <div class="w-full min-w-0 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -1407,7 +1447,7 @@ const pages = {
         </div>
         
         <div class="w-full min-w-0 grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
-            ${allMembers.map(m => `
+            ${paginatedMembers.map(m => `
                 <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-5 shadow-sm hover:shadow-lg hover:shadow-brand/5 transition-all group">
                     <div class="mb-4 flex items-center gap-3">
                         <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand/10 to-brand/5 text-xl font-bold text-brand flex-shrink-0 group-hover:scale-110 transition-transform">
@@ -1437,6 +1477,7 @@ const pages = {
                 </div>
             `}
         </div>
+        ${renderPagination('adminMembers', page, allMembers.length, limit)}
         
         <!-- Add Member Modal - Bottom Sheet -->
         <div id="add-member-modal" class="fixed inset-0 z-50 hidden">
@@ -1483,10 +1524,20 @@ const pages = {
     },
     
     notifications: async () => {
-        const notifications = await store.loadNotifications().catch(e => {
+        window.notifPage = window.notifPage || 1;
+        const limit = 20;
+        const page = window.notifPage;
+        
+        const allNotifications = await store.loadNotifications().catch(e => {
             console.warn('notifications load failed:', e);
             return [];
         });
+        
+        // Paginate
+        const start = (page - 1) * limit;
+        const end = start + limit;
+        const notifications = allNotifications.slice(start, end);
+        
         const unread = (notifications || []).filter(n => !n.read);
         const read = (notifications || []).filter(n => n.read);
         
@@ -1525,7 +1576,7 @@ const pages = {
                     ` : ''}
                 </div>
                 
-                ${notifications.length === 0 ? `
+                ${allNotifications.length === 0 ? `
                     <div class="flex flex-col items-center justify-center py-20">
                         <div class="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-surface-soft text-3xl">
                             ${Icons.bell()}
@@ -1537,6 +1588,7 @@ const pages = {
                     <div class="space-y-3">
                         ${notifications.map(n => item(n, !n.read)).join('')}
                     </div>
+                    ${renderPagination('notif', page, allNotifications.length, limit)}
                 `}
             </div>
         `;
@@ -2541,4 +2593,138 @@ function downloadReceiptData(transactionId, receiptData) {
     a.download = `receipt-${refId}-${new Date().toISOString().split('T')[0]}.txt`;
     a.click();
     URL.revokeObjectURL(url);
+}
+
+// Infinite Scroll Pagination
+const infiniteScroll = {
+    observers: {},
+    
+    init(pageKey, fetchFn, options = {}) {
+        const { containerId = 'infinite-scroll-container', loaderId = 'infinite-scroll-loader', threshold = 100 } = options;
+        
+        // Clean up existing observer
+        if (this.observers[pageKey]) {
+            this.observers[pageKey].disconnect();
+        }
+        
+        // Reset page state
+        window[`${pageKey}Offset`] = 0;
+        window[`${pageKey}Loading`] = false;
+        window[`${pageKey}HasMore`] = true;
+        window[`${pageKey}Data`] = [];
+        
+        const container = document.getElementById(containerId);
+        const loader = document.getElementById(loaderId);
+        
+        if (!container) return;
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !window[`${pageKey}Loading`] && window[`${pageKey}HasMore`]) {
+                    this.loadMore(pageKey, fetchFn, options);
+                }
+            });
+        }, { rootMargin: `${threshold}px` });
+        
+        if (loader) {
+            observer.observe(loader);
+        }
+        
+        this.observers[pageKey] = observer;
+    },
+    
+    async loadMore(pageKey, fetchFn, options) {
+        if (window[`${pageKey}Loading`] || !window[`${pageKey}HasMore`]) return;
+        
+        window[`${pageKey}Loading`] = true;
+        const loader = document.getElementById('infinite-scroll-loader');
+        const endMessage = document.getElementById('infinite-scroll-end');
+        
+        if (loader) loader.classList.remove('hidden');
+        if (endMessage) endMessage.classList.add('hidden');
+        
+        try {
+            const offset = window[`${pageKey}Offset`] || 0;
+            const newData = await fetchFn(offset);
+            
+            if (!newData || newData.length === 0) {
+                window[`${pageKey}HasMore`] = false;
+            } else {
+                window[`${pageKey}Data`] = [...(window[`${pageKey}Data`] || []), ...newData];
+                window[`${pageKey}Offset`] = offset + newData.length;
+                
+                // If returned less than limit, no more data
+                if (newData.length < 20) {
+                    window[`${pageKey}HasMore`] = false;
+                }
+            }
+        } catch (e) {
+            console.error('Load more error:', e);
+            window[`${pageKey}HasMore`] = false;
+        } finally {
+            window[`${pageKey}Loading`] = false;
+            if (loader) loader.classList.add('hidden');
+            
+            if (!window[`${pageKey}HasMore`] && endMessage) {
+                endMessage.classList.remove('hidden');
+            }
+        }
+    },
+    
+    reset(pageKey) {
+        window[`${pageKey}Offset`] = 0;
+        window[`${pageKey}Loading`] = false;
+        window[`${pageKey}HasMore`] = true;
+        window[`${pageKey}Data`] = [];
+    },
+    
+    cleanup(pageKey) {
+        if (this.observers[pageKey]) {
+            this.observers[pageKey].disconnect();
+            delete this.observers[pageKey];
+        }
+    }
+};
+
+// Render loading indicator
+function renderInfiniteLoader() {
+    return `
+        <div id="infinite-scroll-loader" class="hidden py-6 text-center">
+            <div class="inline-flex items-center gap-2 text-sm text-text-muted">
+                <div class="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin"></div>
+                Loading more...
+            </div>
+        </div>
+    `;
+}
+
+// Render end message
+function renderInfiniteEnd(count) {
+    return `
+        <div id="infinite-scroll-end" class="hidden py-6 text-center text-sm text-text-muted">
+            ${count > 0 ? 'You have reached the end' : 'No data'}
+        </div>
+    `;
+}
+
+// Pagination Controls
+function renderPagination(pageKey, currentPage, totalItems, limit = 20) {
+    const totalPages = Math.ceil(totalItems / limit) || 1;
+    if (totalPages <= 1) return '';
+    
+    return `
+        <div class="flex items-center justify-between mt-6 pt-4 border-t border-border">
+            <button onclick="window.${pageKey}Page = (window.${pageKey}Page || 1) - 1; if(window.${pageKey}Page < 1) window.${pageKey}Page = 1; router.refresh()" 
+                class="px-4 py-2.5 rounded-xl border border-border text-sm font-medium text-text-secondary hover:bg-surface-soft disabled:opacity-50 ${currentPage <= 1 ? 'disabled' : ''}" 
+                ${currentPage <= 1 ? 'disabled' : ''}>
+                ${Icons.chevronLeft()} Previous
+            </button>
+            <span class="text-sm text-text-muted">Page ${currentPage} of ${totalPages}</span>
+            <button onclick="window.${pageKey}Page = (window.${pageKey}Page || 1) + 1; router.refresh()" 
+                class="px-4 py-2.5 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand-hover ${currentPage >= totalPages ? 'disabled opacity-50' : ''}"
+                ${currentPage >= totalPages ? 'disabled' : ''}>
+                Next ${Icons.chevronRight()}
+            </button>
+        </div>
+    `;
 }
