@@ -163,13 +163,7 @@ function formatMoney(amount, options = {}) {
 }
 
 function formatCurrency(amount) {
-    if (amount === null || amount === undefined || amount === '') return '₦0';
-    const num = parseFloat(amount);
-    if (isNaN(num)) return '₦0';
-    return '₦' + num.toLocaleString('en-NG', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2
-    });
+    return formatMoney(amount);
 }
 
 function formatDate(dateStr, options = {}) {

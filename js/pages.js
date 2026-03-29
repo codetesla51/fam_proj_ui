@@ -492,7 +492,7 @@ const pages = {
                                         ${pReceiptUrl ? `<button onclick="showReceiptImage('${pReceiptUrl}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                         ${!pReceiptUrl && pReceiptData ? `<button onclick="showTransferReceiptData('${p.id || p.ID}', '${encodeURIComponent(pReceiptData)}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                         <p class="text-sm font-bold whitespace-nowrap ${pType === 'credit' || pReason.includes('Transfer from pool2') ? 'text-success' : 'text-error'}">
-                                            ${pType === 'credit' || pReason.includes('Transfer from pool2') ? '+' : '-'}${formatCurrency(pAmount)}
+                                            ${pType === 'credit' || pReason.includes('Transfer from pool2') ? '+' : '-'}${formatMoney(pAmount)}
                                         </p>
                                     </div>
                                 </div>
@@ -569,7 +569,7 @@ const pages = {
                                 </div>
                                 <div class="text-right flex items-center gap-2">
                                     <div>
-                                        <p class="text-lg font-bold ${txType === 'credit' ? 'text-success' : 'text-error'}">${txType === 'credit' ? '+' : '-'}${formatCurrency(txAmount)}</p>
+                                        <p class="text-lg font-bold ${txType === 'credit' ? 'text-success' : 'text-error'}">${txType === 'credit' ? '+' : '-'}${formatMoney(txAmount)}</p>
                                         ${txReceiptUrl ? `<button onclick="showReceiptImage('${txReceiptUrl}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                         ${!txReceiptUrl && txReceiptData ? `<button onclick="showTransferReceiptData('${tx.id || tx.ID}', '${encodeURIComponent(txReceiptData)}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                     </div>
@@ -730,7 +730,7 @@ const pages = {
             <div class="w-full min-w-0 mb-4 grid grid-cols-2 gap-3">
                 <div class="rounded-2xl bg-success/10 p-3 border border-success/20">
                     <p class="text-xs text-success font-medium">Total Money In</p>
-                    <p class="text-lg font-bold text-success">+${formatCurrency(totalIn)}</p>
+                    <p class="text-lg font-bold text-success">+${formatMoney(totalIn)}</p>
                 </div>
                 <div class="rounded-2xl bg-error/10 p-3 border border-error/20">
                     <p class="text-xs text-error font-medium">Total Money Out</p>
@@ -772,7 +772,7 @@ const pages = {
                                         <p class="text-xs text-text-muted mt-1">${formatDate(tx.created_at)}</p>
                                     </div>
                                     <div class="text-right flex items-center gap-2">
-                                        <p class="text-lg font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}</p>
+                                        <p class="text-lg font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatMoney(tx.amount)}</p>
                                         ${tx.receipt_url ? `<button onclick="showReceiptImage('${tx.receipt_url}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                         ${tx.receiptData && !tx.receipt_url ? `<button onclick="showTransferReceiptData('${tx.id}', '${encodeURIComponent(tx.receiptData)}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                     </div>
@@ -859,7 +859,7 @@ const pages = {
                                     ${p.receipt_url ? `<a href="${p.receipt_url}" target="_blank" class="p-2 text-brand hover:text-brand-hover" title="View Receipt">${Icons.fileText()}</a>` : ''}
                                     ${!p.receipt_url && p.receiptData ? `<button onclick="showTransferReceiptData('${p.id}', '${encodeURIComponent(p.receiptData || '')}')" class="p-2 text-brand hover:text-brand-hover" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                     <p class="text-sm font-bold whitespace-nowrap ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? 'text-success' : 'text-error'}">
-                                        ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? '+' : '-'}${formatCurrency(p.amount)}
+                                        ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? '+' : '-'}${formatMoney(p.amount)}
                                     </p>
                                 </div>
                             </div>
@@ -1011,7 +1011,7 @@ const pages = {
                                 <div class="rounded-2xl border border-border bg-surface-soft p-4">
                                     <div class="flex items-center justify-between mb-2">
                                         <div>
-                                            <p class="font-bold text-text-primary">${formatCurrency(amount)}</p>
+                                            <p class="font-bold text-text-primary">${formatMoney(amount, { compact: true })}</p>
                                             ${occasion ? `<p class="text-xs font-medium text-brand mt-1">${occasion}</p>` : ''}
                                         </div>
                                         ${StatusBadge({ status: status })}
@@ -1041,7 +1041,7 @@ const pages = {
                                 <div class="rounded-2xl border border-border bg-surface-soft p-4">
                                     <div class="flex items-center justify-between mb-2">
                                         <div>
-                                            <p class="font-bold text-text-primary">${formatCurrency(amount)}</p>
+                                            <p class="font-bold text-text-primary">${formatMoney(amount, { compact: true })}</p>
                                             ${occasion ? `<p class="text-xs font-medium text-text-secondary mt-1">${occasion}</p>` : ''}
                                         </div>
                                         ${StatusBadge({ status: status })}
@@ -1193,7 +1193,7 @@ const pages = {
             <div class="w-full min-w-0 mb-4 grid grid-cols-3 gap-3">
                 <div class="rounded-2xl bg-success/10 p-3 border border-success/20">
                     <p class="text-xs text-success font-medium">Money In</p>
-                    <p class="text-lg font-bold text-success">+${formatCurrency(totalIn)}</p>
+                    <p class="text-lg font-bold text-success">+${formatMoney(totalIn)}</p>
                 </div>
                 <div class="rounded-2xl bg-error/10 p-3 border border-error/20">
                     <p class="text-xs text-error font-medium">Money Out</p>
@@ -1236,7 +1236,7 @@ const pages = {
                                                 </div>
                                             </div>
                                             <div class="text-right flex flex-col items-end gap-2">
-                                                <p class="text-xl font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatCurrency(tx.amount)}</p>
+                                                <p class="text-xl font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatMoney(tx.amount)}</p>
                                                 <div class="flex items-center gap-2">
                                                     ${tx.receipt_url ? `<button onclick="showReceiptImage('${tx.receipt_url}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                                 </div>
@@ -1549,7 +1549,7 @@ const pages = {
                                         </p>
                                     </div>
                                     <div class="text-right flex-shrink-0">
-                                        <p class="font-bold text-text-primary">${formatCurrency(amount)}</p>
+                                        <p class="font-bold text-text-primary">${formatMoney(amount, { compact: true })}</p>
                                         ${StatusBadge({ status: status })}
                                     </div>
                                 </div>
@@ -1612,7 +1612,7 @@ const pages = {
                         <div class="min-w-0 flex-1">
                             <h3 class="font-bold text-text-primary truncate text-base">${m.name}</h3>
                             <p class="text-xs text-text-muted flex items-center gap-1">
-                                ${m.interval === 'weekly' ? 'Weekly' : 'Monthly'} • ${formatCurrency(m.committed_amount)}
+                                ${m.interval === 'weekly' ? 'Weekly' : 'Monthly'} • ${formatMoney(m.committed_amount)}
                             </p>
                         </div>
                     </div>
