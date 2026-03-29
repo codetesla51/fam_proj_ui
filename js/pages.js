@@ -422,7 +422,7 @@ const pages = {
         
         const name = store.user?.name?.split(' ')[0] || 'Friend';
         return `
-            <div class="w-full min-w-0">
+            <div class="w-full min-w-0 animate-fadeIn">
                 <!-- Greeting -->
                 <div class="mb-6 flex items-center gap-4">
                     <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-white text-xl font-bold shadow-lg shadow-brand/30">
@@ -434,12 +434,40 @@ const pages = {
                     </div>
                 </div>
                 
-                <!-- KPI Grid -->
+                <!-- Hero Card - Family Savings -->
+                <div class="mb-6 rounded-3xl bg-gradient-to-br from-brand via-brand-hover to-brand-700 text-white p-6 shadow-xl shadow-brand/30">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-white/80 font-medium">${t('member.familySavings') || 'Family Savings'}</span>
+                        <span class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">${Icons.piggyBank()}</span>
+                    </div>
+                    <div class="text-4xl font-extrabold mb-2 tracking-tight">${formatCurrency(d.pool1_balance || 0)}</div>
+                    <div class="text-white/70 text-sm">${d.my_contributions ? formatCurrency(d.my_contributions) + ' ' + (t('common.yourContributions') || 'your contribution') : ''}</div>
+                </div>
+                
+                <!-- Quick Stats Grid -->
                 <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-4">
-                    ${KpiCard({ label: 'Family Savings', amount: d.pool1_balance || 0, subtext: t('common.totalPool1'), highlight: true })}
-                    ${KpiCard({ label: 'My Savings', amount: d.my_contributions || 0, subtext: t('common.yourContributions') })}
-                    ${KpiCard({ label: 'Personal Savings', amount: pool2Balance || 0, subtext: t('common.yourBalance') })}
-                    ${KpiCard({ label: 'Alerts', amount: store.unreadCount || 0, subtext: 'Unread', isCurrency: false })}
+                    <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.wallet()}</span>
+                            <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">${t('member.mySavings') || 'My Savings'}</span>
+                        </div>
+                        <div class="text-xl font-bold text-text-primary">${formatCurrency(d.my_contributions || 0)}</div>
+                    </div>
+                    <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-brand/10 text-brand">${Icons.heartHandshake()}</span>
+                            <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">${t('member.personalSavings') || 'Personal Savings'}</span>
+                        </div>
+                        <div class="text-xl font-bold text-text-primary">${formatCurrency(pool2Balance || 0)}</div>
+                    </div>
+                </div>
+                
+                <!-- Quick Action -->
+                <div class="mb-6">
+                    <a href="/member/transfer" class="flex items-center justify-center gap-3 rounded-2xl bg-brand p-4 font-bold text-white shadow-lg shadow-brand/25 select-none hover:bg-brand-hover hover:shadow-xl hover:shadow-brand/30 transition-all active:scale-[0.98]">
+                        ${Icons.arrowRightLeft()}
+                        ${t('common.transferNow') || 'Transfer to Family Savings'}
+                    </a>
                 </div>
                 
                 <!-- Recent Activity -->
@@ -476,7 +504,6 @@ const pages = {
                             `}).join('')}
                         </div>
                     ` : `
-                        <div class="rounded-2xl border border-border bg-surface p-8 text-center">
                             <div class="mb-3 flex justify-center">${Icons.wallet()}</div>
                             <p class="text-sm text-text-muted">${t('member.noPayments')}</p>
                         </div>
