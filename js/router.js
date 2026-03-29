@@ -182,7 +182,10 @@ const router = {
         
         // Show loading for protected routes
         if (isProtectedRoute) {
-            store.startPolling();
+            if (!store._polling) {
+                store._polling = true;
+                store.startPolling();
+            }
             await Promise.allSettled([
                 store.loadDashboard().catch(e => console.warn('dashboard failed', e)),
                 store.loadNotifications().catch(e => console.warn('notifications failed', e)),

@@ -391,6 +391,8 @@ const store = {
     
     // Start polling
     startPolling() {
+        if (this._polling) return;
+        this._polling = true;
         this.stopPolling();
         
         if (!this.isLoggedIn()) return;
@@ -442,6 +444,7 @@ const store = {
             this._txInterval = null;
         }
         this._pollFailures = 0;
+        this._polling = false;
     },
     
     // Update notification badge in nav
