@@ -1651,7 +1651,7 @@ async function handleAdminLogin(e) {
     e.preventDefault();
     const password = document.getElementById('admin-password').value;
     const errorEl = document.getElementById('admin-error');
-    const btn = document.querySelector('#admin-password')?.closest('form')?.querySelector('button[type="submit"]');
+    const btn = e.target.querySelector('button[type="submit"]');
     
     if (!password) {
         errorEl.querySelector('span:last-child').textContent = t('validation.required');
@@ -1659,17 +1659,20 @@ async function handleAdminLogin(e) {
         return;
     }
     
-    if (btn) {
-        btn.disabled = true;
-    }
+    if (btn) btn.disabled = true;
     errorEl.classList.add('hidden');
     
     try {
-        await store.adminLogin(password);
+        // Set is_admin FIRST before any API calls
         localStorage.setItem('is_admin', 'true');
+        
+        await store.adminLogin(password);
         showToast(t('common.success'), 'success');
         router.navigate('/admin/dashboard');
     } catch(err) {
+        // Clear is_admin on error
+        localStorage.removeItem('is_admin');
+        
         let msg = err.message || 'errors.wrongPassword';
         if (msg.includes('.')) {
             msg = t(msg) || t('errors.tryAgain');
