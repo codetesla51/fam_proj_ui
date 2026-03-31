@@ -2387,13 +2387,11 @@ async function handlePoolTransfer() {
 
 function showAddMemberModal() {
     document.getElementById('add-member-modal').classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
     lucide.createIcons();
 }
 
 function closeAddMemberModal() {
     document.getElementById('add-member-modal').classList.add('hidden');
-    document.body.classList.remove('overflow-hidden');
 }
 
 // Settings - Set interval
