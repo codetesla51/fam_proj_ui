@@ -228,11 +228,11 @@ const router = {
                 app.innerHTML = `
                     <div class="min-h-screen bg-surface-soft flex flex-col">
                         <header class="sticky top-0 z-40">${navComponents.topNav}</header>
-                        <div class="flex flex-1 overflow-hidden">
+                        <div class="flex flex-1 min-h-0">
                             <aside class="hidden md:flex w-56 flex-shrink-0 border-r border-border bg-surface">
                                 ${navComponents.sidebar}
                             </aside>
-                            <main class="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24 md:pb-8 sm:p-6 lg:p-8 scroll-smooth" style="-webkit-overflow-scrolling: touch; overscroll-behavior: none;">
+                            <main class="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24 md:pb-8 sm:p-6 lg:p-8 scroll-smooth" style="-webkit-overflow-scrolling: touch;">
                                 <div class="mx-auto max-w-4xl w-full min-w-0">
                                     ${content}
                                 </div>
@@ -255,11 +255,11 @@ const router = {
                     app.innerHTML = `
                         <div class="min-h-screen bg-surface-soft flex flex-col">
                             <header class="sticky top-0 z-40 safe-area-top">${navComponents.topNav}</header>
-                            <div class="flex flex-1 overflow-hidden">
+                            <div class="flex flex-1 min-h-0">
                                 <aside class="hidden md:flex w-56 flex-shrink-0 border-r border-border bg-surface">
                                     ${navComponents.sidebar}
                                 </aside>
-                                <main class="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24 md:pb-8 sm:p-6 lg:p-8 scroll-smooth" style="-webkit-overflow-scrolling: touch; overscroll-behavior: none;">
+                                <main class="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24 md:pb-8 sm:p-6 lg:p-8 scroll-smooth" style="-webkit-overflow-scrolling: touch;">
                                     <div class="mx-auto max-w-4xl w-full min-w-0">
                                         ${this._lastContent.content}
                                     </div>
