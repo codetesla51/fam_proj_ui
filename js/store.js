@@ -55,6 +55,17 @@ function normalizeArray(arr) {
     return arr.map(normalizeItem);
 }
 
+// Scroll detection for Safari iOS fix
+let userIsScrolling = false;
+let scrollTimer;
+window.addEventListener('scroll', () => {
+    userIsScrolling = true;
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+        userIsScrolling = false;
+    }, 150);
+}, { passive: true });
+
 // Store - State management with real API only
 const store = {
     _justLoggedIn: false,
@@ -604,6 +615,7 @@ const store = {
         
         // Poll notifications every 30 seconds
         this._notifInterval = setInterval(async () => {
+            if (userIsScrolling) return;
             try {
                 const oldCount = (this.data.notifications || []).filter(n => !n.read).length;
                 await this.loadNotifications();
@@ -621,6 +633,7 @@ const store = {
         
         // Poll dashboard every 30 seconds
         this._dashboardInterval = setInterval(async () => {
+            if (userIsScrolling) return;
             try {
                 await this.loadDashboard();
                 this._pollFailures = 0;
@@ -632,6 +645,7 @@ const store = {
         
         // Poll transactions every 30 seconds
         this._txInterval = setInterval(async () => {
+            if (userIsScrolling) return;
             try {
                 await this.loadTransactions();
                 this._pollFailures = 0;
