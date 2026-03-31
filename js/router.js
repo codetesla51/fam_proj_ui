@@ -1,11 +1,27 @@
 // Router - Smart routing with query params and loading states
 
-NProgress.configure({ 
-    showSpinner: false,
-    trickleSpeed: 200,
-    minimum: 0.1,
-    speed: 300
-});
+function loaderStart() {
+    const el = document.getElementById('page-loader');
+    if (!el) return;
+    el.className = 'loading';
+    el.style.width = '0%';
+    requestAnimationFrame(() => {
+        el.style.width = '70%';
+    });
+}
+
+function loaderDone() {
+    const el = document.getElementById('page-loader');
+    if (!el) return;
+    el.style.width = '100%';
+    setTimeout(() => {
+        el.className = 'complete';
+        setTimeout(() => {
+            el.className = '';
+            el.style.width = '0%';
+        }, 300);
+    }, 100);
+}
 
 const router = {
     routes: {
@@ -104,7 +120,7 @@ const router = {
     },
     
     navigate(path, replace = false) {
-        NProgress.start();
+        loaderStart();
         window.scrollTo(0, 0);
         if (replace) {
             history.replaceState(null, '', path);
@@ -140,7 +156,7 @@ const router = {
         
         if (!pageName) {
             app.innerHTML = this.notFound();
-            NProgress.done();
+            loaderDone();
             return;
         }
         
@@ -316,7 +332,7 @@ const router = {
             console.log('Date picker init error:', e);
         }
         
-        NProgress.done();
+        loaderDone();
     },
     
     init() {

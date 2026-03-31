@@ -78,10 +78,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-    <!-- NProgress - page loading bar -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css">
-    <script src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.js"></script>
-
     <!-- Flatpickr - date picker -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -289,6 +285,26 @@
             padding-bottom: env(safe-area-inset-bottom);
         }
         
+        /* Custom page loader */
+        #page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: var(--color-brand, #0D9488);
+            z-index: 99999;
+            transition: width 0.3s ease, opacity 0.3s ease;
+            pointer-events: none;
+        }
+        #page-loader.loading {
+            width: 70%;
+        }
+        #page-loader.complete {
+            width: 100%;
+            opacity: 0;
+        }
+        
         main {
             height: 100%;
             overflow-y: auto;
@@ -336,6 +352,7 @@
     </style>
 </head>
 <body class="bg-surface-soft text-text-primary min-h-screen">
+    <div id="page-loader"></div>
     <div id="app"></div>
     <div id="toasts" class="fixed bottom-20 left-4 right-4 z-50 flex flex-col gap-2 sm:bottom-4 sm:left-auto sm:right-4 sm:w-96 pointer-events-none"></div>
     <div id="lang-modal" class="fixed inset-0 z-50 hidden">
