@@ -1637,49 +1637,7 @@ const pages = {
                 </div>
             `}
         </div>
-        ${renderPagination('adminMembers', page, allMembers.length, limit)}
-        
-        <!-- Add Member Modal - Bottom Sheet -->
-        <div id="add-member-modal" class="fixed inset-0 z-50 hidden">
-            <div class="absolute inset-0 bg-black/50" onclick="closeAddMemberModal()"></div>
-            <div class="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-surface p-6 pb-8">
-                <div class="mb-6">
-                    <h2 class="text-lg font-semibold flex items-center gap-2">
-                        ${Icons.userPlus()}
-                        ${t('members.addMember')}
-                    </h2>
-                </div>
-                <form onsubmit="handleAddMember(event)" class="space-y-4">
-                    <div class="space-y-1.5">
-                        <label class="block text-sm font-medium text-text-primary">${t('members.fullName')} <span class="text-error">*</span></label>
-                        <input type="text" id="new-member-name" class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="block text-sm font-medium text-text-primary">${t('members.password')} <span class="text-error">*</span></label>
-                        <input type="password" id="new-member-password" class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="block text-sm font-medium text-text-primary">How often will they save?</label>
-                        <div class="flex rounded-2xl border border-border p-1 gap-1">
-                            <button type="button" onclick="setNewMemberInterval('weekly')" id="interval-weekly-btn" class="flex-1 rounded-lg py-2 text-sm font-medium select-none">Every Week</button>
-                            <button type="button" onclick="setNewMemberInterval('monthly')" id="interval-monthly-btn" class="flex-1 rounded-lg py-2 text-sm font-medium select-none bg-brand text-white">Every Month</button>
-                        </div>
-                        <input type="hidden" id="new-member-interval" value="monthly">
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="block text-sm font-medium text-text-primary">${t('members.howMuchEach')}</label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">₦</span>
-                            <input type="number" id="new-member-amount" placeholder="0" class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                        </div>
-                    </div>
-                    <div class="flex gap-3 pt-2">
-                        <button type="button" onclick="closeAddMemberModal()" class="flex h-12 flex-1 items-center justify-center rounded-2xl border border-border font-medium select-none">${t('common.cancel')}</button>
-                        <button type="submit" class="flex h-12 flex-1 items-center justify-center rounded-2xl bg-brand font-medium text-white select-none">${t('members.addMember')}</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+         ${renderPagination('adminMembers', page, allMembers.length, limit)}
     `;
     },
     
@@ -2387,6 +2345,17 @@ async function handlePoolTransfer() {
 
 function showAddMemberModal() {
     document.getElementById('add-member-modal').classList.remove('hidden');
+    document.getElementById('add-member-icon').innerHTML = Icons.userPlus();
+    document.getElementById('add-member-title').textContent = t('members.addMember');
+    document.getElementById('lbl-name').textContent = t('members.fullName') + ' *';
+    document.getElementById('lbl-password').textContent = t('members.password') + ' *';
+    document.getElementById('lbl-interval').textContent = 'How often will they save?';
+    document.getElementById('lbl-amount').textContent = t('members.howMuchEach');
+    document.getElementById('btn-cancel').textContent = t('common.cancel');
+    document.getElementById('btn-add').textContent = t('members.addMember');
+    document.getElementById('new-member-name').value = '';
+    document.getElementById('new-member-password').value = '';
+    document.getElementById('new-member-amount').value = '';
     lucide.createIcons();
 }
 
