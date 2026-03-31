@@ -1,5 +1,12 @@
 // Router - Smart routing with query params and loading states
 
+NProgress.configure({ 
+    showSpinner: false,
+    trickleSpeed: 200,
+    minimum: 0.1,
+    speed: 300
+});
+
 const router = {
     routes: {
         '/': 'home',
@@ -97,6 +104,7 @@ const router = {
     },
     
     navigate(path, replace = false) {
+        NProgress.start();
         window.scrollTo(0, 0);
         if (replace) {
             history.replaceState(null, '', path);
@@ -132,6 +140,7 @@ const router = {
         
         if (!pageName) {
             app.innerHTML = this.notFound();
+            NProgress.done();
             return;
         }
         
@@ -306,6 +315,8 @@ const router = {
         } catch(e) {
             console.log('Date picker init error:', e);
         }
+        
+        NProgress.done();
     },
     
     init() {

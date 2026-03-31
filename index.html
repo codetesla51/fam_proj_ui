@@ -78,6 +78,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
+    <!-- NProgress - page loading bar -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css">
+    <script src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.js"></script>
+
     <!-- Flatpickr - date picker -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -289,6 +293,9 @@
             height: 100%;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            will-change: scroll-position;
         }
         
         /* Safari iOS - button/input styling fixes */
@@ -296,12 +303,27 @@
             -webkit-appearance: none;
             appearance: none;
             border-radius: 0;
+            font-size: 16px !important;
         }
         
         /* Prevent iOS text size adjust */
         html {
             -webkit-text-size-adjust: 100%;
             text-size-adjust: 100%;
+        }
+        
+        /* Prevent double tap zoom on buttons */
+        button, a {
+            touch-action: manipulation;
+        }
+        
+        /* Safe area for iPhone notch and home bar */
+        header {
+            padding-top: env(safe-area-inset-top);
+        }
+        
+        nav.fixed {
+            padding-bottom: env(safe-area-inset-bottom, 8px);
         }
         
         /* Safari - fix for date/time inputs */
