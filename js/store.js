@@ -55,23 +55,6 @@ function normalizeArray(arr) {
     return arr.map(normalizeItem);
 }
 
-// Scroll detection for Safari iOS fix
-let userIsScrolling = false;
-let scrollTimer;
-
-function attachScrollListener() {
-    const mainEl = document.querySelector('main');
-    if (!mainEl) return;
-    
-    mainEl.addEventListener('scroll', () => {
-        userIsScrolling = true;
-        clearTimeout(scrollTimer);
-        scrollTimer = setTimeout(() => {
-            userIsScrolling = false;
-        }, 500);
-    }, { passive: true });
-}
-
 // Store - State management with real API only
 const store = {
     _justLoggedIn: false,
@@ -621,44 +604,18 @@ const store = {
         
         // Poll notifications every 30 seconds
         this._notifInterval = setInterval(async () => {
-            if (userIsScrolling) return;
-            try {
-                const oldCount = (this.data.notifications || []).filter(n => !n.read).length;
-                await this.loadNotifications();
-                this.updateNotifBadge();
-                this._pollFailures = 0;
-                // Trigger custom event for UI update
-                const newCount = (this.data.notifications || []).filter(n => !n.read).length;
-                if (newCount !== oldCount) {
-                    window.dispatchEvent(new CustomEvent('dataUpdated', { detail: { type: 'notifications', data: this.data.notifications } }));
-                }
-            } catch {
-                this._pollFailures++;
-            }
+            await this.loadNotifications();
+            this.updateNotifBadge();
         }, 8000);
         
         // Poll dashboard every 30 seconds
         this._dashboardInterval = setInterval(async () => {
-            if (userIsScrolling) return;
-            try {
-                await this.loadDashboard();
-                this._pollFailures = 0;
-                window.dispatchEvent(new CustomEvent('dataUpdated', { detail: { type: 'dashboard', data: this.data.dashboard } }));
-            } catch {
-                this._pollFailures++;
-            }
+            await this.loadDashboard();
         }, 8000);
         
         // Poll transactions every 30 seconds
         this._txInterval = setInterval(async () => {
-            if (userIsScrolling) return;
-            try {
-                await this.loadTransactions();
-                this._pollFailures = 0;
-                window.dispatchEvent(new CustomEvent('dataUpdated', { detail: { type: 'transactions', data: this.data.transactions } }));
-            } catch {
-                this._pollFailures++;
-            }
+            await this.loadTransactions();
         }, 8000);
     },
     

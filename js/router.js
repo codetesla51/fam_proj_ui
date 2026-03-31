@@ -324,9 +324,6 @@ const router = {
         } catch(e) {
             console.log('Date picker init error:', e);
         }
-        
-        // Reattach scroll listener since <main> is recreated on navigation
-        attachScrollListener();
     },
     
     init() {
