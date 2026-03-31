@@ -55,21 +55,16 @@ function normalizeArray(arr) {
     return arr.map(normalizeItem);
 }
 
-// Scroll detection for Safari iOS fix - listens on #app (the scrollable element)
+// Scroll detection for Safari iOS fix
 let userIsScrolling = false;
 let scrollTimer;
-document.addEventListener('DOMContentLoaded', () => {
-    const app = document.getElementById('app');
-    if (app) {
-        app.addEventListener('scroll', () => {
-            userIsScrolling = true;
-            clearTimeout(scrollTimer);
-            scrollTimer = setTimeout(() => {
-                userIsScrolling = false;
-            }, 500);
-        }, { passive: true });
-    }
-}, { once: true });
+document.addEventListener('scroll', () => {
+    userIsScrolling = true;
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+        userIsScrolling = false;
+    }, 500);
+}, { passive: true, capture: true });
 
 // Store - State management with real API only
 const store = {
