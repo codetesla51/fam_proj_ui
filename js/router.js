@@ -245,7 +245,7 @@ const router = {
                             <aside class="hidden md:flex w-56 flex-shrink-0 border-r border-border bg-surface">
                                 ${navComponents.sidebar}
                             </aside>
-                            <main class="flex-1 overflow-y-auto overflow-x-hidden overscroll-behavior-y-contain p-4 pb-24 md:pb-8 sm:p-6 lg:p-8">
+                            <main class="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24 md:pb-8 sm:p-6 lg:p-8 scroll-smooth" style="-webkit-overflow-scrolling: touch; overscroll-behavior: none;">
                                 <div class="mx-auto max-w-4xl w-full min-w-0">
                                     ${content}
                                 </div>

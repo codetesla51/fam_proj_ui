@@ -245,6 +245,93 @@
             animation: moneyUpdate 1s ease-out;
         }
         
+        /* ========== CROSS-BROWSER COMPATIBILITY FIXES ========== */
+        
+        /* Safari iOS - prevent zoom on input focus */
+        input, select, textarea {
+            font-size: 16px !important;
+        }
+        
+        /* Safari iOS - remove tap delay */
+        a, button, [role="button"], .touch-target {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Safari iOS - smooth scrolling and overflow */
+        .overflow-y-auto {
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Safari iOS - backdrop filter support */
+        .backdrop-blur {
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+        }
+        
+        /* Safari iOS - sticky position */
+        .sticky {
+            position: -webkit-sticky;
+            position: sticky;
+        }
+        
+        /* Android Chrome - viewport height fix */
+        .min-h-screen {
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+        
+        /* Android Chrome - safe area for notch devices */
+        .safe-area-top {
+            padding-top: env(safe-area-inset-top);
+        }
+        .safe-area-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        /* Android Chrome - prevent pull-to-refresh on main content */
+        #app {
+            overscroll-behavior-y: contain;
+        }
+        
+        /* Safari - prevent elastic bounce affecting layout */
+        html {
+            height: 100%;
+            overflow: hidden;
+        }
+        body {
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+        #app {
+            height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: none;
+        }
+        
+        /* Safari iOS - button/input styling fixes */
+        button, input, select, textarea {
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: 0;
+        }
+        
+        /* Prevent iOS text size adjust */
+        html {
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+        
+        /* Safari - fix for date/time inputs */
+        input[type="date"],
+        input[type="time"],
+        input[type="datetime-local"] {
+            min-height: 44px;
+        }
+        
     </style>
 </head>
 <body class="bg-surface-soft text-text-primary min-h-screen">
