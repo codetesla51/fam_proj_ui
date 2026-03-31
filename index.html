@@ -289,26 +289,10 @@
             padding-bottom: env(safe-area-inset-bottom);
         }
         
-        /* Android Chrome - prevent pull-to-refresh on main content */
-        #app {
-            overscroll-behavior-y: contain;
-        }
-        
-        /* Safari - prevent elastic bounce affecting layout */
-        html {
-            overflow-x: hidden;
-        }
-        
-        body {
-            overflow-x: hidden;
-            /* Do NOT use position: fixed or overflow: hidden on body */
-        }
-        
-        /* Let main handle its own scrolling as it already does */
         main {
+            height: 100%;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            overscroll-behavior-y: contain;
         }
         
         /* Safari iOS - button/input styling fixes */
