@@ -296,20 +296,19 @@
         
         /* Safari - prevent elastic bounce affecting layout */
         html {
-            height: 100%;
-            overflow: hidden;
+            overflow-x: hidden;
         }
+        
         body {
-            height: 100%;
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
+            overflow-x: hidden;
+            /* Do NOT use position: fixed or overflow: hidden on body */
         }
-        #app {
-            height: 100%;
+        
+        /* Let main handle its own scrolling as it already does */
+        main {
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            overscroll-behavior: none;
+            overscroll-behavior-y: contain;
         }
         
         /* Safari iOS - button/input styling fixes */
