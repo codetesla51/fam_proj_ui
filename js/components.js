@@ -36,6 +36,7 @@ const Icons = {
     refreshCw: () => icon('refresh-cw'),
     shield: () => icon('shield'),
     user: () => icon('user'),
+    userRound: () => icon('user-round'),
     lock: () => icon('lock'),
     mail: () => icon('mail'),
     calendar: () => icon('calendar'),
