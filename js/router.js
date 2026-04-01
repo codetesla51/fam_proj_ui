@@ -83,6 +83,11 @@ const router = {
         }
         return { pathname, params };
     },
+
+    // Match /admin and /admin/... only; avoid false positives like /administrator
+    isAdminPath(path) {
+        return /^\/admin(\/|$)/.test(path);
+    },
     
     getQuery() {
         const { params } = this.parseUrl(window.location.search.substring(1) ? '?' + window.location.search.substring(1) : window.location.pathname);
@@ -172,11 +177,11 @@ const router = {
         }
         
         // Check auth for protected routes (exclude login pages)
-        const isProtected = (path.startsWith('/member') || path.startsWith('/admin')) && path !== '/admin/login';
+        const isProtected = (path.startsWith('/member') || this.isAdminPath(path)) && path !== '/admin/login';
         
         if (isProtected) {
             const hasToken = authState.isLoggedIn;
-            const isAdminRoute = path.startsWith('/admin');
+            const isAdminRoute = this.isAdminPath(path);
             const isAdmin = authState.isAdmin;
             
             if (!hasToken) {
@@ -204,7 +209,7 @@ const router = {
         }
         
         // Check if this is a protected route
-        const isProtectedRoute = (path.startsWith('/member') || path.startsWith('/admin')) && path !== '/admin/login';
+        const isProtectedRoute = (path.startsWith('/member') || this.isAdminPath(path)) && path !== '/admin/login';
         if (!isProtectedRoute) {
             store.stopPolling();
         }
@@ -215,13 +220,18 @@ const router = {
             // Force fresh data after login or when stale
             const forceFresh = store._justLoggedIn;
             store._justLoggedIn = false;
-            await Promise.allSettled([
+            const preloadCalls = [
                 store.loadDashboard(forceFresh).catch(e => console.warn('dashboard failed', e)),
                 store.loadNotifications(forceFresh).catch(e => console.warn('notifications failed', e)),
                 store.loadTransactions({}, forceFresh).catch(e => console.warn('transactions failed', e)),
-                store.loadCareFundRequests(null, forceFresh).catch(e => console.warn('carefund failed', e)),
-                store.loadAllMembers(forceFresh).catch(e => console.warn('members failed', e))
-            ]);
+                store.loadCareFundRequests(null, forceFresh).catch(e => console.warn('carefund failed', e))
+            ];
+            if (this.isAdminPath(path)) {
+                preloadCalls.push(
+                    store.loadAllMembers(forceFresh).catch(e => console.warn('members failed', e))
+                );
+            }
+            await Promise.allSettled(preloadCalls);
             store.updateNotifBadge();
         }
         
@@ -253,7 +263,7 @@ const router = {
             this._lastContent = { path, content };
             
             // Render nav + content for protected pages (exclude login pages)
-            if ((path.startsWith('/member') || path.startsWith('/admin')) && path !== '/admin/login') {
+            if ((path.startsWith('/member') || this.isAdminPath(path)) && path !== '/admin/login') {
                 const navComponents = Nav({ currentPath: path });
                 app.innerHTML = `
                     <div class="min-h-screen bg-surface-soft flex flex-col">
@@ -282,12 +292,12 @@ const router = {
             }
             // Show cached content if available, otherwise error
             if (isProtectedRoute && !authState.isLoggedIn) {
-                this.navigate(path.startsWith('/admin') ? '/admin/login' : '/login', true);
+                this.navigate(this.isAdminPath(path) ? '/admin/login' : '/login', true);
                 return;
             }
             if (this._lastContent && this._lastContent.path === path) {
                 // Use last content
-                if (path.startsWith('/member') || path.startsWith('/admin')) {
+                if (path.startsWith('/member') || this.isAdminPath(path)) {
                     const navComponents = Nav({ currentPath: path });
                     app.innerHTML = `
                         <div class="min-h-screen bg-surface-soft flex flex-col">

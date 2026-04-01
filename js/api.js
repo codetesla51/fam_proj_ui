@@ -46,6 +46,8 @@ const tokens = {
 // Core fetch wrapper with auth and auto-refresh
 async function apiFetch(endpoint, options = {}) {
     const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
+    const method = (options.method || 'GET').toUpperCase();
+    const isReadOnlyRequest = method === 'GET';
     
     const headers = {
         ...options.headers
@@ -72,7 +74,9 @@ async function apiFetch(endpoint, options = {}) {
             // Admin tokens cannot be refreshed - just logout
             if (authState.isAdmin) {
                 authState.clear();
-                router.navigate('/admin/login', true);
+                if (!isReadOnlyRequest) {
+                    router.navigate('/admin/login', true);
+                }
                 throw new Error('Session expired. Please login again.');
             }
             // Member tokens can be refreshed
@@ -86,7 +90,9 @@ async function apiFetch(endpoint, options = {}) {
             }
             // Refresh failed or no refresh token, logout
             authState.clear();
-            router.navigate('/login', true);
+            if (!isReadOnlyRequest) {
+                router.navigate('/login', true);
+            }
             throw new Error('Session expired. Please login again.');
         }
         
@@ -111,7 +117,10 @@ async function refreshAccessToken() {
         if (res.ok) {
             const data = await res.json();
             tokens.access = data.access_token;
-            tokens.refresh = data.refresh_token;
+            // Some backends return only access_token on refresh; preserve existing refresh_token if omitted
+            if (data.refresh_token) {
+                tokens.refresh = data.refresh_token;
+            }
             return true;
         }
         return false;

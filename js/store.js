@@ -773,6 +773,8 @@ const store = {
     _txInterval: null,
     _pollFailures: 0,
     _pollDelay: 8000,
+    _visibilityListenerAttached: false,
+    _visibilityChangeHandler: null,
 
     // Strategy 3: Prefetch next likely pages
     _schedulePrefetch() {
@@ -816,13 +818,17 @@ const store = {
         if (!this.isLoggedIn()) return;
 
         // Strategy 4: Stop polling when tab is hidden
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                this.stopPolling();
-            } else if (this.isLoggedIn()) {
-                this.startPolling();
-            }
-        });
+        if (!this._visibilityListenerAttached) {
+            this._visibilityChangeHandler = () => {
+                if (document.hidden) {
+                    this.stopPolling();
+                } else if (this.isLoggedIn()) {
+                    this.startPolling();
+                }
+            };
+            document.addEventListener('visibilitychange', this._visibilityChangeHandler);
+            this._visibilityListenerAttached = true;
+        }
 
         // Reset poll delay
         this._pollDelay = 8000;
