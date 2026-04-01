@@ -532,7 +532,8 @@
                 { code: 'en', name: 'English' },
                 { code: 'yo', name: 'Yorùbá' },
                 { code: 'ig', name: 'Igbo' },
-                { code: 'ha', name: 'Hausa' }
+                { code: 'ha', name: 'Hausa' },
+                { code: 'ar', name: 'العربية' }
             ];
             container.innerHTML = langs.map(function(lang) {
                 return '<button onclick="setLang(\'' + lang.code + '\')" aria-current="' + (lang.code === (localStorage.getItem('language') || 'en') ? 'true' : 'false') + '" class="flex w-full items-center justify-between rounded-xl px-4 py-4 text-left hover:bg-surface-soft">' +

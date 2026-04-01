@@ -79,15 +79,15 @@ const Skeletons = {
 
 // Helper to clean reason text
 function cleanReason(reason, type) {
-    if (!reason) return type === 'credit' ? 'Money In' : 'Money Out';
+    if (!reason) return type === 'credit' ? t('table.moneyIn') : t('table.moneyOut');
     const r = reason.toLowerCase();
-    if (r.includes('transfer from pool2 to pool1') || r.includes('transfer from pool2')) return 'Transfer to Family Savings';
-    if (r.includes('transfer from pool1 to pool2') || r.includes('transfer from pool1')) return 'Transfer to Personal Savings';
-    if (r === 'pool2') return 'Personal Savings Deposit';
-    if (r === 'pool1') return 'Family Savings Deposit';
-    if (r.includes('care fund approved') || r.includes('care fund')) return 'Care Fund Withdrawal';
-    if (r.includes('contribution')) return 'Contribution';
-    if (r.includes('withdrawal')) return 'Withdrawal';
+    if (r.includes('transfer from pool2 to pool1') || r.includes('transfer from pool2')) return t('member.familySavings');
+    if (r.includes('transfer from pool1 to pool2') || r.includes('transfer from pool1')) return t('member.personalSavings');
+    if (r === 'pool2') return t('member.personalSavings');
+    if (r === 'pool1') return t('member.familySavings');
+    if (r.includes('care fund approved') || r.includes('care fund')) return t('careFund.requestHelp');
+    if (r.includes('contribution')) return t('table.moneyIn');
+    if (r.includes('withdrawal')) return t('table.moneyOut');
     // Remove amount suffix like ": 50" from transfer reasons
     return reason.replace(/:\s*\d+(\.\d+)?$/, '').trim() || reason;
 }
@@ -597,8 +597,8 @@ const pages = {
                                         <p class="text-xs text-text-muted">${pMemberName} • ${formatDate(pCreated)}</p>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        ${pReceiptUrl ? `<button onclick="showReceiptImage('${pReceiptUrl}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
-                                        ${!pReceiptUrl && pReceiptData ? `<button onclick="showTransferReceiptData('${p.id || p.ID}', '${encodeURIComponent(pReceiptData)}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
+                                        ${pReceiptUrl ? `<button onclick="showReceiptImage('${pReceiptUrl}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="${t('common.viewReceipt')}">${Icons.fileText()}</button>` : ''}
+                                        ${!pReceiptUrl && pReceiptData ? `<button onclick="showTransferReceiptData('${p.id || p.ID}', '${encodeURIComponent(pReceiptData)}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="${t('common.viewReceipt')}">${Icons.fileText()}</button>` : ''}
                                         <p class="text-sm font-bold whitespace-nowrap ${pType === 'credit' || pReason?.includes('Transfer from pool2') ? 'text-success' : 'text-error'}">
                                             ${pType === 'credit' || pReason?.includes('Transfer from pool2') ? '+' : '-'}${formatMoney(pAmount, { compact: true })}
                                         </p>
@@ -678,8 +678,8 @@ const pages = {
                                 <div class="text-right flex items-center gap-2">
                                     <div>
                                         <p class="text-lg font-bold ${txType === 'credit' ? 'text-success' : 'text-error'}">${txType === 'credit' ? '+' : '-'}${formatMoney(txAmount, { compact: true })}</p>
-                                        ${txReceiptUrl ? `<button onclick="showReceiptImage('${txReceiptUrl}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
-                                        ${!txReceiptUrl && txReceiptData ? `<button onclick="showTransferReceiptData('${tx.id || tx.ID}', '${encodeURIComponent(txReceiptData)}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
+                                        ${txReceiptUrl ? `<button onclick="showReceiptImage('${txReceiptUrl}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="${t('common.viewReceipt')}">${Icons.fileText()}</button>` : ''}
+                                        ${!txReceiptUrl && txReceiptData ? `<button onclick="showTransferReceiptData('${tx.id || tx.ID}', '${encodeURIComponent(txReceiptData)}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="${t('common.viewReceipt')}">${Icons.fileText()}</button>` : ''}
                                     </div>
                                 </div>
                             </div>
@@ -964,8 +964,8 @@ const pages = {
                                     <p class="text-xs text-text-muted">${p.member_name || 'Family member'} • ${formatDate(p.created_at)}</p>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    ${p.receipt_url ? `<a href="${p.receipt_url}" target="_blank" class="p-2 text-brand hover:text-brand-hover" title="View Receipt">${Icons.fileText()}</a>` : ''}
-                                    ${!p.receipt_url && p.receiptData ? `<button onclick="showTransferReceiptData('${p.id}', '${encodeURIComponent(p.receiptData || '')}')" class="p-2 text-brand hover:text-brand-hover" title="View Receipt">${Icons.fileText()}</button>` : ''}
+                                    ${p.receipt_url ? `<a href="${p.receipt_url}" target="_blank" class="p-2 text-brand hover:text-brand-hover" title="${t('common.viewReceipt')}">${Icons.fileText()}</a>` : ''}
+                                    ${!p.receipt_url && p.receiptData ? `<button onclick="showTransferReceiptData('${p.id}', '${encodeURIComponent(p.receiptData || '')}')" class="p-2 text-brand hover:text-brand-hover" title="${t('common.viewReceipt')}">${Icons.fileText()}</button>` : ''}
                                     <p class="text-sm font-bold whitespace-nowrap ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? 'text-success' : 'text-error'}">
                                         ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? '+' : '-'}${formatMoney(p.amount, { compact: true })}
                                     </p>
@@ -1425,8 +1425,8 @@ const pages = {
                             <div class="flex items-center gap-3">
                                 <label class="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-surface-soft px-4 text-sm font-medium text-text-secondary hover:border-brand hover:text-brand transition-all select-none">
                                     ${Icons.paperclip()}
-                                    <span id="receipt-label">Choose file</span>
-                                    <input type="file" id="txn-receipt" accept="image/*,.pdf" class="hidden" onchange="document.getElementById('receipt-label').textContent = this.files[0]?.name || 'Choose file'">
+                                    <span id="receipt-label">${t('transaction.attachProof')}</span>
+                                    <input type="file" id="txn-receipt" accept="image/*,.pdf" class="hidden" onchange="document.getElementById('receipt-label').textContent = this.files[0]?.name || t('transaction.attachProof')">
                                 </label>
                                 <span class="text-xs text-text-muted">Photo or PDF</span>
                             </div>
@@ -1460,7 +1460,7 @@ const pages = {
                         </div>
                         <div>
                             <p class="text-lg font-bold">${name}</p>
-                            <p class="text-sm text-text-muted">${p.start_date ? 'Started: ' + formatDate(p.start_date) : t('settings.contactManager')}</p>
+                            <p class="text-sm text-text-muted">${p.start_date ? t('table.date') + ': ' + formatDate(p.start_date) : t('settings.contactManager')}</p>
                         </div>
                     </div>
                 </div>
@@ -1625,9 +1625,9 @@ const pages = {
             
             <!-- Type Filter -->
             <div class="w-full min-w-0 mb-4 flex gap-2">
-                ${typeBtn('all', 'All Requests')}
-                ${typeBtn('care_fund', 'Family Help')}
-                ${typeBtn('withdrawal', 'Withdrawals')}
+                ${typeBtn('all', t('table.all'))}
+                ${typeBtn('care_fund', t('careFund.requestHelp'))}
+                ${typeBtn('withdrawal', t('careFund.requestHelp'))}
             </div>
             
             <div class="w-full min-w-0 space-y-3">
@@ -1652,7 +1652,7 @@ const pages = {
                                         <h3 class="font-semibold text-text-primary truncate">${memberName}</h3>
                                         <p class="text-xs text-text-muted flex items-center gap-1">
                                             <span class="px-1.5 py-0.5 rounded text-[10px] font-medium ${(r.Type || r.type) === 'care_fund' ? 'bg-brand/10 text-brand' : 'bg-pool2/10 text-pool2'}">
-                                                ${(r.Type || r.type) === 'care_fund' ? 'Family Help' : 'Withdrawal'}
+                                                ${(r.Type || r.type) === 'care_fund' ? t('careFund.requestHelp') : t('table.moneyOut')}
                                             </span>
                                             ${occasion ? (t('occasions.' + occasion) || occasion) : ''} • ${eventDate ? formatDate(eventDate) : ''}
                                         </p>
