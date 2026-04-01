@@ -597,6 +597,7 @@ const store = {
     // Start polling
     startPolling() {
         if (this._polling) return;
+        this._polling = true;
         this.stopPolling();
         this._polling = true;
         

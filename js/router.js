@@ -211,9 +211,7 @@ const router = {
         
         // Show loading for protected routes
         if (isProtectedRoute) {
-            if (!store._polling) {
-                store.startPolling();
-            }
+            store.startPolling();
             // Force fresh data after login or when stale
             const forceFresh = store._justLoggedIn;
             store._justLoggedIn = false;
