@@ -6,7 +6,9 @@
   "scripts": {
     "build": "node -e \"fs=require('fs');fs.writeFileSync('public/env.js','window.ENV={BACKEND_URL:\\\"'+(process.env.BACKEND_URL||'http://localhost:8080')+'\\\"}; ')\"",
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -18,5 +20,8 @@
     "contributions"
   ],
   "author": "Odelade Family",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
+  }
 }
