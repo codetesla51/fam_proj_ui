@@ -612,7 +612,9 @@ const store = {
         try {
             const result = await admin.updateCareFundRequest(id, status, rejection_reason);
             await this.loadCareFundRequests(null, true);
-            await this.loadNotifications(true);
+            if (!this.isAdmin()) {
+                await this.loadNotifications(true);
+            }
             window.dispatchEvent(new CustomEvent('dataUpdated', { detail: { type: 'careFundRequests', data: this.data.careFundRequests } }));
             return result;
         } catch (e) {
@@ -835,19 +837,21 @@ const store = {
         this._pollFailures = 0;
 
         // Poll notifications
-        this._notifInterval = setInterval(async () => {
-            try {
-                await this.loadNotifications();
-                this.updateNotifBadge();
-                // Reset delay on success
-                if (this._pollFailures > 0) {
-                    this._pollFailures = 0;
-                    this._pollDelay = 8000;
+        if (!this.isAdmin()) {
+            this._notifInterval = setInterval(async () => {
+                try {
+                    await this.loadNotifications();
+                    this.updateNotifBadge();
+                    // Reset delay on success
+                    if (this._pollFailures > 0) {
+                        this._pollFailures = 0;
+                        this._pollDelay = 8000;
+                    }
+                } catch (e) {
+                    this._handlePollFailure();
                 }
-            } catch (e) {
-                this._handlePollFailure();
-            }
-        }, this._pollDelay);
+            }, this._pollDelay);
+        }
 
         // Poll dashboard
         this._dashboardInterval = setInterval(async () => {
