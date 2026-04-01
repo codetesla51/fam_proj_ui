@@ -211,8 +211,8 @@ const pages = {
                             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
                                 ${Icons.wallet()}
                             </div>
-                            <span class="text-2xl font-bold text-white">${formatMoney(500000, { compact: true })}+</span>
-                            <span class="text-xs text-white/60">Saved Together</span>
+                            <span class="text-2xl font-bold text-white">${tr('auth.savedTogether', 'Saved Together')}</span>
+                            <span class="text-xs text-white/60">${tr('auth.savedTogether', 'Saved Together')}</span>
                         </div>
                         <div class="flex flex-col items-center gap-3">
                             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
@@ -608,7 +608,7 @@ const pages = {
                         </div>
                     `}).join('')}
                 </div>
-                <p class="text-center text-sm text-text-muted mt-4">${transactions.length} ${tr('ui.paymentsRecorded', 'payments recorded')}</p>
+                <p class="text-center text-sm text-text-muted mt-4">${transactions.length} ${transactions.length === 1 ? tr('ui.paymentRecorded', 'payment recorded') : tr('ui.paymentsRecorded', 'payments recorded')}</p>
             ` : `
                 <div class="rounded-2xl border border-border bg-surface p-8 text-center">
                     <div class="mb-3 flex justify-center">${Icons.wallet()}</div>
@@ -814,8 +814,8 @@ const pages = {
                 ` : `
                     <div class="rounded-2xl border border-border bg-surface p-8 text-center">
                         <div class="mb-3 flex justify-center">${Icons.history()}</div>
-                        <p class="text-sm font-medium text-text-primary">${transactions.length === 0 ? tr('ui.noPaymentsYet', 'No transactions yet') : tr('ui.clear', 'No transactions match your filter')}</p>
-                        <p class="text-xs text-text-muted mt-1">${transactions.length === 0 ? t('member.noPayments') : tr('ui.clear', 'Clear filters to see all transactions')}</p>
+                        <p class="text-sm font-medium text-text-primary">${transactions.length === 0 ? tr('ui.noPaymentsYet', 'No transactions yet') : tr('ui.noMatchingTransactions', 'No transactions match your filter')}</p>
+                        <p class="text-xs text-text-muted mt-1">${transactions.length === 0 ? t('member.noPayments') : tr('ui.clearFilters', 'Clear filters to see all transactions')}</p>
                     </div>
                 `}
             </div>
@@ -965,9 +965,9 @@ const pages = {
                                             <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-pool2 text-white">
                                                 ${Icons.wallet()}
                                             </div>
-                                            <span class="font-bold text-text-primary">${t('careFund.requestHelp')}</span>
+                                            <span class="font-bold text-text-primary">${tr('careFund.withdrawFromSavings', 'Withdraw from Savings')}</span>
                                         </div>
-                                        <p class="text-xs text-text-muted ml-13">${tr('member.personalSavings', 'Take money from your personal savings')}</p>
+                                        <p class="text-xs text-text-muted ml-13">${tr('careFund.withdrawFromSavingsDesc', 'Take money from your personal savings')}</p>
                                     </button>
                                 </div>
                             </div>
@@ -1007,14 +1007,14 @@ const pages = {
                                 </div>
                                 <div class="space-y-2">
                                     <label class="block text-sm font-bold text-text-primary">${t('careFund.tellMore')} (${t('careFund.optional')})</label>
-                                    <textarea id="care-description" rows="2" placeholder="${tr('careFund.tellMore', 'Any additional details...')}"
+                                    <textarea id="care-description" rows="2" placeholder="${tr('careFund.detailsPlaceholder', 'Any additional details...')}"
                                         class="w-full min-w-0 rounded-2xl border-2 border-border bg-surface p-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"></textarea>
                                 </div>
                             </div>
                             
                             <!-- Withdrawal Info -->
                             <div id="withdrawal-info" class="hidden p-3 rounded-xl bg-surface-soft border border-border">
-                                <p class="text-xs text-text-muted">${tr('careFund.requestHelp', 'This will withdraw from your personal savings balance of')} <span class="font-bold text-text-primary">${formatMoney(pool2Balance || 0, { compact: true })}</span></p>
+                                <p class="text-xs text-text-muted">${tr('careFund.withdrawInfo', 'This will withdraw from your personal savings balance of')} <span class="font-bold text-text-primary">${formatMoney(pool2Balance || 0, { compact: true })}</span></p>
                             </div>
                             
                             <button type="submit" id="care-btn" class="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-brand text-lg font-bold text-white shadow-lg shadow-brand/25 select-none">
@@ -2064,22 +2064,27 @@ async function handleAddMember(e) {
 // Helper to select request type
 function selectRequestType(requestType) {
     window.requestType = requestType;
-    document.getElementById('request-type').value = requestType;
+    const requestTypeInput = document.getElementById('request-type');
+    if (!requestTypeInput) return;
+    requestTypeInput.value = requestType;
     
     const careFundBtn = document.getElementById('type-care_fund');
     const withdrawalBtn = document.getElementById('type-withdrawal');
     const careFundFields = document.getElementById('care-fund-fields');
     const withdrawalInfo = document.getElementById('withdrawal-info');
     const btnText = document.getElementById('btn-text');
+    if (!careFundBtn || !withdrawalBtn || !careFundFields || !withdrawalInfo || !btnText) return;
     
     if (requestType === 'care_fund') {
         // Style care fund button
         careFundBtn.className = 'request-type-btn p-4 rounded-2xl border-2 border-brand bg-brand-light text-left transition-all hover:shadow-md';
-        careFundBtn.querySelector('span').className = 'font-bold text-brand';
+        const careSpan = careFundBtn.querySelector('span');
+        if (careSpan) careSpan.className = 'font-bold text-brand';
         
         // Reset withdrawal button
         withdrawalBtn.className = 'request-type-btn p-4 rounded-2xl border-2 border-border bg-surface text-left transition-all hover:border-brand hover:shadow-md';
-        withdrawalBtn.querySelector('span').className = 'font-bold text-text-primary';
+        const withdrawSpan = withdrawalBtn.querySelector('span');
+        if (withdrawSpan) withdrawSpan.className = 'font-bold text-text-primary';
         
         // Show care fund fields
         careFundFields.classList.remove('hidden');
@@ -2090,18 +2095,20 @@ function selectRequestType(requestType) {
     } else {
         // Style withdrawal button
         withdrawalBtn.className = 'request-type-btn p-4 rounded-2xl border-2 border-brand bg-brand-light text-left transition-all hover:shadow-md';
-        withdrawalBtn.querySelector('span').className = 'font-bold text-brand';
+        const withdrawSpan2 = withdrawalBtn.querySelector('span');
+        if (withdrawSpan2) withdrawSpan2.className = 'font-bold text-brand';
         
         // Reset care fund button
         careFundBtn.className = 'request-type-btn p-4 rounded-2xl border-2 border-border bg-surface text-left transition-all hover:border-brand hover:shadow-md';
-        careFundBtn.querySelector('span').className = 'font-bold text-text-primary';
+        const careSpan2 = careFundBtn.querySelector('span');
+        if (careSpan2) careSpan2.className = 'font-bold text-text-primary';
         
         // Hide care fund fields
         careFundFields.classList.add('hidden');
         withdrawalInfo.classList.remove('hidden');
         
         // Update button text
-        btnText.textContent = t('careFund.requestHelp');
+        btnText.textContent = tr('careFund.withdrawFromSavings', 'Withdraw from Savings');
     }
 }
 
@@ -2544,7 +2551,7 @@ async function showTransferReceiptModal(receipt, newPool2Balance, newPool1Balanc
     if (!modal) return;
     
     const user = store.user;
-    const memberName = user?.name || tr('members.fullName', 'Member');
+    const memberName = user?.name || tr('common.member', 'Member');
     const amount = receipt?.amount || receipt?.Amount || '0';
     const date = receipt?.created_at ? formatDateTime(receipt.created_at) : formatDateTime(new Date().toISOString());
     const receiptNumber = receipt?.receipt_number || receipt?.ReceiptNumber || receipt?.id || '';
@@ -2624,7 +2631,7 @@ async function showTransferReceiptModal(receipt, newPool2Balance, newPool1Balanc
     
     modal.classList.remove('hidden');
     setTimeout(() => {
-        modal.querySelector('#transfer-receipt-content').classList.remove('scale-95', 'opacity-0');
+        modal.querySelector('#transfer-receipt-content')?.classList.remove('scale-95', 'opacity-0');
     }, 10);
     lockBodyScroll();
     lucide.createIcons();
@@ -2711,7 +2718,7 @@ function downloadTransferReceipt(receiptNumber, amount, memberName) {
     ctx.font = '14px Arial';
     const details = [
         ['Receipt Number:', receiptNumber || 'N/A'],
-        ['Member:', memberName || tr('members.fullName', 'Member')],
+        ['Member:', memberName || tr('common.member', 'Member')],
         ['Amount:', formatMoney(amount || 0)],
         ['From:', 'Personal Savings (Pool 2)'],
         ['To:', 'Family Savings (Pool 1)'],
@@ -2748,7 +2755,7 @@ function downloadReceiptFromModal() {
     const modal = document.getElementById('transfer-receipt-modal');
     const receiptNo = modal?.querySelector('.font-mono.font-bold')?.textContent || 'RCP';
     const amount = modal?.querySelector('.text-brand.font-bold')?.textContent?.replace(/[₦,]/g, '') || '0';
-    const member = store.user?.name || tr('members.fullName', 'Member');
+    const member = store.user?.name || tr('common.member', 'Member');
     downloadTransferReceipt(receiptNo, amount, member);
 }
 
@@ -2782,7 +2789,7 @@ function showTransferReceiptData(transactionId, receiptData) {
         time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     }
     
-    const refId = transactionId ? String(transactionId).slice(0, 8) : 'N/A';
+    const refId = transactionId ? String(transactionId).slice(0, 8) : tr('common.notAvailable', 'N/A');
     
     if (modal) {
         modal.innerHTML = `
