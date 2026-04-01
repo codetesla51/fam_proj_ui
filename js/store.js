@@ -237,7 +237,7 @@ const store = {
         this._clearTimestamps();
         this._justLoggedIn = false;
         
-        router.navigate('/login');
+        router.navigate('/login', true);
     },
     
     // Load dashboard
