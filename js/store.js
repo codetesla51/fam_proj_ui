@@ -599,7 +599,6 @@ const store = {
         if (this._polling) return;
         this._polling = true;
         this.stopPolling();
-        this._polling = true;
         
         if (!this.isLoggedIn()) return;
         

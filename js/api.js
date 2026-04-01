@@ -1,6 +1,12 @@
 // API Service - All backend communication
 const API_BASE = 'https://ledger-system-e7t7.onrender.com';
 
+function clearAuthStorage() {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('is_admin');
+}
+
 // Auth state - single source of truth for auth status
 const authState = {
     token: localStorage.getItem('access_token'),
@@ -16,9 +22,7 @@ const authState = {
     clear() {
         this.token = null;
         this.isAdmin = false;
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('is_admin');
+        clearAuthStorage();
     },
     get isLoggedIn() {
         return !!this.token;
@@ -33,9 +37,7 @@ const tokens = {
     set refresh(v) { localStorage.setItem('refresh_token', v); },
     clear() {
         // Only clear tokens, not authState
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('is_admin');
+        clearAuthStorage();
         authState.token = null;
         authState.isAdmin = false;
     }
@@ -75,12 +77,7 @@ async function apiFetch(endpoint, options = {}) {
             }
             // Member tokens can be refreshed
             if (tokens.refresh) {
-                let refreshed = false;
-                try {
-                    refreshed = await refreshAccessToken();
-                } catch (refreshErr) {
-                    throw refreshErr;
-                }
+                const refreshed = await refreshAccessToken();
                 if (refreshed) {
                     // Retry with new token
                     headers['Authorization'] = `Bearer ${tokens.access}`;
