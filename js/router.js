@@ -24,6 +24,7 @@ function loaderDone() {
 }
 
 const router = {
+    _renderToken: 0,
     routes: {
         '/': 'home',
         '/login': 'login',
@@ -147,6 +148,7 @@ const router = {
     },
     
     async render() {
+        const renderToken = ++this._renderToken;
         const path = window.location.pathname;
         const pageName = this.routes[path];
         const app = document.getElementById('app');
@@ -203,11 +205,13 @@ const router = {
         
         // Check if this is a protected route
         const isProtectedRoute = (path.startsWith('/member') || path.startsWith('/admin')) && path !== '/admin/login';
+        if (!isProtectedRoute) {
+            store.stopPolling();
+        }
         
         // Show loading for protected routes
         if (isProtectedRoute) {
             if (!store._polling) {
-                store._polling = true;
                 store.startPolling();
             }
             // Force fresh data after login or when stale
@@ -243,6 +247,9 @@ const router = {
         // Load page content (async)
         try {
             const content = await pageFn();
+            if (renderToken !== this._renderToken || path !== window.location.pathname) {
+                return;
+            }
             
             // Save for instant re-render
             this._lastContent = { path, content };
@@ -272,7 +279,14 @@ const router = {
             }
         } catch (err) {
             console.error('Page render error:', err);
+            if (renderToken !== this._renderToken || path !== window.location.pathname) {
+                return;
+            }
             // Show cached content if available, otherwise error
+            if (isProtectedRoute && !authState.isLoggedIn) {
+                this.navigate(path.startsWith('/admin') ? '/admin/login' : '/login', true);
+                return;
+            }
             if (this._lastContent && this._lastContent.path === path) {
                 // Use last content
                 if (path.startsWith('/member') || path.startsWith('/admin')) {

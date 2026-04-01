@@ -16,7 +16,9 @@ const authState = {
     clear() {
         this.token = null;
         this.isAdmin = false;
-        localStorage.clear();
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('is_admin');
     },
     get isLoggedIn() {
         return !!this.token;
@@ -33,6 +35,9 @@ const tokens = {
         // Only clear tokens, not authState
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        localStorage.removeItem('is_admin');
+        authState.token = null;
+        authState.isAdmin = false;
     }
 };
 
@@ -64,13 +69,18 @@ async function apiFetch(endpoint, options = {}) {
         if (response.status === 401 && endpoint !== '/auth/admin/login' && endpoint !== '/login') {
             // Admin tokens cannot be refreshed - just logout
             if (authState.isAdmin) {
-                tokens.clear();
+                authState.clear();
                 router.navigate('/admin/login', true);
                 throw new Error('Session expired. Please login again.');
             }
             // Member tokens can be refreshed
             if (tokens.refresh) {
-                const refreshed = await refreshAccessToken();
+                let refreshed = false;
+                try {
+                    refreshed = await refreshAccessToken();
+                } catch (refreshErr) {
+                    throw refreshErr;
+                }
                 if (refreshed) {
                     // Retry with new token
                     headers['Authorization'] = `Bearer ${tokens.access}`;
@@ -78,7 +88,7 @@ async function apiFetch(endpoint, options = {}) {
                 }
             }
             // Refresh failed or no refresh token, logout
-            tokens.clear();
+            authState.clear();
             router.navigate('/login', true);
             throw new Error('Session expired. Please login again.');
         }
@@ -108,7 +118,10 @@ async function refreshAccessToken() {
             return true;
         }
         return false;
-    } catch {
+    } catch (error) {
+        if (!navigator.onLine) {
+            throw new Error('You are offline. Please check your connection.');
+        }
         return false;
     }
 }
@@ -187,9 +200,8 @@ const auth = {
             method: 'POST',
             body: JSON.stringify({ name, password })
         }));
-        tokens.access = data.access_token;
+        authState.set(data.access_token, false);
         tokens.refresh = data.refresh_token;
-        tokens.isAdmin = false;
         return data;
     },
     
@@ -210,9 +222,8 @@ const auth = {
             method: 'POST',
             body: JSON.stringify({ password })
         }));
-        tokens.access = data.access_token;
+        authState.set(data.access_token, true);
         tokens.refresh = data.refresh_token;
-        tokens.isAdmin = true;
         return data;
     },
     
@@ -223,7 +234,7 @@ const auth = {
         } catch (e) {
             console.warn('Logout API call failed:', e);
         }
-        tokens.clear();
+        authState.clear();
     },
     
     // Admin logout
@@ -233,7 +244,7 @@ const auth = {
         } catch (e) {
             console.warn('Admin logout API call failed:', e);
         }
-        tokens.clear();
+        authState.clear();
     },
     
     isLoggedIn() {
