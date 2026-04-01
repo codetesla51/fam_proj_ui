@@ -15,6 +15,36 @@ function cleanReason(reason, type) {
     return reason.replace(/:\s*\d+(\.\d+)?$/, '').trim() || reason;
 }
 
+function tr(key, fallback) {
+    const translated = t(key);
+    return !translated || translated === key ? fallback : translated;
+}
+
+let _scrollLockY = 0;
+function lockBodyScroll() {
+    if (document.body.dataset.scrollLocked === 'true') return;
+    _scrollLockY = window.scrollY || window.pageYOffset || 0;
+    document.body.dataset.scrollLocked = 'true';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${_scrollLockY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+    document.body.classList.add('overflow-hidden');
+}
+
+function unlockBodyScroll() {
+    if (document.body.dataset.scrollLocked !== 'true') return;
+    document.body.dataset.scrollLocked = 'false';
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+    document.body.classList.remove('overflow-hidden');
+    window.scrollTo(0, _scrollLockY);
+}
+
 // Filter transactions for family view - hides private Pool 2 transactions from other members
 function filterFamilyTransactions(transactions, currentMemberId) {
     if (!transactions || !currentMemberId) return transactions || [];
@@ -181,7 +211,7 @@ const pages = {
                             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
                                 ${Icons.wallet()}
                             </div>
-                            <span class="text-2xl font-bold text-white">₦500K+</span>
+                            <span class="text-2xl font-bold text-white">${formatMoney(500000, { compact: true })}+</span>
                             <span class="text-xs text-white/60">Saved Together</span>
                         </div>
                         <div class="flex flex-col items-center gap-3">
@@ -389,7 +419,7 @@ const pages = {
                             <div class="space-y-3">
                                 <label class="block text-sm font-semibold text-text-primary flex items-center gap-2">
                                     ${Icons.lock()}
-                                    Manager Password
+                                    ${t('auth.managerPassword')}
                                 </label>
                                 <div class="relative">
                                     <input type="password" id="admin-password" placeholder="Enter your password"
@@ -403,14 +433,14 @@ const pages = {
                             <button type="submit" id="admin-submit-btn"
                                 class="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-brand px-6 text-base font-bold text-white shadow-lg shadow-brand/30 transition-all hover:bg-brand-hover hover:shadow-xl hover:shadow-brand/40 active:scale-[0.98] select-none">
                                 ${Icons.logIn()}
-                                Sign In as Manager
+                                ${t('auth.signInAsManager')}
                             </button>
                         </form>
                         
                         <div class="mt-8 pt-6 border-t border-border">
                             <a href="/login" class="flex items-center justify-center gap-2 text-sm font-medium text-text-muted hover:text-brand transition-colors select-none">
                                 ${Icons.arrowLeft()}
-                                Back to family login
+                                ${tr('auth.backToFamily', 'Back to family login')}
                             </a>
                         </div>
                     </div>
@@ -457,10 +487,10 @@ const pages = {
                 
                 <!-- KPI Grid -->
                 <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-4">
-                    ${KpiCard({ label: 'Family Savings', amount: d.pool1_balance || 0, subtext: t('common.totalPool1'), highlight: true })}
-                    ${KpiCard({ label: 'My Savings', amount: d.my_contributions || 0, subtext: t('common.yourContributions') })}
-                    ${KpiCard({ label: 'Personal Savings', amount: pool2Balance || 0, subtext: t('common.yourBalance') })}
-                    ${KpiCard({ label: 'Alerts', amount: store.unreadCount || 0, subtext: 'Unread', isCurrency: false })}
+                    ${KpiCard({ label: t('member.familySavings'), amount: d.pool1_balance || 0, subtext: t('common.totalPool1'), highlight: true })}
+                    ${KpiCard({ label: t('member.mySavings'), amount: d.my_contributions || 0, subtext: t('common.yourContributions') })}
+                    ${KpiCard({ label: t('member.personalSavings'), amount: pool2Balance || 0, subtext: t('common.yourBalance') })}
+                    ${KpiCard({ label: t('member.alerts'), amount: store.unreadCount || 0, subtext: t('common.unread'), isCurrency: false })}
                 </div>
                 
                 <!-- Recent Activity -->
@@ -532,15 +562,15 @@ const pages = {
             <div class="w-full min-w-0 mb-4">
                 <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                     ${Icons.wallet()}
-                    My Family Savings
+                    ${t('member.familySavings')}
                 </h1>
-                <p class="text-xs sm:text-sm text-text-muted">Your contributions to the family savings pool</p>
+                <p class="text-xs sm:text-sm text-text-muted">${tr('member.savingsHistory', 'Your contributions to the family savings pool')}</p>
             </div>
             
             <!-- Summary -->
             <div class="w-full min-w-0 mb-4">
                 <div class="rounded-2xl bg-success/10 p-4 border border-success/20">
-                    <p class="text-xs text-success font-medium">Total Saved</p>
+                    <p class="text-xs text-success font-medium">${tr('ui.totalSaved', 'Total Saved')}</p>
                     <p class="text-xl font-bold text-success">+${formatMoney(totalIn, { compact: true })}</p>
                 </div>
             </div>
@@ -578,12 +608,12 @@ const pages = {
                         </div>
                     `}).join('')}
                 </div>
-                <p class="text-center text-sm text-text-muted mt-4">${transactions.length} payment${transactions.length !== 1 ? 's' : ''} recorded</p>
+                <p class="text-center text-sm text-text-muted mt-4">${transactions.length} ${tr('ui.paymentsRecorded', 'payments recorded')}</p>
             ` : `
                 <div class="rounded-2xl border border-border bg-surface p-8 text-center">
                     <div class="mb-3 flex justify-center">${Icons.wallet()}</div>
-                    <p class="text-sm font-medium text-text-primary">No payments recorded yet</p>
-                    <p class="text-xs text-text-muted mt-1">Your family manager will record your first payment</p>
+                        <p class="text-sm font-medium text-text-primary">${tr('ui.noPaymentsYet', 'No payments recorded yet')}</p>
+                        <p class="text-xs text-text-muted mt-1">${t('member.noPayments')}</p>
                 </div>
             `}
             </div>
@@ -766,7 +796,7 @@ const pages = {
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center gap-2 mb-1">
-                                            <span class="text-xs font-medium px-2 py-0.5 rounded-full ${tx.pool === 'pool1' ? 'bg-brand/10 text-brand' : 'bg-pool2/10 text-pool2'}">${tx.pool === 'pool1' ? 'Family Savings' : 'Personal Savings'}</span>
+                                            <span class="text-xs font-medium px-2 py-0.5 rounded-full ${tx.pool === 'pool1' ? 'bg-brand/10 text-brand' : 'bg-pool2/10 text-pool2'}">${tx.pool === 'pool1' ? t('member.familySavings') : t('member.personalSavings')}</span>
                                         </div>
                                         <p class="text-sm font-semibold text-text-primary">${cleanReason(tx.reason, tx.type)}</p>
                                         <p class="text-xs text-text-muted mt-1">${formatDate(tx.created_at)}</p>
@@ -784,8 +814,8 @@ const pages = {
                 ` : `
                     <div class="rounded-2xl border border-border bg-surface p-8 text-center">
                         <div class="mb-3 flex justify-center">${Icons.history()}</div>
-                        <p class="text-sm font-medium text-text-primary">${transactions.length === 0 ? 'No transactions yet' : 'No transactions match your filter'}</p>
-                        <p class="text-xs text-text-muted mt-1">${transactions.length === 0 ? 'Your transactions will appear here once your family manager records your first payment' : 'Clear filters to see all transactions'}</p>
+                        <p class="text-sm font-medium text-text-primary">${transactions.length === 0 ? tr('ui.noPaymentsYet', 'No transactions yet') : tr('ui.clear', 'No transactions match your filter')}</p>
+                        <p class="text-xs text-text-muted mt-1">${transactions.length === 0 ? t('member.noPayments') : tr('ui.clear', 'Clear filters to see all transactions')}</p>
                     </div>
                 `}
             </div>
@@ -838,9 +868,9 @@ const pages = {
             <div class="w-full min-w-0 mb-6">
                 <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                     ${Icons.users()}
-                    Family Activity
+                    ${tr('ui.familyActivity', 'Family Activity')}
                 </h1>
-                <p class="text-xs sm:text-sm text-text-muted">All family savings activity across Pool 1</p>
+                <p class="text-xs sm:text-sm text-text-muted">${tr('ui.allActivity', 'All family savings activity across Pool 1')}</p>
             </div>
             
             <div class="w-full min-w-0">
@@ -869,7 +899,7 @@ const pages = {
                 ` : `
                     <div class="rounded-2xl border border-border bg-surface p-8 text-center">
                         <div class="mb-3 flex justify-center">${Icons.users()}</div>
-                        <p class="text-sm text-text-muted">No family activity yet. Transactions will appear here.</p>
+                        <p class="text-sm text-text-muted">${tr('common.noData', 'No family activity yet. Transactions will appear here.')}</p>
                     </div>
                 `}
             </div>
@@ -898,24 +928,24 @@ const pages = {
         return `
             <div class="w-full min-w-0 mb-6">
                 <h1 class="text-2xl font-bold text-text-primary">${t('nav.personalSavings')}</h1>
-                <p class="text-sm text-text-muted mt-1">Request help from your family</p>
+                <p class="text-sm text-text-muted mt-1">${t('member.requestHelp')}</p>
             </div>
             
             <!-- Balance -->
             <div class="w-full min-w-0 mb-6 rounded-2xl border-2 border-brand/20 bg-gradient-to-br from-brand-light to-white p-5 shadow-lg shadow-brand/10">
-                <p class="text-sm font-bold text-brand mb-1">Personal Savings Balance</p>
+                <p class="text-sm font-bold text-brand mb-1">${t('careFund.balance')}</p>
                 <p class="text-3xl font-bold text-brand">${formatMoney(pool2Balance || 0, { compact: true })}</p>
             </div>
             
             <!-- Request Form -->
             <div class="w-full min-w-0 mb-6">
                 ${Card({
-                    title: 'Make a Request',
+                    title: tr('careFund.requestHelp', 'Make a Request'),
                     children: `
                         <form onsubmit="handleCareFundRequest(event)" class="space-y-5">
                             <!-- Request Type Toggle - Clear and Simple -->
                             <div class="space-y-3">
-                                <label class="text-sm font-bold text-text-primary">What would you like to do?</label>
+                                <label class="text-sm font-bold text-text-primary">${tr('careFund.whatFor', 'What would you like to do?')}</label>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <button type="button" onclick="selectRequestType('care_fund')" 
                                         id="type-care_fund"
@@ -924,9 +954,9 @@ const pages = {
                                             <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white">
                                                 ${Icons.heartHandshake()}
                                             </div>
-                                            <span class="font-bold text-text-primary">Get Money from Family</span>
+                                            <span class="font-bold text-text-primary">${tr('member.requestHelp', 'Get Money from Family')}</span>
                                         </div>
-                                        <p class="text-xs text-text-muted ml-13">Ask the family for financial help</p>
+                                        <p class="text-xs text-text-muted ml-13">${tr('careFund.tellMore', 'Ask the family for financial help')}</p>
                                     </button>
                                     <button type="button" onclick="selectRequestType('withdrawal')" 
                                         id="type-withdrawal"
@@ -935,9 +965,9 @@ const pages = {
                                             <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-pool2 text-white">
                                                 ${Icons.wallet()}
                                             </div>
-                                            <span class="font-bold text-text-primary">Withdraw from Savings</span>
+                                            <span class="font-bold text-text-primary">${t('careFund.requestHelp')}</span>
                                         </div>
-                                        <p class="text-xs text-text-muted ml-13">Take money from your personal savings</p>
+                                        <p class="text-xs text-text-muted ml-13">${tr('member.personalSavings', 'Take money from your personal savings')}</p>
                                     </button>
                                 </div>
                             </div>
@@ -945,7 +975,7 @@ const pages = {
                             
                             <!-- Amount Field -->
                             <div class="space-y-2">
-                                <label class="block text-sm font-bold text-text-primary">How much?</label>
+                                    <label class="block text-sm font-bold text-text-primary">${t('careFund.howMuchNeed')}</label>
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
                                     <input type="number" id="care-amount" placeholder="0" 
@@ -956,12 +986,12 @@ const pages = {
                             <!-- Care Fund Extra Fields -->
                             <div id="care-fund-fields" class="space-y-4">
                                 <div class="p-3 rounded-xl bg-brand-light border border-brand/20">
-                                    <p class="text-xs text-brand font-medium mb-2">This request will be sent to your family manager</p>
+                                    <p class="text-xs text-brand font-medium mb-2">${tr('common.familyManagerAccess', 'This request will be sent to your family manager')}</p>
                                 </div>
                                 <div class="space-y-2">
-                                    <label class="block text-sm font-bold text-text-primary">What do you need the money for?</label>
+                                    <label class="block text-sm font-bold text-text-primary">${t('careFund.whatFor')}</label>
                                     <select id="care-occasion" class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-                                        <option value="">Select a reason</option>
+                                        <option value="">${tr('common.select', 'Select a reason')}</option>
                                         <option value="birthday">${Icons.cake()} Birthday</option>
                                         <option value="wedding">${Icons.ring()} Wedding</option>
                                         <option value="newBaby">${Icons.baby()} New Baby</option>
@@ -971,24 +1001,24 @@ const pages = {
                                     </select>
                                 </div>
                                 <div class="space-y-2">
-                                    <label class="block text-sm font-bold text-text-primary">When do you need it?</label>
+                                    <label class="block text-sm font-bold text-text-primary">${t('careFund.whenOccasion')}</label>
                                     <input type="date" id="care-event-date" 
                                         class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                                 </div>
                                 <div class="space-y-2">
-                                    <label class="block text-sm font-bold text-text-primary">Tell us more (optional)</label>
-                                    <textarea id="care-description" rows="2" placeholder="Any additional details..."
+                                    <label class="block text-sm font-bold text-text-primary">${t('careFund.tellMore')} (${t('careFund.optional')})</label>
+                                    <textarea id="care-description" rows="2" placeholder="${tr('careFund.tellMore', 'Any additional details...')}"
                                         class="w-full min-w-0 rounded-2xl border-2 border-border bg-surface p-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"></textarea>
                                 </div>
                             </div>
                             
                             <!-- Withdrawal Info -->
                             <div id="withdrawal-info" class="hidden p-3 rounded-xl bg-surface-soft border border-border">
-                                <p class="text-xs text-text-muted">This will withdraw from your personal savings balance of <span class="font-bold text-text-primary">${formatMoney(pool2Balance || 0, { compact: true })}</span></p>
+                                <p class="text-xs text-text-muted">${tr('careFund.requestHelp', 'This will withdraw from your personal savings balance of')} <span class="font-bold text-text-primary">${formatMoney(pool2Balance || 0, { compact: true })}</span></p>
                             </div>
                             
                             <button type="submit" id="care-btn" class="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-brand text-lg font-bold text-white shadow-lg shadow-brand/25 select-none">
-                                ${Icons.send()} <span id="btn-text">Send Request</span>
+                                ${Icons.send()} <span id="btn-text">${t('careFund.sendRequest')}</span>
                             </button>
                         </form>
                     `
@@ -998,7 +1028,7 @@ const pages = {
             <!-- Past Care Fund Requests -->
             <div class="w-full min-w-0 mb-6">
                 ${Card({
-                    title: 'Family Help Requests',
+                    title: tr('careFund.pastRequests', 'Family Help Requests'),
                     children: careFundRequests.length > 0 ? `
                         <div class="space-y-3">
                             ${careFundRequests.map(r => {
@@ -1021,14 +1051,14 @@ const pages = {
                                 </div>
                             `}).join('')}
                         </div>
-                    ` : EmptyState({ icon: Icons.heartHandshake(), message: 'No family help requests yet' })
+                    ` : EmptyState({ icon: Icons.heartHandshake(), message: tr('careFund.noRequests', 'No family help requests yet') })
                 })}
             </div>
             
             <!-- Past Withdrawal Requests -->
             <div class="w-full min-w-0">
                 ${Card({
-                    title: 'Withdrawal Requests',
+                    title: tr('admin.careFund', 'Withdrawal Requests'),
                     children: withdrawalRequests.length > 0 ? `
                         <div class="space-y-3">
                             ${withdrawalRequests.map(r => {
@@ -1051,7 +1081,7 @@ const pages = {
                                 </div>
                             `}).join('')}
                         </div>
-                    ` : EmptyState({ icon: Icons.wallet(), message: 'No withdrawal requests yet' })
+                    ` : EmptyState({ icon: Icons.wallet(), message: tr('careFund.noRequests', 'No withdrawal requests yet') })
                 })}
             </div>
         `;
@@ -1075,10 +1105,10 @@ const pages = {
                 
                 <!-- KPI Grid -->
                 <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-                    ${KpiCard({ label: 'Family Savings', amount: d.pool1_balance || 0, subtext: t('common.totalPool1'), highlight: true })}
-                    ${KpiCard({ label: 'Personal Savings', amount: d.pool2_balance || 0, subtext: 'Total Pool 2' })}
+                    ${KpiCard({ label: t('member.familySavings'), amount: d.pool1_balance || 0, subtext: t('common.totalPool1'), highlight: true })}
+                    ${KpiCard({ label: t('member.personalSavings'), amount: d.pool2_balance || 0, subtext: tr('common.totalPool2', 'Total Pool 2') })}
                     ${KpiCard({ label: t('admin.members'), amount: d.member_count || 0, subtext: (d.active_count || 0) + ' ' + t('common.active'), isCurrency: false })}
-                    ${KpiCard({ label: 'Overdue', amount: d.overdue_count || 0, subtext: t('member.behind'), isCurrency: false })}
+                    ${KpiCard({ label: tr('admin.behindOnSavings', 'Overdue'), amount: d.overdue_count || 0, subtext: t('member.behind'), isCurrency: false })}
                 </div>
                 
                 ${d.underfunded_members && d.underfunded_members.length > 0 ? `
@@ -1096,7 +1126,7 @@ const pages = {
                                         <div class="flex h-8 w-8 items-center justify-center rounded-full bg-error/10 text-xs font-bold text-error flex-shrink-0">${name.charAt(0)}</div>
                                         <span class="text-sm font-medium text-text-primary truncate min-w-0">${name}</span>
                                     </div>
-                                    <span class="text-xs font-bold text-error whitespace-nowrap flex-shrink-0">${formatMoney(gap, { compact: true })} behind</span>
+                                    <span class="text-xs font-bold text-error whitespace-nowrap flex-shrink-0">${formatMoney(gap, { compact: true })} ${t('member.behind')}</span>
                                 </div>
                             `}).join('')}
                         </div>
@@ -1567,7 +1597,7 @@ const pages = {
                         </div>
                         ` : ''}
                     </div>
-                `}).join('') : EmptyState({ icon: Icons.heartHandshake(), message: activeTab === 'pending' ? 'No pending requests' : activeTab === 'accepted' ? 'No accepted requests yet' : 'No declined requests' })}
+                `}).join('') : EmptyState({ icon: Icons.heartHandshake(), message: activeTab === 'pending' ? tr('careFund.pending', 'No pending requests') : activeTab === 'accepted' ? tr('careFund.accepted', 'No accepted requests yet') : tr('careFund.notApproved', 'No declined requests') })}
             </div>
             ${renderPagination('careFund', page, allRequestsToShow.length, limit)}
         `;
@@ -1612,28 +1642,28 @@ const pages = {
                         <div class="min-w-0 flex-1">
                             <h3 class="font-bold text-text-primary truncate text-base">${m.name}</h3>
                             <p class="text-xs text-text-muted flex items-center gap-1">
-                                ${m.interval === 'weekly' ? 'Weekly' : 'Monthly'} • ${formatMoney(m.committed_amount)}
+                                ${m.interval === 'weekly' ? t('register.everyWeek') : t('register.everyMonth')} • ${formatMoney(m.committed_amount)}
                             </p>
                         </div>
                     </div>
                     <div class="mb-4 space-y-2 rounded-2xl bg-surface-soft p-4">
                         <div class="flex justify-between items-center">
-                            <span class="text-xs text-text-muted">Family Savings</span>
+                            <span class="text-xs text-text-muted">${t('member.familySavings')}</span>
                             <span class="text-xs font-bold text-text-primary">${formatMoney(m.current_sum || m.CurrentSum || 0, { compact: true })}</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-xs text-text-muted">Personal Savings</span>
+                            <span class="text-xs text-text-muted">${t('member.personalSavings')}</span>
                             <span class="text-xs font-bold text-text-primary">${formatMoney(m.pool2_sum || m.Pool2Sum || 0, { compact: true })}</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-xs text-text-muted">Status</span>
-                            <span class="font-bold ${m.status === 'active' ? 'text-success' : 'text-error'}">${m.status === 'active' ? 'Up to date' : 'Behind'}</span>
+                            <span class="text-xs text-text-muted">${t('table.status')}</span>
+                            <span class="font-bold ${m.status === 'active' ? 'text-success' : 'text-error'}">${m.status === 'active' ? t('common.upToDate') : t('member.behind')}</span>
                         </div>
                     </div>
                 </div>
             `).join('') || `
                 <div class="col-span-full text-center py-12">
-                    <p class="text-sm text-text-muted">No members found</p>
+                    <p class="text-sm text-text-muted">${t('common.noData')}</p>
                 </div>
             `}
         </div>
@@ -1717,11 +1747,11 @@ const pages = {
         <div class="flex min-h-screen flex-col items-center justify-center p-6">
             <div class="text-8xl text-brand mb-6">${Icons.alertCircle()}</div>
             <h1 class="text-4xl font-bold mb-2">404</h1>
-            <h2 class="text-xl font-semibold text-text-secondary mb-4">Page Not Found</h2>
-            <p class="text-text-muted mb-8 text-center max-w-md">The page you're looking for doesn't exist or has been moved.</p>
+            <h2 class="text-xl font-semibold text-text-secondary mb-4">${t('errors.pageNotFound')}</h2>
+            <p class="text-text-muted mb-8 text-center max-w-md">${t('errors.pageNotFoundDesc')}</p>
             <a href="/" class="flex h-12 items-center justify-center rounded-2xl bg-brand px-6 font-medium text-white hover:bg-brand-hover active:bg-brand-hover">
                 ${Icons.home()}
-                Go Home
+                ${t('nav.home')}
             </a>
         </div>
     `,
@@ -1730,11 +1760,11 @@ const pages = {
         <div class="flex min-h-screen flex-col items-center justify-center p-6">
             <div class="text-8xl text-error mb-6">${Icons.alertOctagon()}</div>
             <h1 class="text-4xl font-bold mb-2">500</h1>
-            <h2 class="text-xl font-semibold text-text-secondary mb-4">Server Error</h2>
-            <p class="text-text-muted mb-8 text-center max-w-md">Something went wrong on our end. Please try again later.</p>
-            <button onclick="location.reload()" class="flex h-12 items-center justify-center rounded-2xl bg-brand px-6 font-medium text-white hover:bg-brand-hover active:bg-brand-hover">
+            <h2 class="text-xl font-semibold text-text-secondary mb-4">${t('errors.serverError')}</h2>
+            <p class="text-text-muted mb-8 text-center max-w-md">${t('common.error')}</p>
+            <button onclick="router.refresh()" class="flex h-12 items-center justify-center rounded-2xl bg-brand px-6 font-medium text-white hover:bg-brand-hover active:bg-brand-hover">
                 ${Icons.refreshCw()}
-                Try Again
+                ${t('common.tryAgain')}
             </button>
         </div>
     `,
@@ -1847,37 +1877,37 @@ async function handleAdminLogin(e) {
     successEl.classList.add('hidden');
     
     if (!password) {
-        errorEl.querySelector('span:last-child').textContent = 'Password is required';
+        errorEl.querySelector('span:last-child').textContent = t('validation.required');
         errorEl.classList.remove('hidden');
         return;
     }
     
     if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<span class="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span> Signing in...';
+        btn.innerHTML = '<span class="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span> ' + t('common.loading');
     }
     
     try {
         await store.adminLogin(password);
-        successEl.querySelector('span:last-child').textContent = 'Login successful! Redirecting...';
+        successEl.querySelector('span:last-child').textContent = t('common.success');
         successEl.classList.remove('hidden');
         await new Promise(r => setTimeout(r, 300));
         router.navigate('/admin/dashboard');
     } catch(err) {
-        let msg = err.message || 'Wrong password. Please try again.';
+        let msg = err.message || t('errors.wrongPassword');
         if (msg.includes('.')) {
             msg = t(msg) || t('errors.tryAgain');
         } else {
             msg = msg.replace(/[{}"\[\]]/g, '').trim();
             if (!msg || msg === 'Request failed' || msg === 'Network Error') {
-                msg = 'Wrong password. Please try again.';
+                msg = t('errors.wrongPassword');
             }
         }
         errorEl.querySelector('span:last-child').textContent = msg;
         errorEl.classList.remove('hidden');
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = `${Icons.shield()} Sign In as Manager`;
+            btn.innerHTML = `${Icons.shield()} ${t('auth.signInAsManager')}`;
         }
     }
 }
@@ -1902,18 +1932,27 @@ function togglePassword(id) {
 }
 
 function setSchedule(schedule) {
-    document.getElementById('btn-weekly').className = 'flex-1 rounded-lg py-3 text-sm font-medium transition-all select-none ' + (schedule === 'weekly' ? 'bg-brand text-white shadow-md' : 'text-text-secondary hover:bg-surface-soft');
-    document.getElementById('btn-monthly').className = 'flex-1 rounded-lg py-3 text-sm font-medium transition-all select-none ' + (schedule === 'monthly' ? 'bg-brand text-white shadow-md' : 'text-text-secondary hover:bg-surface-soft');
+    const weeklyBtn = document.getElementById('btn-weekly');
+    const monthlyBtn = document.getElementById('btn-monthly');
+    if (!weeklyBtn || !monthlyBtn) return;
+    weeklyBtn.className = 'flex-1 rounded-lg py-3 text-sm font-medium transition-all select-none ' + (schedule === 'weekly' ? 'bg-brand text-white shadow-md' : 'text-text-secondary hover:bg-surface-soft');
+    monthlyBtn.className = 'flex-1 rounded-lg py-3 text-sm font-medium transition-all select-none ' + (schedule === 'monthly' ? 'bg-brand text-white shadow-md' : 'text-text-secondary hover:bg-surface-soft');
 }
 
 function setFund(fund) {
-    document.getElementById('fund-pool1').className = 'flex-1 rounded-lg py-3 text-sm font-medium select-none ' + (fund === 'pool1' ? 'bg-brand text-white' : 'text-text-secondary');
-    document.getElementById('fund-pool2').className = 'flex-1 rounded-lg py-3 text-sm font-medium select-none ' + (fund === 'pool2' ? 'bg-brand text-white' : 'text-text-secondary');
+    const pool1Btn = document.getElementById('fund-pool1');
+    const pool2Btn = document.getElementById('fund-pool2');
+    if (!pool1Btn || !pool2Btn) return;
+    pool1Btn.className = 'flex-1 rounded-lg py-3 text-sm font-medium select-none ' + (fund === 'pool1' ? 'bg-brand text-white' : 'text-text-secondary');
+    pool2Btn.className = 'flex-1 rounded-lg py-3 text-sm font-medium select-none ' + (fund === 'pool2' ? 'bg-brand text-white' : 'text-text-secondary');
 }
 
 function setTxType(type) {
-    document.getElementById('type-credit').className = 'flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium select-none ' + (type === 'credit' ? 'bg-success text-white' : 'text-text-secondary');
-    document.getElementById('type-debit').className = 'flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium select-none ' + (type === 'debit' ? 'bg-error text-white' : 'text-text-secondary');
+    const creditBtn = document.getElementById('type-credit');
+    const debitBtn = document.getElementById('type-debit');
+    if (!creditBtn || !debitBtn) return;
+    creditBtn.className = 'flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium select-none ' + (type === 'credit' ? 'bg-success text-white' : 'text-text-secondary');
+    debitBtn.className = 'flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium select-none ' + (type === 'debit' ? 'bg-error text-white' : 'text-text-secondary');
 }
 
 // Admin - Record Payment
@@ -1934,7 +1973,7 @@ async function handleRecordPayment(e) {
     }
     
     if (!receiptFile) {
-        showToast('Receipt is required before recording a payment', 'error');
+        showToast(tr('transaction.attachProof', 'Receipt is required before recording a payment'), 'error');
         return;
     }
     
@@ -1990,7 +2029,7 @@ async function handleAddMember(e) {
     }
     
     if (!amount || parseInt(amount) <= 0) {
-        showToast('Please enter a valid amount', 'error');
+        showToast(t('validation.required'), 'error');
         return;
     }
     
@@ -2047,7 +2086,7 @@ function selectRequestType(requestType) {
         withdrawalInfo.classList.add('hidden');
         
         // Update button text
-        btnText.textContent = 'Send Request to Family';
+        btnText.textContent = t('careFund.sendRequest');
     } else {
         // Style withdrawal button
         withdrawalBtn.className = 'request-type-btn p-4 rounded-2xl border-2 border-brand bg-brand-light text-left transition-all hover:shadow-md';
@@ -2062,7 +2101,7 @@ function selectRequestType(requestType) {
         withdrawalInfo.classList.remove('hidden');
         
         // Update button text
-        btnText.textContent = 'Withdraw from Savings';
+        btnText.textContent = t('careFund.requestHelp');
     }
 }
 
@@ -2095,7 +2134,7 @@ function selectRequestType(requestType) {
     
     // Only check balance for withdrawal requests
     if (requestType === 'withdrawal' && requested > balance) {
-        showToast('Not enough money in your personal savings. You have ' + formatMoney(balance, { compact: true }), 'error');
+        showToast(`${t('errors.insufficientFunds')}. ${formatMoney(balance, { compact: true })}`, 'error');
         return;
     }
     
@@ -2110,7 +2149,7 @@ function selectRequestType(requestType) {
         
         // For care fund requests, occasion is required
         if (requestType === 'care_fund' && !occasion) {
-            showToast('Please select what this is for', 'error');
+            showToast(t('validation.required'), 'error');
             return;
         }
         
@@ -2163,11 +2202,11 @@ function showDeclineForm(id) {
     if (card) {
         card.innerHTML += `
             <div id="decline-form-${id}" class="mt-3 rounded-2xl bg-error/5 border border-error/20 p-4">
-                <p class="text-sm font-medium text-text-primary mb-2">Reason for declining:</p>
-                <textarea id="decline-reason-${id}" rows="3" class="w-full rounded-lg border border-border bg-surface p-3 text-sm focus:border-brand focus:outline-none" placeholder="Enter reason..."></textarea>
+                <p class="text-sm font-medium text-text-primary mb-2">${tr('careFund.tellMore', 'Reason for declining:')}</p>
+                <textarea id="decline-reason-${id}" rows="3" class="w-full rounded-lg border border-border bg-surface p-3 text-sm focus:border-brand focus:outline-none" placeholder="${tr('careFund.tellMore', 'Enter reason...')}"></textarea>
                 <div class="mt-3 flex gap-2">
-                    <button onclick="submitDecline('${id}')" class="flex-1 rounded-lg bg-error py-2 text-sm font-medium text-white">Confirm Decline</button>
-                    <button onclick="cancelDecline('${id}')" class="flex-1 rounded-lg border border-border py-2 text-sm font-medium text-text-secondary">Cancel</button>
+                    <button onclick="submitDecline('${id}')" class="flex-1 rounded-lg bg-error py-2 text-sm font-medium text-white">${t('common.confirm')}</button>
+                    <button onclick="cancelDecline('${id}')" class="flex-1 rounded-lg border border-border py-2 text-sm font-medium text-text-secondary">${t('common.cancel')}</button>
                 </div>
             </div>
         `;
@@ -2184,13 +2223,13 @@ async function submitDecline(id) {
     const reasonEl = document.getElementById(`decline-reason-${id}`);
     const reason = reasonEl?.value?.trim();
     if (!reason) {
-        showToast('Please enter a reason', 'error');
+        showToast(t('validation.required'), 'error');
         return;
     }
     
     try {
         await store.updateCareFundRequest(id, 'rejected', reason);
-        showToast('Request declined', 'info');
+        showToast(tr('careFund.notApproved', 'Request declined'), 'info');
         window.decliningRequestId = null;
         router.refresh();
     } catch (err) {
@@ -2288,7 +2327,7 @@ async function handlePoolTransfer() {
     const requested = parseInt(amount);
     
     if (requested > balance) {
-        showToast('Not enough money. You have ' + formatMoney(balance, { compact: true }) + ' available', 'error');
+        showToast(`${t('errors.insufficientFunds')}. ${formatMoney(balance, { compact: true })}`, 'error');
         return;
     }
     
@@ -2321,7 +2360,7 @@ async function handlePoolTransfer() {
                 router.refresh();
             } catch (receiptErr) {
                 console.error('Failed to fetch receipt:', receiptErr);
-                showToast(t('common.success') + ' (Receipt unavailable)', 'success');
+                showToast(t('common.success'), 'success');
                 router.refresh();
             }
         } else {
@@ -2339,35 +2378,54 @@ async function handlePoolTransfer() {
         showToast(msg, 'error');
     } finally {
         btn.disabled = false;
-        btn.innerHTML = Icons.arrowRightLeft() + ' Transfer Now';
+        btn.innerHTML = Icons.arrowRightLeft() + ' ' + t('common.transferNow');
     }
 }
 
 function showAddMemberModal() {
-    document.getElementById('add-member-modal').classList.remove('hidden');
-    document.getElementById('add-member-icon').innerHTML = Icons.userPlus();
-    document.getElementById('add-member-title').textContent = t('members.addMember');
-    document.getElementById('lbl-name').textContent = t('members.fullName') + ' *';
-    document.getElementById('lbl-password').textContent = t('members.password') + ' *';
-    document.getElementById('lbl-interval').textContent = 'How often will they save?';
-    document.getElementById('lbl-amount').textContent = t('members.howMuchEach');
-    document.getElementById('btn-cancel').textContent = t('common.cancel');
-    document.getElementById('btn-add').textContent = t('members.addMember');
-    document.getElementById('new-member-name').value = '';
-    document.getElementById('new-member-password').value = '';
-    document.getElementById('new-member-amount').value = '';
-    lucide.createIcons();
+    const modal = document.getElementById('add-member-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    const addMemberIcon = document.getElementById('add-member-icon');
+    const addMemberTitle = document.getElementById('add-member-title');
+    const lblName = document.getElementById('lbl-name');
+    const lblPassword = document.getElementById('lbl-password');
+    if (addMemberIcon) addMemberIcon.innerHTML = Icons.userPlus();
+    if (addMemberTitle) addMemberTitle.textContent = t('members.addMember');
+    if (lblName) lblName.textContent = t('members.fullName') + ' *';
+    if (lblPassword) lblPassword.textContent = t('members.password') + ' *';
+    const lblInterval = document.getElementById('lbl-interval');
+    if (lblInterval) lblInterval.textContent = t('members.howOften');
+    const lblAmount = document.getElementById('lbl-amount');
+    const btnCancel = document.getElementById('btn-cancel');
+    const btnAdd = document.getElementById('btn-add');
+    const newMemberName = document.getElementById('new-member-name');
+    const newMemberPassword = document.getElementById('new-member-password');
+    const newMemberAmount = document.getElementById('new-member-amount');
+    if (lblAmount) lblAmount.textContent = t('members.howMuchEach');
+    if (btnCancel) btnCancel.textContent = t('common.cancel');
+    if (btnAdd) btnAdd.textContent = t('members.addMember');
+    if (newMemberName) newMemberName.value = '';
+    if (newMemberPassword) newMemberPassword.value = '';
+    if (newMemberAmount) newMemberAmount.value = '';
+    if (window.lucide && window.lucide.createIcons) {
+        window.lucide.createIcons();
+    }
 }
 
 function closeAddMemberModal() {
-    document.getElementById('add-member-modal').classList.add('hidden');
+    const modal = document.getElementById('add-member-modal');
+    if (modal) modal.classList.add('hidden');
 }
 
 // Settings - Set interval
 function setSettingsInterval(interval) {
-    document.getElementById('settings-interval').value = interval;
+    const intervalInput = document.getElementById('settings-interval');
+    if (!intervalInput) return;
+    intervalInput.value = interval;
     const weeklyBtn = document.getElementById('interval-weekly');
     const monthlyBtn = document.getElementById('interval-monthly');
+    if (!weeklyBtn || !monthlyBtn) return;
     if (interval === 'weekly') {
         weeklyBtn.classList.add('bg-brand', 'text-white');
         weeklyBtn.classList.remove('text-text-secondary');
@@ -2430,7 +2488,7 @@ function showReceiptModal(url) {
             modal.classList.remove('opacity-0');
             modal.querySelector('.transform')?.classList.remove('scale-95');
         }, 10);
-        document.body.classList.add('overflow-hidden');
+        lockBodyScroll();
         lucide.createIcons();
     }
 }
@@ -2442,7 +2500,7 @@ function closeReceiptModal() {
         modal.querySelector('.transform')?.classList.add('scale-95');
         setTimeout(() => {
             modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
+            unlockBodyScroll();
         }, 200);
     }
 }
@@ -2476,7 +2534,7 @@ function showReceiptImage(url) {
     setTimeout(() => {
         modal.querySelector('#receipt-image-content')?.classList.remove('scale-95', 'opacity-0');
     }, 10);
-    document.body.classList.add('overflow-hidden');
+    lockBodyScroll();
     lucide.createIcons();
 }
 
@@ -2486,9 +2544,9 @@ async function showTransferReceiptModal(receipt, newPool2Balance, newPool1Balanc
     if (!modal) return;
     
     const user = store.user;
-    const memberName = user?.name || 'Member';
+    const memberName = user?.name || tr('members.fullName', 'Member');
     const amount = receipt?.amount || receipt?.Amount || '0';
-    const date = receipt?.created_at ? new Date(receipt.created_at).toLocaleString() : new Date().toLocaleString();
+    const date = receipt?.created_at ? formatDateTime(receipt.created_at) : formatDateTime(new Date().toISOString());
     const receiptNumber = receipt?.receipt_number || receipt?.ReceiptNumber || receipt?.id || '';
     
     modal.innerHTML = `
@@ -2496,7 +2554,7 @@ async function showTransferReceiptModal(receipt, newPool2Balance, newPool1Balanc
             <div class="absolute inset-0 bg-black/50" onclick="closeTransferReceiptModal()"></div>
             <div class="relative w-full max-w-md rounded-2xl bg-surface shadow-2xl transform transition-all scale-95 opacity-0" id="transfer-receipt-content">
                 <div class="flex items-center justify-between border-b border-border p-5">
-                    <h2 class="text-xl font-bold text-text-primary">Transfer Receipt</h2>
+                    <h2 class="text-xl font-bold text-text-primary">${tr('common.viewReceipt', 'Transfer Receipt')}</h2>
                     <button onclick="closeTransferReceiptModal()" class="rounded-lg p-2 hover:bg-surface-soft">
                         ${Icons.x()}
                     </button>
@@ -2506,17 +2564,17 @@ async function showTransferReceiptModal(receipt, newPool2Balance, newPool1Balanc
                         <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-success/10 mb-3">
                             ${Icons.checkCircle()}
                         </div>
-                        <p class="text-success font-bold text-lg">Transfer Successful!</p>
+                        <p class="text-success font-bold text-lg">${t('common.success')}</p>
                     </div>
                     
                     <div class="space-y-3">
                         <div class="flex justify-between">
-                            <span class="text-text-muted">Member</span>
+                            <span class="text-text-muted">${t('table.member')}</span>
                             <span class="font-semibold text-text-primary">${memberName}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-text-muted">Amount</span>
-                            <span class="font-bold text-brand">₦${parseFloat(amount).toLocaleString()}</span>
+                            <span class="text-text-muted">${t('table.amount')}</span>
+                            <span class="font-bold text-brand">${formatMoney(amount)}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-text-muted">From</span>
@@ -2527,30 +2585,30 @@ async function showTransferReceiptModal(receipt, newPool2Balance, newPool1Balanc
                             <span class="text-text-primary">Family Savings (Pool 1)</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-text-muted">Date</span>
+                            <span class="text-text-muted">${t('table.date')}</span>
                             <span class="text-text-primary">${date}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-text-muted">Receipt No.</span>
+                            <span class="text-text-muted">${tr('common.receiptNumber', 'Receipt No.')}</span>
                             <span class="text-text-primary text-sm font-mono font-bold">${receiptNumber}</span>
                         </div>
                     </div>
                     
                     <div class="bg-surface-soft rounded-2xl p-4 space-y-2">
                         <div class="flex justify-between text-sm">
-                            <span class="text-text-muted">New Personal Savings</span>
-                            <span class="font-bold text-text-primary">₦${parseFloat(newPool2Balance || 0).toLocaleString()}</span>
+                            <span class="text-text-muted">${tr('member.personalSavings', 'New Personal Savings')}</span>
+                            <span class="font-bold text-text-primary">${formatMoney(newPool2Balance || 0)}</span>
                         </div>
                         <div class="flex justify-between text-sm">
-                            <span class="text-text-muted">New Family Savings</span>
-                            <span class="font-bold text-text-primary">₦${parseFloat(newPool1Balance || 0).toLocaleString()}</span>
+                            <span class="text-text-muted">${tr('member.familySavings', 'New Family Savings')}</span>
+                            <span class="font-bold text-text-primary">${formatMoney(newPool1Balance || 0)}</span>
                         </div>
                     </div>
                     
                     <div class="flex gap-2 pt-2">
                         <button onclick="downloadReceiptFromModal()" class="flex-1 flex items-center justify-center gap-2 h-12 rounded-2xl bg-brand text-white font-semibold hover:bg-brand-hover transition-colors">
                             ${Icons.download()}
-                            Download
+                            ${tr('common.download', 'Download')}
                         </button>
                         <button onclick="copyReceiptNumber('${receiptNumber}')" class="flex items-center justify-center gap-2 h-12 px-4 rounded-2xl bg-surface-soft border border-border font-semibold hover:bg-surface-raised transition-colors">
                             ${Icons.copy()}
@@ -2568,16 +2626,33 @@ async function showTransferReceiptModal(receipt, newPool2Balance, newPool1Balanc
     setTimeout(() => {
         modal.querySelector('#transfer-receipt-content').classList.remove('scale-95', 'opacity-0');
     }, 10);
-    document.body.classList.add('overflow-hidden');
+    lockBodyScroll();
     lucide.createIcons();
 }
 
 function copyReceiptNumber(number) {
-    navigator.clipboard.writeText(number).then(() => {
-        showToast('Receipt number copied!', 'success');
-    }).catch(() => {
-        showToast('Failed to copy', 'error');
-    });
+    if (!number) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(number).then(() => {
+            showToast(t('common.success'), 'success');
+        }).catch(() => {
+            showToast(t('common.error'), 'error');
+        });
+        return;
+    }
+    const textarea = document.createElement('textarea');
+    textarea.value = number;
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+        if (!document.execCommand('copy')) {
+            throw new Error('copy_failed');
+        }
+        showToast(t('common.success'), 'success');
+    } catch {
+        showToast(t('common.error'), 'error');
+    }
+    textarea.remove();
 }
 
 function closeTransferReceiptModal() {
@@ -2587,7 +2662,7 @@ function closeTransferReceiptModal() {
         content.classList.add('scale-95', 'opacity-0');
         setTimeout(() => {
             modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
+            unlockBodyScroll();
             store.loadDashboard();
             store.loadTransactions();
         }, 200);
@@ -2636,12 +2711,12 @@ function downloadTransferReceipt(receiptNumber, amount, memberName) {
     ctx.font = '14px Arial';
     const details = [
         ['Receipt Number:', receiptNumber || 'N/A'],
-        ['Member:', memberName || 'Member'],
-        ['Amount:', '₦' + parseFloat(amount || 0).toLocaleString()],
+        ['Member:', memberName || tr('members.fullName', 'Member')],
+        ['Amount:', formatMoney(amount || 0)],
         ['From:', 'Personal Savings (Pool 2)'],
         ['To:', 'Family Savings (Pool 1)'],
-        ['Date:', new Date().toLocaleDateString()],
-        ['Time:', new Date().toLocaleTimeString()]
+        ['Date:', formatDate(new Date().toISOString())],
+        ['Time:', new Date().toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' })]
     ];
     
     let y = 210;
@@ -2673,7 +2748,7 @@ function downloadReceiptFromModal() {
     const modal = document.getElementById('transfer-receipt-modal');
     const receiptNo = modal?.querySelector('.font-mono.font-bold')?.textContent || 'RCP';
     const amount = modal?.querySelector('.text-brand.font-bold')?.textContent?.replace(/[₦,]/g, '') || '0';
-    const member = store.user?.name || 'Member';
+    const member = store.user?.name || tr('members.fullName', 'Member');
     downloadTransferReceipt(receiptNo, amount, member);
 }
 
@@ -2685,8 +2760,8 @@ function showTransferReceiptData(transactionId, receiptData) {
     let amount = '0';
     let fromFund = 'Personal Savings';
     let toFund = 'Family Savings';
-    let date = new Date().toLocaleDateString();
-    let time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    let date = formatDate(new Date().toISOString());
+    let time = new Date().toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' });
     
     // Parse the text format: "Transfer Receipt: Amount 150 transferred from pool2 to pool1. Transaction ID: ..., Date: ..."
     const amountMatch = rawData.match(/Amount (\d+)/);
@@ -2707,7 +2782,7 @@ function showTransferReceiptData(transactionId, receiptData) {
         time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     }
     
-    const refId = transactionId ? transactionId.slice(0, 8) : 'N/A';
+    const refId = transactionId ? String(transactionId).slice(0, 8) : 'N/A';
     
     if (modal) {
         modal.innerHTML = `
@@ -2716,34 +2791,34 @@ function showTransferReceiptData(transactionId, receiptData) {
                 <div class="relative w-full max-w-sm rounded-2xl bg-surface shadow-2xl overflow-hidden">
                     <!-- Header -->
                     <div class="bg-brand px-6 py-4 text-center">
-                        <p class="text-white font-bold text-lg">Transfer Receipt</p>
+                        <p class="text-white font-bold text-lg">${tr('common.viewReceipt', 'Transfer Receipt')}</p>
                     </div>
                     
                     <!-- Body -->
                     <div class="p-6 space-y-4">
                         <div class="text-center pb-4 border-b border-border">
-                            <p class="text-3xl font-bold text-brand">₦${parseInt(amount).toLocaleString()}</p>
+                            <p class="text-3xl font-bold text-brand">${formatMoney(amount)}</p>
                         </div>
                         
                         <div class="space-y-3">
                             <div class="flex justify-between">
-                                <span class="text-text-muted text-sm">From</span>
+                                <span class="text-text-muted text-sm">${tr('table.from', 'From')}</span>
                                 <span class="text-text-primary font-medium">${fromFund}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-text-muted text-sm">To</span>
+                                <span class="text-text-muted text-sm">${tr('table.to', 'To')}</span>
                                 <span class="text-text-primary font-medium">${toFund}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-text-muted text-sm">Date</span>
+                                <span class="text-text-muted text-sm">${t('table.date')}</span>
                                 <span class="text-text-primary">${date}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-text-muted text-sm">Time</span>
+                                <span class="text-text-muted text-sm">${tr('common.time', 'Time')}</span>
                                 <span class="text-text-primary">${time}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-text-muted text-sm">Reference</span>
+                                <span class="text-text-muted text-sm">${tr('common.reference', 'Reference')}</span>
                                 <span class="text-text-primary font-mono text-sm">${refId}</span>
                             </div>
                         </div>
@@ -2764,7 +2839,7 @@ function showTransferReceiptData(transactionId, receiptData) {
         
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.remove('opacity-0'), 10);
-        document.body.classList.add('overflow-hidden');
+        lockBodyScroll();
         lucide.createIcons();
     }
 }
@@ -2804,6 +2879,10 @@ const infiniteScroll = {
         
         if (!container) return;
         
+        if (!('IntersectionObserver' in window)) {
+            this.loadMore(pageKey, fetchFn, options);
+            return;
+        }
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting && !window[`${pageKey}Loading`] && window[`${pageKey}HasMore`]) {
@@ -2878,7 +2957,7 @@ function renderInfiniteLoader() {
         <div id="infinite-scroll-loader" class="hidden py-6 text-center">
             <div class="inline-flex items-center gap-2 text-sm text-text-muted">
                 <div class="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin"></div>
-                Loading more...
+                ${t('common.loading')}
             </div>
         </div>
     `;
@@ -2888,7 +2967,7 @@ function renderInfiniteLoader() {
 function renderInfiniteEnd(count) {
     return `
         <div id="infinite-scroll-end" class="hidden py-6 text-center text-sm text-text-muted">
-            ${count > 0 ? 'You have reached the end' : 'No data'}
+            ${count > 0 ? tr('common.allCaughtUp', 'You have reached the end') : t('common.noData')}
         </div>
     `;
 }
@@ -2903,13 +2982,13 @@ function renderPagination(pageKey, currentPage, totalItems, limit = 20) {
             <button onclick="window.${pageKey}Page = (window.${pageKey}Page || 1) - 1; if(window.${pageKey}Page < 1) window.${pageKey}Page = 1; router.refresh()" 
                 class="px-4 py-2.5 rounded-2xl border border-border text-sm font-medium text-text-secondary hover:bg-surface-soft disabled:opacity-50 ${currentPage <= 1 ? 'disabled' : ''}" 
                 ${currentPage <= 1 ? 'disabled' : ''}>
-                ${Icons.chevronLeft()} Previous
+                ${Icons.chevronLeft()} ${tr('common.previous', 'Previous')}
             </button>
-            <span class="text-sm text-text-muted">Page ${currentPage} of ${totalPages}</span>
+            <span class="text-sm text-text-muted">${tr('common.page', 'Page')} ${currentPage} ${tr('common.of', 'of')} ${totalPages}</span>
             <button onclick="window.${pageKey}Page = (window.${pageKey}Page || 1) + 1; router.refresh()" 
                 class="px-4 py-2.5 rounded-2xl bg-brand text-white text-sm font-medium hover:bg-brand-hover ${currentPage >= totalPages ? 'disabled opacity-50' : ''}"
                 ${currentPage >= totalPages ? 'disabled' : ''}>
-                Next ${Icons.chevronRight()}
+                ${tr('common.next', 'Next')} ${Icons.chevronRight()}
             </button>
         </div>
     `;

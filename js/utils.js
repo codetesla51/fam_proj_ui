@@ -444,6 +444,8 @@ let isPulling = false;
 function initPullToRefresh(onRefresh) {
     const main = document.querySelector('main');
     if (!main) return;
+    if (main.dataset.pullRefreshBound === 'true') return;
+    main.dataset.pullRefreshBound = 'true';
     
     let indicator = document.getElementById('pull-indicator');
     if (!indicator) {
@@ -459,7 +461,7 @@ function initPullToRefresh(onRefresh) {
             pullStartY = e.touches[0].clientY;
             isPulling = true;
         }
-    });
+    }, { passive: true });
     
     main.addEventListener('touchmove', (e) => {
         if (!isPulling) return;
@@ -467,7 +469,7 @@ function initPullToRefresh(onRefresh) {
         if (pullDistance > 0 && pullDistance < 150) {
             indicator.style.transform = `translateY(${pullDistance - 50}px)`;
         }
-    });
+    }, { passive: true });
     
 // Skeleton Loaders
 function skeletonCard() {
@@ -581,5 +583,5 @@ function highlightElement(id) {
                 }, 1000);
             }
         }
-    });
+    }, { passive: true });
 }
