@@ -20,6 +20,15 @@ function tr(key, fallback) {
     return !translated || translated === key ? fallback : translated;
 }
 
+function escapeHtmlAttr(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function ensureArray(value) {
     return Array.isArray(value) ? value : [];
 }
@@ -29,23 +38,11 @@ function lockBodyScroll() {
     if (document.body.dataset.scrollLocked === 'true') return;
     _scrollLockY = window.scrollY || window.pageYOffset || 0;
     document.body.dataset.scrollLocked = 'true';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${_scrollLockY}px`;
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.width = '100%';
-    document.body.classList.add('overflow-hidden');
 }
 
 function unlockBodyScroll() {
     if (document.body.dataset.scrollLocked !== 'true') return;
     document.body.dataset.scrollLocked = 'false';
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.left = '';
-    document.body.style.right = '';
-    document.body.style.width = '';
-    document.body.classList.remove('overflow-hidden');
     window.scrollTo(0, _scrollLockY);
 }
 
@@ -1802,7 +1799,7 @@ function handleLogin(e) {
     }
     
     btn.disabled = true;
-    btn.innerHTML = '<div class="loader !w-5 !h-5 !border-2"></div> ' + t('common.loading');
+    btn.innerHTML = '<div class="loader !w-5 !h-5 !border-2" role="status" aria-label="' + t('common.loading') + '"></div> ' + t('common.loading');
     
     store.login(name, password).then(() => {
         showToast(t('common.success'), 'success');
@@ -2038,20 +2035,34 @@ async function handleAddMember(e) {
     const password = document.getElementById('new-member-password')?.value;
     const amount = document.getElementById('new-member-amount')?.value;
     const interval = document.getElementById('new-member-interval')?.value || 'monthly';
-    const btn = e.target.querySelector('button[type="submit"]');
+    const btn = document.getElementById('btn-submit-member');
+    const errorBox = document.getElementById('add-member-error');
+    if (errorBox) {
+        errorBox.classList.add('hidden');
+        errorBox.textContent = '';
+    }
     
     if (!name || !password) {
         showToast(t('validation.required'), 'error');
+        if (errorBox) {
+            errorBox.textContent = t('validation.required');
+            errorBox.classList.remove('hidden');
+        }
         return;
     }
     
     if (!amount || parseInt(amount) <= 0) {
         showToast(t('validation.required'), 'error');
+        if (errorBox) {
+            errorBox.textContent = t('validation.required');
+            errorBox.classList.remove('hidden');
+        }
         return;
     }
     
+    if (!btn) return;
     btn.disabled = true;
-    btn.innerHTML = '<div class="loader !w-5 !h-5 !border-2"></div> ';
+    btn.innerHTML = '<div class="loader !w-5 !h-5 !border-2"></div> ' + t('common.loading');
     
     try {
         await store.createMember({
@@ -2072,6 +2083,10 @@ async function handleAddMember(e) {
             msg = msg.replace(/[{}"\[\]]/g, '').trim();
         }
         showToast(msg, 'error');
+        if (errorBox) {
+            errorBox.textContent = msg;
+            errorBox.classList.remove('hidden');
+        }
     } finally {
         btn.disabled = false;
         btn.innerHTML = t('members.addMember');
@@ -2461,15 +2476,33 @@ function showAddMemberModal() {
     const lblAmount = document.getElementById('lbl-amount');
     const btnCancel = document.getElementById('btn-cancel');
     const btnAdd = document.getElementById('btn-add');
+    const intervalWeeklyBtn = document.getElementById('interval-weekly-btn');
+    const intervalMonthlyBtn = document.getElementById('interval-monthly-btn');
     const newMemberName = document.getElementById('new-member-name');
     const newMemberPassword = document.getElementById('new-member-password');
     const newMemberAmount = document.getElementById('new-member-amount');
+    let addMemberError = document.getElementById('add-member-error');
+    if (!addMemberError) {
+        const form = modal.querySelector('form');
+        if (form) {
+            addMemberError = document.createElement('p');
+            addMemberError.id = 'add-member-error';
+            addMemberError.className = 'hidden rounded-xl border border-error/20 bg-error/5 p-3 text-sm text-error';
+            form.appendChild(addMemberError);
+        }
+    }
     if (lblAmount) lblAmount.textContent = t('members.howMuchEach');
     if (btnCancel) btnCancel.textContent = t('common.cancel');
     if (btnAdd) btnAdd.textContent = t('members.addMember');
+    if (intervalWeeklyBtn) intervalWeeklyBtn.textContent = t('common.weekly');
+    if (intervalMonthlyBtn) intervalMonthlyBtn.textContent = t('common.monthly');
     if (newMemberName) newMemberName.value = '';
     if (newMemberPassword) newMemberPassword.value = '';
     if (newMemberAmount) newMemberAmount.value = '';
+    if (addMemberError) {
+        addMemberError.classList.add('hidden');
+        addMemberError.textContent = '';
+    }
     if (window.lucide && window.lucide.createIcons) {
         window.lucide.createIcons();
     }
@@ -2477,7 +2510,36 @@ function showAddMemberModal() {
 
 function closeAddMemberModal() {
     const modal = document.getElementById('add-member-modal');
+    const addMemberError = document.getElementById('add-member-error');
     if (modal) modal.classList.add('hidden');
+    if (addMemberError) {
+        addMemberError.classList.add('hidden');
+        addMemberError.textContent = '';
+    }
+}
+
+function applyFadeInToCurrentView() {
+    const candidates = document.querySelectorAll('#app .mx-auto.max-w-4xl, #app > div');
+    candidates.forEach((el) => {
+        if (!el || el.classList.contains('fade-in')) return;
+        el.classList.add('fade-in');
+    });
+}
+
+if (typeof window !== 'undefined') {
+    const startFadeObserver = () => {
+        const app = document.getElementById('app');
+        if (!app || window.__appFadeObserverAttached) return;
+        window.__appFadeObserverAttached = true;
+        applyFadeInToCurrentView();
+        const observer = new MutationObserver(() => applyFadeInToCurrentView());
+        observer.observe(app, { childList: true, subtree: true });
+    };
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startFadeObserver);
+    } else {
+        startFadeObserver();
+    }
 }
 
 // Settings - Set interval
@@ -2582,7 +2644,7 @@ function showReceiptImage(url) {
                     </button>
                 </div>
                 <div class="p-4">
-                    <img src="${url}" alt="Receipt" class="w-full rounded-lg" onerror="this.parentElement.innerHTML='<div class=\\'text-center p-8\\'><p class=\\'text-text-muted\\'>Could not load receipt image</p></div>'">
+                    <img src="${url}" alt="Receipt" loading="lazy" class="w-full rounded-lg" onerror="this.onerror=null;const wrap=document.createElement('div');wrap.className='text-center p-8';const p=document.createElement('p');p.className='text-text-muted';p.textContent='${escapeHtmlAttr(tr('errors.tryAgain', 'Could not load receipt image'))}';wrap.appendChild(p);this.parentElement.innerHTML='';this.parentElement.appendChild(wrap);">
                     <a href="${url}" target="_blank" download class="mt-4 flex items-center justify-center gap-2 h-12 rounded-2xl bg-brand text-white font-semibold hover:bg-brand-hover transition-colors">
                         ${Icons.download()}
                         Open Full Image
@@ -2614,7 +2676,7 @@ async function showTransferReceiptModal(receipt, newPool2Balance, newPool1Balanc
     modal.innerHTML = `
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div class="absolute inset-0 bg-black/50" onclick="closeTransferReceiptModal()"></div>
-            <div class="relative w-full max-w-md rounded-2xl bg-surface shadow-2xl transform transition-all scale-95 opacity-0" id="transfer-receipt-content">
+            <div class="relative w-full max-w-md max-h-[85vh] overflow-y-auto rounded-2xl bg-surface shadow-2xl transform transition-all duration-200 scale-95 opacity-0 safe-area-bottom" id="transfer-receipt-content" data-receipt-number="${escapeHtmlAttr(receiptNumber)}" data-receipt-amount="${escapeHtmlAttr(amount)}">
                 <div class="flex items-center justify-between border-b border-border p-5">
                     <h2 class="text-xl font-bold text-text-primary">${tr('common.viewReceipt', 'Transfer Receipt')}</h2>
                     <button onclick="closeTransferReceiptModal()" class="rounded-lg p-2 hover:bg-surface-soft">
@@ -2668,7 +2730,7 @@ async function showTransferReceiptModal(receipt, newPool2Balance, newPool1Balanc
                     </div>
                     
                     <div class="flex gap-2 pt-2">
-                        <button onclick="downloadReceiptFromModal()" class="flex-1 flex items-center justify-center gap-2 h-12 rounded-2xl bg-brand text-white font-semibold hover:bg-brand-hover transition-colors">
+                        <button onclick="downloadReceiptFromModal(event)" class="flex-1 flex items-center justify-center gap-2 h-12 rounded-2xl bg-brand text-white font-semibold hover:bg-brand-hover transition-colors">
                             ${Icons.download()}
                             ${tr('common.download', 'Download')}
                         </button>
@@ -2806,12 +2868,31 @@ function downloadTransferReceipt(receiptNumber, amount, memberName) {
     link.click();
 }
 
-function downloadReceiptFromModal() {
+function downloadReceiptFromModal(event) {
     const modal = document.getElementById('transfer-receipt-modal');
-    const receiptNo = modal?.querySelector('.font-mono.font-bold')?.textContent || 'RCP';
-    const amount = modal?.querySelector('.text-brand.font-bold')?.textContent?.replace(/[₦,]/g, '') || '0';
+    const content = modal?.querySelector('#transfer-receipt-content');
+    const btn = event?.currentTarget;
+    const receiptNo = content?.dataset?.receiptNumber || 'RCP';
+    const amount = content?.dataset?.receiptAmount || '0';
     const member = store.user?.name || tr('common.member', 'Member');
-    downloadTransferReceipt(receiptNo, amount, member);
+    if (btn) {
+        btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
+        btn.innerHTML = '<div class="loader !w-4 !h-4 !border-2" role="status" aria-label="' + t('common.loading') + '"></div> ' + t('common.loading');
+    }
+    try {
+        downloadTransferReceipt(receiptNo, amount, member);
+        showToast(t('common.success'), 'success');
+    } catch {
+        showToast(t('common.error'), 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.setAttribute('aria-busy', 'false');
+            btn.innerHTML = `${Icons.download()} ${tr('common.download', 'Download')}`;
+            lucide.createIcons();
+        }
+    }
 }
 
 function showTransferReceiptData(transactionId, receiptData) {

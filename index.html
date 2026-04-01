@@ -161,6 +161,7 @@
         }
         .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
         .animate-slideUp { animation: slideUp 0.4s ease-out; }
+        .fade-in { animation: fadeIn 0.25s ease-out; }
         a, button { transition: all 0.15s ease; }
         .icon { display: inline-flex; width: 1em; height: 1em; }
         .icon-sm { width: 16px; height: 16px; }
@@ -185,6 +186,13 @@
         @keyframes shimmer {
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
         }
         
         /* Premium card styles */
@@ -336,9 +344,6 @@
             height: 100%;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-            will-change: scroll-position;
         }
         
         /* Safari iOS - button/input styling fixes */
