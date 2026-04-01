@@ -67,8 +67,8 @@ const store = {
         notifications: null,
         careFundRequests: null,
         dashboard: null,
-        members: [],
-        receipts: []
+        members: null,
+        receipts: null
     },
     
     // Check if data is stale (older than 30 seconds)
@@ -242,15 +242,25 @@ const store = {
     
     // Load dashboard
     async loadDashboard(force = false) {
-        // Load from cache instantly
-        if (!this.data.dashboard) {
+        // Load from cache instantly (SWR)
+        if (this.data.dashboard === null) {
             const cached = cache.get('dashboard');
-            if (cached) this.data.dashboard = cached;
+            this.data.dashboard = cached || null;
+        }
+        const hasCached = this.data.dashboard !== null;
+        // Return stale cached data immediately and revalidate in background
+        if (!force && hasCached && this.isStale('dashboard')) {
+            this._fetchDashboard().catch(() => {});
+            return this.data.dashboard;
         }
         // Check if stale unless forced
         if (!force && !this.isStale('dashboard')) {
-            return this.data.dashboard || {};
+            return this.data.dashboard;
         }
+        return this._fetchDashboard();
+    },
+
+    async _fetchDashboard() {
         try {
             if (this.isAdmin()) {
                 this.data.dashboard = await admin.getDashboard();
@@ -262,21 +272,32 @@ const store = {
         } catch (e) {
             console.warn('dashboard fetch failed, using cache');
         }
-        return this.data.dashboard || {};
+        return this.data.dashboard;
     },
     
     // Load transactions
     async loadTransactions(options = {}, force = false) {
         const cacheKey = 'transactions_' + JSON.stringify(options);
-        // Load from cache instantly
-        if (!this.data.transactions) {
+        // Load from cache instantly (SWR)
+        if (this.data.transactions === null) {
             const cached = cache.get(cacheKey);
-            if (cached) this.data.transactions = cached;
+            this.data.transactions = cached || null;
+        }
+        const hasCached = Array.isArray(this.data.transactions);
+        // Return stale cached data immediately and revalidate in background
+        if (!force && hasCached && this.isStale('transactions')) {
+            this._fetchTransactions(options, cacheKey).catch(() => {});
+            return this.data.transactions;
         }
         // Check if stale unless forced
         if (!force && !this.isStale('transactions')) {
-            return this.data.transactions || [];
+            return this.data.transactions;
         }
+        return this._fetchTransactions(options, cacheKey);
+    },
+
+    async _fetchTransactions(options = {}, cacheKey = null) {
+        const key = cacheKey || ('transactions_' + JSON.stringify(options));
         try {
             let result;
             if (this.isAdmin()) {
@@ -296,12 +317,12 @@ const store = {
             }
             
             this.data.transactions = normalizeArray(raw);
-            cache.set(cacheKey, this.data.transactions);
+            cache.set(key, this.data.transactions);
             this._markFresh('transactions');
             return this.data.transactions;
         } catch (e) {
             console.warn('transactions fetch failed, using cache');
-            return this.data.transactions || [];
+            return this.data.transactions;
         }
     },
     
@@ -335,15 +356,25 @@ const store = {
     },
     
     async loadNotifications(force = false) {
-        // Load from cache instantly
-        if (!this.data.notifications) {
+        // Load from cache instantly (SWR)
+        if (this.data.notifications === null) {
             const cached = cache.get('notifications');
-            if (cached) this.data.notifications = cached;
+            this.data.notifications = cached || null;
+        }
+        const hasCached = Array.isArray(this.data.notifications);
+        // Return stale cached data immediately and revalidate in background
+        if (!force && hasCached && this.isStale('notifications')) {
+            this._fetchNotifications().catch(() => {});
+            return this.data.notifications;
         }
         // Check if stale unless forced
         if (!force && !this.isStale('notifications')) {
-            return this.data.notifications || [];
+            return this.data.notifications;
         }
+        return this._fetchNotifications();
+    },
+
+    async _fetchNotifications() {
         try {
             const data = await member.getNotifications();
             const raw = Array.isArray(data.notifications) ? data.notifications : (Array.isArray(data) ? data : []);
@@ -353,11 +384,12 @@ const store = {
         } catch (e) {
             console.warn('notifications unavailable, using cache');
         }
-        return this.data.notifications || [];
+        return this.data.notifications;
     },
     
     // Mark notification as read - optimistic
     markRead(id) {
+        if (!Array.isArray(this.data.notifications)) return;
         // Update UI immediately
         const notif = this.data.notifications.find(n => n.id === id);
         if (notif) notif.read = true;
@@ -387,18 +419,30 @@ const store = {
     // Load care fund requests
     async loadCareFundRequests(status, force = false) {
         const cacheKey = 'careFundRequests';
-        // Load from cache instantly
-        if (!this.data.careFundRequests) {
+        // Load from cache instantly (SWR)
+        if (this.data.careFundRequests === null) {
             const cached = cache.get(cacheKey);
-            if (cached) this.data.careFundRequests = cached;
+            this.data.careFundRequests = cached || null;
+        }
+        const hasCached = Array.isArray(this.data.careFundRequests);
+        // Return stale cached data immediately and revalidate in background
+        if (!force && hasCached && this.isStale('careFundRequests')) {
+            this._fetchCareFundRequests(status, cacheKey).catch(() => {});
+            return status
+                ? (this.data.careFundRequests || []).filter(r => r.status === status)
+                : this.data.careFundRequests;
         }
         // Check if stale unless forced
         if (!force && !this.isStale('careFundRequests')) {
             if (status) {
                 return (this.data.careFundRequests || []).filter(r => r.status === status);
             }
-            return this.data.careFundRequests || [];
+            return this.data.careFundRequests;
         }
+        return this._fetchCareFundRequests(status, cacheKey);
+    },
+
+    async _fetchCareFundRequests(status, cacheKey = 'careFundRequests') {
         try {
             let result;
             if (this.isAdmin()) {
@@ -417,11 +461,12 @@ const store = {
         } catch (e) {
             console.warn('care fund requests fetch failed, using cache');
         }
-        return this.data.careFundRequests || [];
+        return this.data.careFundRequests;
     },
     
     // Submit care fund request - optimistic
     async submitCareFundRequest({ amount, occasion, event_date, description, type = 'care_fund' }) {
+        if (!Array.isArray(this.data.careFundRequests)) this.data.careFundRequests = [];
         const optimisticReq = {
             id: 'temp-' + Date.now(),
             member_id: this.user?.id,
@@ -450,6 +495,7 @@ const store = {
     
     // Update care fund request (approve/reject) - optimistic
     async updateCareFundRequest(id, status, rejection_reason) {
+        if (!Array.isArray(this.data.careFundRequests)) this.data.careFundRequests = [];
         const idx = this.data.careFundRequests.findIndex(r => r.id === id);
         if (idx !== -1) {
             this.data.careFundRequests[idx].status = status;
@@ -472,6 +518,7 @@ const store = {
     
     // Create transaction - optimistic
     async createTransaction(data) {
+        if (!Array.isArray(this.data.transactions)) this.data.transactions = [];
         const optimisticTx = {
             id: 'temp-' + Date.now(),
             ...data,
@@ -508,15 +555,25 @@ const store = {
     // Load all members (admin)
     async loadAllMembers(force = false) {
         const cacheKey = 'members';
-        // Load from cache instantly
-        if (!this.data.members) {
+        // Load from cache instantly (SWR)
+        if (this.data.members === null) {
             const cached = cache.get(cacheKey);
-            if (cached) this.data.members = cached;
+            this.data.members = cached || null;
+        }
+        const hasCached = Array.isArray(this.data.members);
+        // Return stale cached data immediately and revalidate in background
+        if (!force && hasCached && this.isStale('members')) {
+            this._fetchAllMembers(cacheKey).catch(() => {});
+            return this.data.members;
         }
         // Check if stale unless forced
         if (!force && !this.isStale('members')) {
-            return this.data.members || [];
+            return this.data.members;
         }
+        return this._fetchAllMembers(cacheKey);
+    },
+
+    async _fetchAllMembers(cacheKey = 'members') {
         try {
             this.data.members = await admin.getAllMembers();
             cache.set(cacheKey, this.data.members);
@@ -524,7 +581,7 @@ const store = {
         } catch (e) {
             console.warn('members fetch failed, using cache');
         }
-        return this.data.members || [];
+        return this.data.members;
     },
     
     // Upload receipt
