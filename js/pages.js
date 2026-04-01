@@ -4,13 +4,13 @@
 function cleanReason(reason, type) {
     if (!reason) return type === 'credit' ? 'Money In' : 'Money Out';
     const r = reason.toLowerCase();
-    if (r?.includes('transfer from pool2 to pool1') || r?.includes('transfer from pool2')) return 'Transfer to Family Savings';
-    if (r?.includes('transfer from pool1 to pool2') || r?.includes('transfer from pool1')) return 'Transfer to Personal Savings';
+    if (r.includes('transfer from pool2 to pool1') || r.includes('transfer from pool2')) return 'Transfer to Family Savings';
+    if (r.includes('transfer from pool1 to pool2') || r.includes('transfer from pool1')) return 'Transfer to Personal Savings';
     if (r === 'pool2') return 'Personal Savings Deposit';
     if (r === 'pool1') return 'Family Savings Deposit';
-    if (r?.includes('care fund approved') || r?.includes('care fund')) return 'Care Fund Withdrawal';
-    if (r?.includes('contribution')) return 'Contribution';
-    if (r?.includes('withdrawal')) return 'Withdrawal';
+    if (r.includes('care fund approved') || r.includes('care fund')) return 'Care Fund Withdrawal';
+    if (r.includes('contribution')) return 'Contribution';
+    if (r.includes('withdrawal')) return 'Withdrawal';
     // Remove amount suffix like ": 50" from transfer reasons
     return reason.replace(/:\s*\d+(\.\d+)?$/, '').trim() || reason;
 }
@@ -18,6 +18,10 @@ function cleanReason(reason, type) {
 function tr(key, fallback) {
     const translated = t(key);
     return !translated || translated === key ? fallback : translated;
+}
+
+function ensureArray(value) {
+    return Array.isArray(value) ? value : [];
 }
 
 let _scrollLockY = 0;
@@ -501,7 +505,7 @@ const pages = {
                     </div>
                     ${recent.length > 0 ? `
                         <div class="w-full min-w-0 space-y-3">
-                            ${(Array.isArray(recent) ? recent : []).map(p => {
+                            ${ensureArray(recent).map(p => {
                                 const pType = p.type || p.Type || 'credit';
                                 const pReason = p.reason || p.Reason || '';
                                 const pAmount = p.amount || p.Amount || 0;
@@ -910,7 +914,7 @@ const pages = {
         const dashboard = await store.loadDashboard();
         const d = dashboard || {};
         const requests = await store.loadCareFundRequests();
-        const requestList = Array.isArray(requests) ? requests : [];
+        const requestList = ensureArray(requests);
         
         // Get pool2 balance from transactions if not in dashboard
         let pool2Balance = d.my_pool2_contributions;
@@ -1480,19 +1484,19 @@ const pages = {
         // Filter by type
         const currentType = window.careFundType;
         if (currentType !== 'all') {
-            requests = (Array.isArray(requests) ? requests : []).filter(r => (r?.Type || r?.type) === currentType);
+            requests = ensureArray(requests).filter(r => (r?.Type || r?.type) === currentType);
         }
         
         // Normalize field names and filter by status
-        const pending = (Array.isArray(requests) ? requests : []).filter(r => {
+        const pending = ensureArray(requests).filter(r => {
             const status = r?.Status || r?.status || '';
             return status === 'pending' || status === 'Pending';
         });
-        const accepted = (Array.isArray(requests) ? requests : []).filter(r => {
+        const accepted = ensureArray(requests).filter(r => {
             const status = r?.Status || r?.status || '';
             return status === 'approved' || status === 'accepted';
         });
-        const rejected = (Array.isArray(requests) ? requests : []).filter(r => {
+        const rejected = ensureArray(requests).filter(r => {
             const status = r?.Status || r?.status || '';
             return status === 'rejected';
         });
@@ -1612,7 +1616,7 @@ const pages = {
         const dashboard = await store.loadDashboard();
         const memberCount = dashboard?.member_count || 0;
         const allMembers = await store.loadAllMembers();
-        const membersList = Array.isArray(allMembers) ? allMembers : [];
+        const membersList = ensureArray(allMembers);
         
         // Paginate
         const start = (page - 1) * limit;
@@ -1688,7 +1692,7 @@ const pages = {
         const end = start + limit;
         const notifications = allNotifications.slice(start, end);
         
-        const safeNotifications = Array.isArray(notifications) ? notifications : [];
+        const safeNotifications = ensureArray(notifications);
         const unread = safeNotifications.filter(n => !n?.read);
         const read = safeNotifications.filter(n => n?.read);
         
@@ -1718,7 +1722,7 @@ const pages = {
                 <div class="mb-6 flex items-center justify-between">
                     <div>
                         <h1 class="text-xl font-bold text-text-primary">${t('nav.notifications')}</h1>
-                    <p class="text-sm text-text-muted mt-0.5">${unread.length > 0 ? unread.length + ' unread' : t('common.allCaughtUp')}</p>
+                        <p class="text-sm text-text-muted mt-0.5">${unread.length > 0 ? `${unread.length} ${t('common.unread')}` : t('common.allCaughtUp')}</p>
                     </div>
                     ${unread.length > 0 ? `
                         <button onclick="handleMarkAllRead()" class="h-10 px-4 rounded-2xl bg-brand text-white text-sm font-semibold shadow-md shadow-brand/25 select-none">
@@ -1920,20 +1924,20 @@ function handleMarkAllRead() {
         store.markAllRead();
         router.refresh();
     } catch (err) {
-        showToast((err && err.message) ? err.message : t('errors.tryAgain'), 'error');
+        showToast(err?.message || t('errors.tryAgain'), 'error');
     }
 }
 
 function handleMarkRead(id) {
     try {
         if (!id) {
-            showToast(t('validation.required'), 'error');
+            showToast(tr('errors.markReadFailed', 'Could not mark this alert as read.'), 'error');
             return;
         }
         store.markRead(id);
         router.refresh();
     } catch (err) {
-        showToast((err && err.message) ? err.message : t('errors.tryAgain'), 'error');
+        showToast(err?.message || t('errors.tryAgain'), 'error');
     }
 }
 
@@ -2221,7 +2225,7 @@ async function acceptRequest(id) {
     } finally {
         if (acceptBtn) {
             acceptBtn.disabled = false;
-            acceptBtn.innerHTML = `${Icons.check()} ${tr('careFund.accepted', 'Accept')}`;
+            acceptBtn.innerHTML = `${Icons.check()} ${t('careFund.accept')}`;
         }
         if (rejectBtn) rejectBtn.disabled = false;
     }

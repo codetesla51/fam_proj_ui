@@ -507,9 +507,9 @@
                 { code: 'ar', name: 'العربية' }
             ];
             container.innerHTML = langs.map(function(lang) {
-                return '<button onclick="setLang(\'' + lang.code + '\')" class="flex w-full items-center justify-between rounded-xl px-4 py-4 text-left hover:bg-surface-soft">' +
+                return '<button onclick="setLang(\'' + lang.code + '\')" aria-current="' + (lang.code === (localStorage.getItem('language') || 'en') ? 'true' : 'false') + '" class="flex w-full items-center justify-between rounded-xl px-4 py-4 text-left hover:bg-surface-soft">' +
                     '<span class="flex items-center gap-3"><span class="font-medium">' + lang.name + '</span></span>' +
-                    '<span class="check hidden text-brand">Selected</span></button>';
+                    '<span class="selected-indicator hidden text-brand">' + (window.t ? t('common.selected') : 'Selected') + '</span></button>';
             }).join('');
         }
         
@@ -550,7 +550,7 @@
                         html += '<div class="flex items-start gap-3 p-3 rounded-xl bg-brand-light/50 border border-brand/20">';
                         html += '<div class="flex-shrink-0 mt-0.5"><div class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand text-white"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg></div></div>';
                         html += '<div class="flex-1 min-w-0"><p class="text-sm font-semibold text-text-primary">' + n.message + '</p><p class="mt-1 text-[11px] text-text-muted">' + timeAgo(n.created_at) + '</p></div>';
-                        html += '<button onclick="handleNotifRead(\'' + n.id + '\')" class="flex-shrink-0 flex h-7 min-w-7 items-center justify-center rounded-full bg-brand px-2 text-white text-[10px] font-bold select-none">Read</button>';
+                        html += '<button onclick="handleNotifRead(\'' + n.id + '\')" aria-label="' + ((window.t ? t('common.markRead') : 'Read') + ': ' + (n.message || 'notification')).replace(/"/g, '&quot;') + '" class="flex-shrink-0 flex h-11 min-w-[44px] items-center justify-center rounded-full bg-brand px-3 text-white text-xs font-bold select-none">' + (window.t ? t('common.markRead') : 'Read') + '</button>';
                         html += '</div>';
                     });
                     html += '</div>';
