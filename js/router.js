@@ -215,13 +215,18 @@ const router = {
             // Force fresh data after login or when stale
             const forceFresh = store._justLoggedIn;
             store._justLoggedIn = false;
-            await Promise.allSettled([
+            const preloadCalls = [
                 store.loadDashboard(forceFresh).catch(e => console.warn('dashboard failed', e)),
                 store.loadNotifications(forceFresh).catch(e => console.warn('notifications failed', e)),
                 store.loadTransactions({}, forceFresh).catch(e => console.warn('transactions failed', e)),
-                store.loadCareFundRequests(null, forceFresh).catch(e => console.warn('carefund failed', e)),
-                store.loadAllMembers(forceFresh).catch(e => console.warn('members failed', e))
-            ]);
+                store.loadCareFundRequests(null, forceFresh).catch(e => console.warn('carefund failed', e))
+            ];
+            if (path.startsWith('/admin')) {
+                preloadCalls.push(
+                    store.loadAllMembers(forceFresh).catch(e => console.warn('members failed', e))
+                );
+            }
+            await Promise.allSettled(preloadCalls);
             store.updateNotifBadge();
         }
         
