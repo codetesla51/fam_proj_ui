@@ -73,8 +73,8 @@ async function apiFetch(endpoint, options = {}) {
         if (response.status === 401 && endpoint !== '/auth/admin/login' && endpoint !== '/login') {
             // Admin tokens cannot be refreshed - just logout
             if (authState.isAdmin) {
+                authState.clear();
                 if (!isReadOnlyRequest) {
-                    authState.clear();
                     router.navigate('/admin/login', true);
                 }
                 throw new Error('Session expired. Please login again.');
@@ -89,8 +89,8 @@ async function apiFetch(endpoint, options = {}) {
                 }
             }
             // Refresh failed or no refresh token, logout
+            authState.clear();
             if (!isReadOnlyRequest) {
-                authState.clear();
                 router.navigate('/login', true);
             }
             throw new Error('Session expired. Please login again.');
