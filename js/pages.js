@@ -203,13 +203,13 @@ const pages = {
                         <!-- Mobile Brand -->
                         <div class="lg:hidden mb-10 text-center">
                             <h1 class="text-3xl font-extrabold text-brand tracking-tight">${t('app.name')}</h1>
-                            <p class="mt-2 text-sm text-text-muted">Your family savings, all in one place</p>
+                            <p class="mt-2 text-sm text-text-muted">${t('app.tagline')}</p>
                         </div>
                         
                         <!-- Welcome Text -->
                         <div class="mb-8">
                             <h2 class="text-2xl sm:text-3xl font-bold text-text-primary">${tr('auth.welcomeBack', 'Welcome back')}</h2>
-                            <p class="mt-2 text-sm text-text-muted">Sign in to see your family savings</p>
+                            <p class="mt-2 text-sm text-text-muted">${t('auth.signInDesc')}</p>
                         </div>
                         
                         <div id="login-error" class="mb-5 hidden rounded-2xl border border-error/20 bg-error/5 p-4 text-sm text-error flex items-center gap-2">
@@ -247,14 +247,14 @@ const pages = {
                         <!-- Divider -->
                         <div class="my-8 flex items-center gap-4">
                             <div class="flex-1 h-px bg-border"></div>
-                            <span class="text-xs text-text-muted uppercase tracking-wider">New here?</span>
+                            <span class="text-xs text-text-muted uppercase tracking-wider">${t('auth.newHere')}</span>
                             <div class="flex-1 h-px bg-border"></div>
                         </div>
                         
                         <!-- Join CTA -->
                         <a href="/register" class="flex h-14 w-full items-center justify-center gap-3 rounded-2xl border-2 border-brand/30 bg-brand-light/30 text-base font-bold text-brand transition-all hover:bg-brand-light hover:border-brand active:scale-[0.98] select-none">
                             ${Icons.userPlus()}
-                            Join the Odelade Family
+                            ${t('auth.joinFamily')}
                         </a>
                     </div>
                 </div>
@@ -282,7 +282,7 @@ const pages = {
                     </svg>
                 </div>
                 <div class="relative z-10 text-center max-w-lg">
-                    <h1 class="text-5xl lg:text-6xl font-extrabold text-white mb-5 tracking-tight">Join the Family</h1>
+                    <h1 class="text-5xl lg:text-6xl font-extrabold text-white mb-5 tracking-tight">${t('auth.joinFamily')}</h1>
                     <p class="text-xl text-white/70 leading-relaxed">Start saving together. Build wealth as a family. Be there for each other.</p>
                     <div class="mt-14 grid grid-cols-3 gap-8">
                         <div class="flex flex-col items-center gap-3">
@@ -297,14 +297,14 @@ const pages = {
                                 ${Icons.users()}
                             </div>
                             <span class="text-2xl font-bold text-white">6</span>
-                            <span class="text-xs text-white/60">Family Members</span>
+                            <span class="text-xs text-white/60">${t('admin.members')}</span>
                         </div>
                         <div class="flex flex-col items-center gap-3">
                             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
                                 ${Icons.heartHandshake()}
                             </div>
                             <span class="text-2xl font-bold text-white">2</span>
-                            <span class="text-xs text-white/60">Savings Funds</span>
+                            <span class="text-xs text-white/60">${t('member.familySavings')}</span>
                         </div>
                     </div>
                 </div>
@@ -326,19 +326,19 @@ const pages = {
                         <!-- Mobile Brand -->
                         <div class="lg:hidden mb-8 text-center">
                             <h1 class="text-3xl font-extrabold text-brand tracking-tight">${t('app.name')}</h1>
-                            <p class="mt-2 text-sm text-text-muted">Join and start saving with your family</p>
+                            <p class="mt-2 text-sm text-text-muted">${t('auth.joinFamily')}</p>
                         </div>
                         
                         <!-- Welcome Text -->
                         <div class="mb-8">
-                            <h2 class="text-2xl sm:text-3xl font-bold text-text-primary">Create your account</h2>
-                            <p class="mt-2 text-sm text-text-muted">Tell us a bit about yourself so we can get you started</p>
+                            <h2 class="text-2xl sm:text-3xl font-bold text-text-primary">${t('auth.createAccount')}</h2>
+                            <p class="mt-2 text-sm text-text-muted">${t('auth.fullNameHelper')}</p>
                         </div>
                         
                         <form onsubmit="handleRegister(event)" class="space-y-5">
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.fullName')} <span class="text-error">*</span></label>
-                                <input type="text" id="reg-name" placeholder="e.g. Taiwo Odelade"
+                                <input type="text" id="reg-name" placeholder="${t('auth.yourNamePlaceholder')}"
                                     class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                                 <p class="text-xs text-text-muted pl-1">${t('auth.fullNameHelper')}</p>
                             </div>
@@ -829,19 +829,19 @@ const pages = {
             <div class="w-full min-w-0 mb-4">
                 <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">
                     ${Icons.history()}
-                    My Transaction History
+                    ${t('member.myHistory')}
                 </h1>
-                <p class="text-xs sm:text-sm text-text-muted">A complete record of your activity across Family Savings and Personal Savings</p>
+                <p class="text-xs sm:text-sm text-text-muted">${t('member.historyDesc')}</p>
             </div>
             
             <!-- Summary Bar -->
             <div class="w-full min-w-0 mb-4 grid grid-cols-2 gap-3">
                 <div class="rounded-2xl bg-success/10 p-3 border border-success/20">
-                    <p class="text-xs text-success font-medium">Total Money In</p>
+                    <p class="text-xs text-success font-medium">${t('table.totalIn')}</p>
                     <p class="text-lg font-bold text-success">+${formatMoney(totalIn, { compact: true })}</p>
                 </div>
                 <div class="rounded-2xl bg-error/10 p-3 border border-error/20">
-                    <p class="text-xs text-error font-medium">Total Money Out</p>
+                    <p class="text-xs text-error font-medium">${t('table.totalOut')}</p>
                     <p class="text-lg font-bold text-error">-${formatMoney(totalOut, { compact: true })}</p>
                 </div>
             </div>
@@ -849,17 +849,17 @@ const pages = {
             <!-- Filters -->
             <div class="w-full min-w-0 mb-4 flex flex-wrap gap-2">
                 <div class="flex rounded-lg border border-border overflow-hidden">
-                    <button onclick="window.historyFilters={fund:'all',type:'all'};window.historyPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='all' && filters.type==='all' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">All</button>
+                    <button onclick="window.historyFilters={fund:'all',type:'all'};window.historyPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='all' && filters.type==='all' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">${t('table.all')}</button>
                 </div>
                 <div class="flex rounded-lg border border-border overflow-hidden">
-                    <button onclick="window.historyFilters.fund='pool1';window.historyPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='pool1' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">Family Savings</button>
-                    <button onclick="window.historyFilters.fund='pool2';window.historyPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='pool2' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">Personal Savings</button>
+                    <button onclick="window.historyFilters.fund='pool1';window.historyPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='pool1' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">${t('member.familySavings')}</button>
+                    <button onclick="window.historyFilters.fund='pool2';window.historyPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.fund==='pool2' ? 'bg-brand text-white' : 'bg-surface text-text-secondary'}">${t('member.personalSavings')}</button>
                 </div>
                 <div class="flex rounded-lg border border-border overflow-hidden">
-                    <button onclick="window.historyFilters.type='credit';window.historyPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.type==='credit' ? 'bg-success text-white' : 'bg-surface text-text-secondary'}">Money In</button>
-                    <button onclick="window.historyFilters.type='debit';window.historyPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.type==='debit' ? 'bg-error text-white' : 'bg-surface text-text-secondary'}">Money Out</button>
+                    <button onclick="window.historyFilters.type='credit';window.historyPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.type==='credit' ? 'bg-success text-white' : 'bg-surface text-text-secondary'}">${t('table.moneyIn')}</button>
+                    <button onclick="window.historyFilters.type='debit';window.historyPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium ${filters.type==='debit' ? 'bg-error text-white' : 'bg-surface text-text-secondary'}">${t('table.moneyOut')}</button>
                 </div>
-                ${(filters.fund !== 'all' || filters.type !== 'all') ? `<button onclick="window.historyFilters={fund:'all',type:'all'};window.historyPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium text-brand">Clear</button>` : ''}
+                ${(filters.fund !== 'all' || filters.type !== 'all') ? `<button onclick="window.historyFilters={fund:'all',type:'all'};window.historyPage=1;router.refresh()" class="px-3 py-2 text-xs font-medium text-brand">${t('ui.clear')}</button>` : ''}
             </div>
             
             <!-- Transactions -->
@@ -881,8 +881,8 @@ const pages = {
                                     </div>
                                     <div class="text-right flex items-center gap-2">
                                         <p class="text-lg font-bold ${tx.type === 'credit' ? 'text-success' : 'text-error'}">${tx.type === 'credit' ? '+' : '-'}${formatMoney(tx.amount, { compact: true })}</p>
-                                        ${tx.receipt_url ? `<button onclick="showReceiptImage('${tx.receipt_url}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
-                                        ${tx.receiptData && !tx.receipt_url ? `<button onclick="showTransferReceiptData('${tx.id}', '${encodeURIComponent(tx.receiptData)}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
+                                        ${tx.receipt_url ? `<button onclick="showReceiptImage('${tx.receipt_url}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="${t('common.viewReceipt')}">${Icons.fileText()}</button>` : ''}
+                                        ${tx.receiptData && !tx.receipt_url ? `<button onclick="showTransferReceiptData('${tx.id}', '${encodeURIComponent(tx.receiptData)}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="${t('common.viewReceipt')}">${Icons.fileText()}</button>` : ''}
                                     </div>
                                 </div>
                             </div>
@@ -2891,7 +2891,7 @@ function downloadTransferReceipt(receiptNumber, amount, memberName) {
     ctx.fillStyle = '#FFFFFF';
     ctx.font = 'bold 24px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('TRANSFER RECEIPT', 300, 50);
+    ctx.fillText(t('common.viewReceipt').toUpperCase(), 300, 50);
     
     // Checkmark
     ctx.beginPath();
@@ -2905,19 +2905,19 @@ function downloadTransferReceipt(receiptNumber, amount, memberName) {
     // Success text
     ctx.fillStyle = '#059669';
     ctx.font = 'bold 18px Arial';
-    ctx.fillText('Transfer Successful!', 300, 175);
+    ctx.fillText(t('common.success'), 300, 175);
     
     // Details
     ctx.fillStyle = '#333333';
     ctx.font = '14px Arial';
     const details = [
-        ['Receipt Number:', receiptNumber || 'N/A'],
-        ['Member:', memberName || tr('common.member', 'Member')],
-        ['Amount:', formatMoney(amount || 0)],
-        ['From:', 'Personal Savings (Pool 2)'],
-        ['To:', 'Family Savings (Pool 1)'],
-        ['Date:', formatDate(new Date().toISOString())],
-        ['Time:', new Date().toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' })]
+        [t('common.receiptNumber'), receiptNumber || 'N/A'],
+        [t('common.member'), memberName || t('common.member')],
+        [t('table.amount'), formatMoney(amount || 0)],
+        [t('common.from'), t('member.personalSavings')],
+        [t('common.to'), t('member.familySavings')],
+        [t('common.date'), formatDate(new Date().toISOString())],
+        [t('common.time'), new Date().toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' })]
     ];
     
     let y = 210;
