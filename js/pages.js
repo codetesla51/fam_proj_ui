@@ -4,13 +4,13 @@
 function cleanReason(reason, type) {
     if (!reason) return type === 'credit' ? 'Money In' : 'Money Out';
     const r = reason.toLowerCase();
-    if (r.includes('transfer from pool2 to pool1') || r.includes('transfer from pool2')) return 'Transfer to Family Savings';
-    if (r.includes('transfer from pool1 to pool2') || r.includes('transfer from pool1')) return 'Transfer to Personal Savings';
+    if (r?.includes('transfer from pool2 to pool1') || r?.includes('transfer from pool2')) return 'Transfer to Family Savings';
+    if (r?.includes('transfer from pool1 to pool2') || r?.includes('transfer from pool1')) return 'Transfer to Personal Savings';
     if (r === 'pool2') return 'Personal Savings Deposit';
     if (r === 'pool1') return 'Family Savings Deposit';
-    if (r.includes('care fund approved') || r.includes('care fund')) return 'Care Fund Withdrawal';
-    if (r.includes('contribution')) return 'Contribution';
-    if (r.includes('withdrawal')) return 'Withdrawal';
+    if (r?.includes('care fund approved') || r?.includes('care fund')) return 'Care Fund Withdrawal';
+    if (r?.includes('contribution')) return 'Contribution';
+    if (r?.includes('withdrawal')) return 'Withdrawal';
     // Remove amount suffix like ": 50" from transfer reasons
     return reason.replace(/:\s*\d+(\.\d+)?$/, '').trim() || reason;
 }
@@ -501,7 +501,7 @@ const pages = {
                     </div>
                     ${recent.length > 0 ? `
                         <div class="w-full min-w-0 space-y-3">
-                            ${recent.map(p => {
+                            ${(Array.isArray(recent) ? recent : []).map(p => {
                                 const pType = p.type || p.Type || 'credit';
                                 const pReason = p.reason || p.Reason || '';
                                 const pAmount = p.amount || p.Amount || 0;
@@ -511,8 +511,8 @@ const pages = {
                                 const pReceiptData = p.receiptData || p.ReceiptData || '';
                                 return `
                                 <div class="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3 hover:shadow-md transition-shadow">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${pType === 'credit' || pReason.includes('Transfer from pool2') ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
-                                        ${pType === 'credit' || pReason.includes('Transfer from pool2') ? Icons.arrowUpRight() : Icons.arrowDownRight()}
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${pType === 'credit' || pReason?.includes('Transfer from pool2') ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
+                                        ${pType === 'credit' || pReason?.includes('Transfer from pool2') ? Icons.arrowUpRight() : Icons.arrowDownRight()}
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <p class="text-sm font-semibold text-text-primary truncate">${cleanReason(pReason, pType)}</p>
@@ -521,8 +521,8 @@ const pages = {
                                     <div class="flex items-center gap-2">
                                         ${pReceiptUrl ? `<button onclick="showReceiptImage('${pReceiptUrl}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
                                         ${!pReceiptUrl && pReceiptData ? `<button onclick="showTransferReceiptData('${p.id || p.ID}', '${encodeURIComponent(pReceiptData)}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="View Receipt">${Icons.fileText()}</button>` : ''}
-                                        <p class="text-sm font-bold whitespace-nowrap ${pType === 'credit' || pReason.includes('Transfer from pool2') ? 'text-success' : 'text-error'}">
-                                            ${pType === 'credit' || pReason.includes('Transfer from pool2') ? '+' : '-'}${formatMoney(pAmount, { compact: true })}
+                                        <p class="text-sm font-bold whitespace-nowrap ${pType === 'credit' || pReason?.includes('Transfer from pool2') ? 'text-success' : 'text-error'}">
+                                            ${pType === 'credit' || pReason?.includes('Transfer from pool2') ? '+' : '-'}${formatMoney(pAmount, { compact: true })}
                                         </p>
                                     </div>
                                 </div>
@@ -910,6 +910,7 @@ const pages = {
         const dashboard = await store.loadDashboard();
         const d = dashboard || {};
         const requests = await store.loadCareFundRequests();
+        const requestList = Array.isArray(requests) ? requests : [];
         
         // Get pool2 balance from transactions if not in dashboard
         let pool2Balance = d.my_pool2_contributions;
@@ -922,8 +923,8 @@ const pages = {
         }
         
         // Group requests by type - normalize field name
-        const careFundRequests = requests.filter(r => (r.type || r.Type) === 'care_fund');
-        const withdrawalRequests = requests.filter(r => (r.type || r.Type) === 'withdrawal');
+        const careFundRequests = requestList.filter(r => (r?.type || r?.Type) === 'care_fund');
+        const withdrawalRequests = requestList.filter(r => (r?.type || r?.Type) === 'withdrawal');
         
         return `
             <div class="w-full min-w-0 mb-6">
@@ -1479,20 +1480,20 @@ const pages = {
         // Filter by type
         const currentType = window.careFundType;
         if (currentType !== 'all') {
-            requests = requests.filter(r => (r.Type || r.type) === currentType);
+            requests = (Array.isArray(requests) ? requests : []).filter(r => (r?.Type || r?.type) === currentType);
         }
         
         // Normalize field names and filter by status
-        const pending = requests.filter(r => {
-            const status = r.Status || r.status || '';
+        const pending = (Array.isArray(requests) ? requests : []).filter(r => {
+            const status = r?.Status || r?.status || '';
             return status === 'pending' || status === 'Pending';
         });
-        const accepted = requests.filter(r => {
-            const status = r.Status || r.status || '';
+        const accepted = (Array.isArray(requests) ? requests : []).filter(r => {
+            const status = r?.Status || r?.status || '';
             return status === 'approved' || status === 'accepted';
         });
-        const rejected = requests.filter(r => {
-            const status = r.Status || r.status || '';
+        const rejected = (Array.isArray(requests) ? requests : []).filter(r => {
+            const status = r?.Status || r?.status || '';
             return status === 'rejected';
         });
         const activeTab = window.careFundTab || 'pending';
@@ -1611,11 +1612,12 @@ const pages = {
         const dashboard = await store.loadDashboard();
         const memberCount = dashboard?.member_count || 0;
         const allMembers = await store.loadAllMembers();
+        const membersList = Array.isArray(allMembers) ? allMembers : [];
         
         // Paginate
         const start = (page - 1) * limit;
         const end = start + limit;
-        const paginatedMembers = allMembers.slice(start, end);
+        const paginatedMembers = membersList.slice(start, end);
         
         return `
         <div class="w-full min-w-0 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -1686,8 +1688,9 @@ const pages = {
         const end = start + limit;
         const notifications = allNotifications.slice(start, end);
         
-        const unread = (notifications || []).filter(n => !n.read);
-        const read = (notifications || []).filter(n => n.read);
+        const safeNotifications = Array.isArray(notifications) ? notifications : [];
+        const unread = safeNotifications.filter(n => !n?.read);
+        const read = safeNotifications.filter(n => n?.read);
         
         function item(n, isUnread) {
             return `
@@ -1715,7 +1718,7 @@ const pages = {
                 <div class="mb-6 flex items-center justify-between">
                     <div>
                         <h1 class="text-xl font-bold text-text-primary">${t('nav.notifications')}</h1>
-                        <p class="text-sm text-text-muted mt-0.5">${unread.length > 0 ? unread.length + ' unread' : t('common.allCaughtUp')}</p>
+                    <p class="text-sm text-text-muted mt-0.5">${unread.length > 0 ? unread.length + ' unread' : t('common.allCaughtUp')}</p>
                     </div>
                     ${unread.length > 0 ? `
                         <button onclick="handleMarkAllRead()" class="h-10 px-4 rounded-2xl bg-brand text-white text-sm font-semibold shadow-md shadow-brand/25 select-none">
@@ -1724,7 +1727,7 @@ const pages = {
                     ` : ''}
                 </div>
                 
-                ${allNotifications.length === 0 ? `
+                ${safeNotifications.length === 0 ? `
                     <div class="flex flex-col items-center justify-center py-20">
                         <div class="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-surface-soft text-3xl">
                             ${Icons.bell()}
@@ -1734,9 +1737,9 @@ const pages = {
                     </div>
                 ` : `
                     <div class="space-y-3">
-                        ${notifications.map(n => item(n, !n.read)).join('')}
+                        ${safeNotifications.map(n => item(n, !n?.read)).join('')}
                     </div>
-                    ${renderPagination('notif', page, allNotifications.length, limit)}
+                    ${renderPagination('notif', page, safeNotifications.length, limit)}
                 `}
             </div>
         `;
@@ -1913,15 +1916,25 @@ async function handleAdminLogin(e) {
 }
 
 function handleMarkAllRead() {
-    store.markAllRead();
-    // Update UI immediately - no waiting
-    router.refresh();
+    try {
+        store.markAllRead();
+        router.refresh();
+    } catch (err) {
+        showToast((err && err.message) ? err.message : t('errors.tryAgain'), 'error');
+    }
 }
 
 function handleMarkRead(id) {
-    store.markRead(id);
-    // Update UI immediately - no waiting
-    router.refresh();
+    try {
+        if (!id) {
+            showToast(t('validation.required'), 'error');
+            return;
+        }
+        store.markRead(id);
+        router.refresh();
+    } catch (err) {
+        showToast((err && err.message) ? err.message : t('errors.tryAgain'), 'error');
+    }
 }
 
 function togglePassword(id) {
@@ -2185,7 +2198,15 @@ function selectRequestType(requestType) {
 
 // Admin - Accept Care Fund Request
 async function acceptRequest(id) {
+    const card = document.getElementById(`request-card-${id}`);
+    const acceptBtn = card?.querySelector(`button[onclick="acceptRequest('${id}')"]`);
+    const rejectBtn = card?.querySelector(`button[onclick="showDeclineForm('${id}')"]`);
     try {
+        if (acceptBtn) {
+            acceptBtn.disabled = true;
+            acceptBtn.innerHTML = '<div class="loader !w-4 !h-4 !border-2"></div> ' + t('common.loading');
+        }
+        if (rejectBtn) rejectBtn.disabled = true;
         await store.updateCareFundRequest(id, 'approved');
         showToast(t('careFund.accepted'), 'success');
         router.refresh();
@@ -2197,6 +2218,12 @@ async function acceptRequest(id) {
             msg = msg.replace(/[{}"\[\]]/g, '').trim();
         }
         showToast(msg, 'error');
+    } finally {
+        if (acceptBtn) {
+            acceptBtn.disabled = false;
+            acceptBtn.innerHTML = `${Icons.check()} ${tr('careFund.accepted', 'Accept')}`;
+        }
+        if (rejectBtn) rejectBtn.disabled = false;
     }
 }
 
@@ -2229,12 +2256,20 @@ function cancelDecline(id) {
 async function submitDecline(id) {
     const reasonEl = document.getElementById(`decline-reason-${id}`);
     const reason = reasonEl?.value?.trim();
+    const form = document.getElementById(`decline-form-${id}`);
+    const confirmBtn = form?.querySelector(`button[onclick="submitDecline('${id}')"]`);
+    const cancelBtn = form?.querySelector(`button[onclick="cancelDecline('${id}')"]`);
     if (!reason) {
         showToast(t('validation.required'), 'error');
         return;
     }
     
     try {
+        if (confirmBtn) {
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<div class="loader !w-4 !h-4 !border-2"></div> ' + t('common.loading');
+        }
+        if (cancelBtn) cancelBtn.disabled = true;
         await store.updateCareFundRequest(id, 'rejected', reason);
         showToast(tr('careFund.notApproved', 'Request declined'), 'info');
         window.decliningRequestId = null;
@@ -2247,6 +2282,12 @@ async function submitDecline(id) {
             msg = msg.replace(/[{}"\[\]]/g, '').trim();
         }
         showToast(msg, 'error');
+    } finally {
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = t('common.confirm');
+        }
+        if (cancelBtn) cancelBtn.disabled = false;
     }
 }
 
@@ -2262,6 +2303,7 @@ async function handleChangePassword(e) {
     const current = inputs[0]?.value;
     const newPass = inputs[1]?.value;
     const confirm = inputs[2]?.value;
+    const btn = document.getElementById('password-btn');
     
     if (!current || !newPass || !confirm) {
         showToast(t('validation.required'), 'error');
@@ -2274,6 +2316,10 @@ async function handleChangePassword(e) {
     }
     
     try {
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loader !w-5 !h-5 !border-2"></div> ' + t('common.loading');
+        }
         await store.changePassword(current, newPass);
         showToast(t('common.success'), 'success');
         form.reset();
@@ -2285,6 +2331,11 @@ async function handleChangePassword(e) {
             msg = msg.replace(/[{}"\[\]]/g, '').trim();
         }
         showToast(msg, 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `${Icons.lock()} ${t('settings.changePassword')}`;
+        }
     }
 }
 
