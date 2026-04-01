@@ -222,10 +222,14 @@ const router = {
             store._justLoggedIn = false;
             const preloadCalls = [
                 store.loadDashboard(forceFresh).catch(e => console.warn('dashboard failed', e)),
-                store.loadNotifications(forceFresh).catch(e => console.warn('notifications failed', e)),
                 store.loadTransactions({}, forceFresh).catch(e => console.warn('transactions failed', e)),
                 store.loadCareFundRequests(null, forceFresh).catch(e => console.warn('carefund failed', e))
             ];
+            if (!store.isAdmin()) {
+                preloadCalls.push(
+                    store.loadNotifications(forceFresh).catch(e => console.warn('notifications failed', e))
+                );
+            }
             if (this.isAdminPath(path)) {
                 preloadCalls.push(
                     store.loadAllMembers(forceFresh).catch(e => console.warn('members failed', e))
