@@ -211,7 +211,7 @@ const pages = {
                             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
                                 ${Icons.wallet()}
                             </div>
-                            <span class="text-2xl font-bold text-white">${tr('auth.savedTogether', 'Saved Together')}</span>
+                            <span class="text-2xl font-bold text-white">₦500K+</span>
                             <span class="text-xs text-white/60">${tr('auth.savedTogether', 'Saved Together')}</span>
                         </div>
                         <div class="flex flex-col items-center gap-3">
