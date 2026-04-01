@@ -12,7 +12,12 @@ const cache = {
         try {
             const item = localStorage.getItem(`cache_${key}`);
             if (!item) return null;
-            return JSON.parse(item).data;
+            const parsed = JSON.parse(item);
+            // Check if cache is expired (30 seconds)
+            if (Date.now() - parsed.timestamp > 30000) {
+                return null;
+            }
+            return parsed.data;
         } catch(e) {
             return null;
         }
@@ -23,6 +28,37 @@ const cache = {
             .forEach(k => localStorage.removeItem(k));
     }
 };
+
+// Request deduplication helper - prevents duplicate API calls
+const inflightRequests = new Map();
+
+function dedupeRequest(key, fetchFn) {
+    // If request is already in flight, return existing promise
+    if (inflightRequests.has(key)) {
+        return inflightRequests.get(key);
+    }
+
+    // Start new request
+    const promise = fetchFn().finally(() => {
+        // Remove from in-flight map when complete
+        inflightRequests.delete(key);
+    });
+
+    inflightRequests.set(key, promise);
+    return promise;
+}
+
+// Hash helper for comparing data changes
+function simpleHash(obj) {
+    try {
+        return JSON.stringify(obj).split('').reduce((a, b) => {
+            a = ((a << 5) - a) + b.charCodeAt(0);
+            return a & a;
+        }, 0);
+    } catch(e) {
+        return 0;
+    }
+}
 
 // Normalize backend PascalCase keys to lowercase for frontend
 function normalizeItem(item) {
@@ -59,7 +95,9 @@ function normalizeArray(arr) {
 const store = {
     _justLoggedIn: false,
     _dataTimestamps: {},
-    
+    _dataHashes: {},
+    _prefetchInProgress: {},
+
     data: {
         user: null,
         profile: null,
@@ -242,31 +280,51 @@ const store = {
     
     // Load dashboard
     async loadDashboard(force = false) {
-        // Load from cache instantly (SWR)
-        if (this.data.dashboard === null) {
-            const cached = cache.get('dashboard');
-            this.data.dashboard = cached || null;
-        }
-        const hasCached = this.data.dashboard !== null;
-        // Return stale cached data immediately and revalidate in background
-        if (!force && hasCached && this.isStale('dashboard')) {
-            this._fetchDashboard().catch(() => {});
-            return this.data.dashboard;
-        }
-        // Check if stale unless forced
-        if (!force && !this.isStale('dashboard')) {
-            return this.data.dashboard;
-        }
-        return this._fetchDashboard();
+        // Strategy 6: Request deduplication
+        return dedupeRequest('dashboard', async () => {
+            // Strategy 2: Load from cache instantly (SWR)
+            if (this.data.dashboard === null) {
+                const cached = cache.get('dashboard');
+                if (cached) {
+                    this.data.dashboard = cached;
+                }
+            }
+            const hasCached = this.data.dashboard !== null;
+
+            // Strategy 3: Prefetch for next likely page
+            this._schedulePrefetch();
+
+            // Return stale cached data immediately and revalidate in background
+            if (!force && hasCached && this.isStale('dashboard')) {
+                this._fetchDashboard().catch(() => {});
+                return this.data.dashboard;
+            }
+            // Check if stale unless forced
+            if (!force && !this.isStale('dashboard')) {
+                return this.data.dashboard;
+            }
+            return this._fetchDashboard();
+        });
     },
 
     async _fetchDashboard() {
         try {
+            let freshData;
             if (this.isAdmin()) {
-                this.data.dashboard = await admin.getDashboard();
+                freshData = await admin.getDashboard();
             } else {
-                this.data.dashboard = await member.getDashboard();
+                freshData = await member.getDashboard();
             }
+
+            // Strategy 4: Compare hash - only update if changed
+            const newHash = simpleHash(freshData);
+            if (this._dataHashes['dashboard'] === newHash) {
+                this._markFresh('dashboard');
+                return this.data.dashboard;
+            }
+
+            this.data.dashboard = freshData;
+            this._dataHashes['dashboard'] = newHash;
             cache.set('dashboard', this.data.dashboard);
             this._markFresh('dashboard');
         } catch (e) {
@@ -278,22 +336,27 @@ const store = {
     // Load transactions
     async loadTransactions(options = {}, force = false) {
         const cacheKey = 'transactions_' + JSON.stringify(options);
-        // Load from cache instantly (SWR)
-        if (this.data.transactions === null) {
-            const cached = cache.get(cacheKey);
-            this.data.transactions = cached || null;
-        }
-        const hasCached = Array.isArray(this.data.transactions);
-        // Return stale cached data immediately and revalidate in background
-        if (!force && hasCached && this.isStale('transactions')) {
-            this._fetchTransactions(options, cacheKey).catch(() => {});
-            return this.data.transactions;
-        }
-        // Check if stale unless forced
-        if (!force && !this.isStale('transactions')) {
-            return this.data.transactions;
-        }
-        return this._fetchTransactions(options, cacheKey);
+        // Strategy 6: Request deduplication
+        return dedupeRequest(cacheKey, async () => {
+            // Strategy 2: Load from cache instantly (SWR)
+            if (this.data.transactions === null) {
+                const cached = cache.get(cacheKey);
+                if (cached) {
+                    this.data.transactions = cached;
+                }
+            }
+            const hasCached = Array.isArray(this.data.transactions);
+            // Return stale cached data immediately and revalidate in background
+            if (!force && hasCached && this.isStale('transactions')) {
+                this._fetchTransactions(options, cacheKey).catch(() => {});
+                return this.data.transactions;
+            }
+            // Check if stale unless forced
+            if (!force && !this.isStale('transactions')) {
+                return this.data.transactions;
+            }
+            return this._fetchTransactions(options, cacheKey);
+        });
     },
 
     async _fetchTransactions(options = {}, cacheKey = null) {
@@ -305,7 +368,7 @@ const store = {
             } else {
                 result = await member.getTransactions(options);
             }
-            
+
             // Handle both array and object response formats
             let raw = [];
             if (Array.isArray(result)) {
@@ -315,8 +378,18 @@ const store = {
             } else if (result?.data && Array.isArray(result.data)) {
                 raw = result.data;
             }
-            
-            this.data.transactions = normalizeArray(raw);
+
+            const normalized = normalizeArray(raw);
+
+            // Strategy 4: Compare hash - only update if changed
+            const newHash = simpleHash(normalized);
+            if (this._dataHashes['transactions'] === newHash) {
+                this._markFresh('transactions');
+                return this.data.transactions;
+            }
+
+            this.data.transactions = normalized;
+            this._dataHashes['transactions'] = newHash;
             cache.set(key, this.data.transactions);
             this._markFresh('transactions');
             return this.data.transactions;
@@ -356,29 +429,44 @@ const store = {
     },
     
     async loadNotifications(force = false) {
-        // Load from cache instantly (SWR)
-        if (this.data.notifications === null) {
-            const cached = cache.get('notifications');
-            this.data.notifications = cached || null;
-        }
-        const hasCached = Array.isArray(this.data.notifications);
-        // Return stale cached data immediately and revalidate in background
-        if (!force && hasCached && this.isStale('notifications')) {
-            this._fetchNotifications().catch(() => {});
-            return this.data.notifications;
-        }
-        // Check if stale unless forced
-        if (!force && !this.isStale('notifications')) {
-            return this.data.notifications;
-        }
-        return this._fetchNotifications();
+        // Strategy 6: Request deduplication
+        return dedupeRequest('notifications', async () => {
+            // Strategy 2: Load from cache instantly (SWR)
+            if (this.data.notifications === null) {
+                const cached = cache.get('notifications');
+                if (cached) {
+                    this.data.notifications = cached;
+                }
+            }
+            const hasCached = Array.isArray(this.data.notifications);
+            // Return stale cached data immediately and revalidate in background
+            if (!force && hasCached && this.isStale('notifications')) {
+                this._fetchNotifications().catch(() => {});
+                return this.data.notifications;
+            }
+            // Check if stale unless forced
+            if (!force && !this.isStale('notifications')) {
+                return this.data.notifications;
+            }
+            return this._fetchNotifications();
+        });
     },
 
     async _fetchNotifications() {
         try {
             const data = await member.getNotifications();
             const raw = Array.isArray(data.notifications) ? data.notifications : (Array.isArray(data) ? data : []);
-            this.data.notifications = normalizeArray(raw);
+            const normalized = normalizeArray(raw);
+
+            // Strategy 4: Compare hash - only update if changed
+            const newHash = simpleHash(normalized);
+            if (this._dataHashes['notifications'] === newHash) {
+                this._markFresh('notifications');
+                return this.data.notifications;
+            }
+
+            this.data.notifications = normalized;
+            this._dataHashes['notifications'] = newHash;
             cache.set('notifications', this.data.notifications);
             this._markFresh('notifications');
         } catch (e) {
@@ -419,27 +507,32 @@ const store = {
     // Load care fund requests
     async loadCareFundRequests(status, force = false) {
         const cacheKey = 'careFundRequests';
-        // Load from cache instantly (SWR)
-        if (this.data.careFundRequests === null) {
-            const cached = cache.get(cacheKey);
-            this.data.careFundRequests = cached || null;
-        }
-        const hasCached = Array.isArray(this.data.careFundRequests);
-        // Return stale cached data immediately and revalidate in background
-        if (!force && hasCached && this.isStale('careFundRequests')) {
-            this._fetchCareFundRequests(status, cacheKey).catch(() => {});
-            return status
-                ? (this.data.careFundRequests || []).filter(r => r.status === status)
-                : this.data.careFundRequests;
-        }
-        // Check if stale unless forced
-        if (!force && !this.isStale('careFundRequests')) {
-            if (status) {
-                return (this.data.careFundRequests || []).filter(r => r.status === status);
+        // Strategy 6: Request deduplication
+        return dedupeRequest(cacheKey, async () => {
+            // Strategy 2: Load from cache instantly (SWR)
+            if (this.data.careFundRequests === null) {
+                const cached = cache.get(cacheKey);
+                if (cached) {
+                    this.data.careFundRequests = cached;
+                }
             }
-            return this.data.careFundRequests;
-        }
-        return this._fetchCareFundRequests(status, cacheKey);
+            const hasCached = Array.isArray(this.data.careFundRequests);
+            // Return stale cached data immediately and revalidate in background
+            if (!force && hasCached && this.isStale('careFundRequests')) {
+                this._fetchCareFundRequests(status, cacheKey).catch(() => {});
+                return status
+                    ? (this.data.careFundRequests || []).filter(r => r.status === status)
+                    : this.data.careFundRequests;
+            }
+            // Check if stale unless forced
+            if (!force && !this.isStale('careFundRequests')) {
+                if (status) {
+                    return (this.data.careFundRequests || []).filter(r => r.status === status);
+                }
+                return this.data.careFundRequests;
+            }
+            return this._fetchCareFundRequests(status, cacheKey);
+        });
     },
 
     async _fetchCareFundRequests(status, cacheKey = 'careFundRequests') {
@@ -448,10 +541,24 @@ const store = {
             if (this.isAdmin()) {
                 result = await admin.getCareFundRequests(status);
                 const raw = Array.isArray(result) ? result : (result?.requests || []);
-                this.data.careFundRequests = normalizeArray(raw);
+                const normalized = normalizeArray(raw);
+
+                // Strategy 4: Compare hash - only update if changed
+                const newHash = simpleHash(normalized);
+                if (this._dataHashes['careFundRequests'] !== newHash) {
+                    this.data.careFundRequests = normalized;
+                    this._dataHashes['careFundRequests'] = newHash;
+                }
             } else {
                 result = await member.getCareFundRequests();
-                this.data.careFundRequests = normalizeArray(result);
+                const normalized = normalizeArray(result);
+
+                // Strategy 4: Compare hash - only update if changed
+                const newHash = simpleHash(normalized);
+                if (this._dataHashes['careFundRequests'] !== newHash) {
+                    this.data.careFundRequests = normalized;
+                    this._dataHashes['careFundRequests'] = newHash;
+                }
             }
             if (status) {
                 this.data.careFundRequests = this.data.careFundRequests.filter(r => r.status === status);
@@ -555,27 +662,42 @@ const store = {
     // Load all members (admin)
     async loadAllMembers(force = false) {
         const cacheKey = 'members';
-        // Load from cache instantly (SWR)
-        if (this.data.members === null) {
-            const cached = cache.get(cacheKey);
-            this.data.members = cached || null;
-        }
-        const hasCached = Array.isArray(this.data.members);
-        // Return stale cached data immediately and revalidate in background
-        if (!force && hasCached && this.isStale('members')) {
-            this._fetchAllMembers(cacheKey).catch(() => {});
-            return this.data.members;
-        }
-        // Check if stale unless forced
-        if (!force && !this.isStale('members')) {
-            return this.data.members;
-        }
-        return this._fetchAllMembers(cacheKey);
+        // Strategy 6: Request deduplication
+        return dedupeRequest(cacheKey, async () => {
+            // Strategy 2: Load from cache instantly (SWR)
+            if (this.data.members === null) {
+                const cached = cache.get(cacheKey);
+                if (cached) {
+                    this.data.members = cached;
+                }
+            }
+            const hasCached = Array.isArray(this.data.members);
+            // Return stale cached data immediately and revalidate in background
+            if (!force && hasCached && this.isStale('members')) {
+                this._fetchAllMembers(cacheKey).catch(() => {});
+                return this.data.members;
+            }
+            // Check if stale unless forced
+            if (!force && !this.isStale('members')) {
+                return this.data.members;
+            }
+            return this._fetchAllMembers(cacheKey);
+        });
     },
 
     async _fetchAllMembers(cacheKey = 'members') {
         try {
-            this.data.members = await admin.getAllMembers();
+            const freshData = await admin.getAllMembers();
+
+            // Strategy 4: Compare hash - only update if changed
+            const newHash = simpleHash(freshData);
+            if (this._dataHashes['members'] === newHash) {
+                this._markFresh('members');
+                return this.data.members;
+            }
+
+            this.data.members = freshData;
+            this._dataHashes['members'] = newHash;
             cache.set(cacheKey, this.data.members);
             this._markFresh('members');
         } catch (e) {
@@ -650,30 +772,106 @@ const store = {
     _dashboardInterval: null,
     _txInterval: null,
     _pollFailures: 0,
-    
+    _pollDelay: 8000,
+
+    // Strategy 3: Prefetch next likely pages
+    _schedulePrefetch() {
+        const currentPath = window.location.pathname;
+
+        // Prefetch based on current page
+        if (currentPath.includes('dashboard') && !this._prefetchInProgress['transactions']) {
+            this._prefetchInProgress['transactions'] = true;
+            setTimeout(() => {
+                this.loadTransactions({}, false).catch(() => {}).finally(() => {
+                    this._prefetchInProgress['transactions'] = false;
+                });
+            }, 1000);
+        }
+
+        if (currentPath.includes('transactions') && !this._prefetchInProgress['careFundRequests']) {
+            this._prefetchInProgress['careFundRequests'] = true;
+            setTimeout(() => {
+                this.loadCareFundRequests(null, false).catch(() => {}).finally(() => {
+                    this._prefetchInProgress['careFundRequests'] = false;
+                });
+            }, 1000);
+        }
+
+        if (currentPath.includes('care-fund') && !this._prefetchInProgress['notifications']) {
+            this._prefetchInProgress['notifications'] = true;
+            setTimeout(() => {
+                this.loadNotifications(false).catch(() => {}).finally(() => {
+                    this._prefetchInProgress['notifications'] = false;
+                });
+            }, 1000);
+        }
+    },
+
     // Start polling
     startPolling() {
         if (this._polling) return;
         this._polling = true;
         this.stopPolling();
-        
+
         if (!this.isLoggedIn()) return;
-        
-        // Poll notifications every 30 seconds
+
+        // Strategy 4: Stop polling when tab is hidden
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.stopPolling();
+            } else if (this.isLoggedIn()) {
+                this.startPolling();
+            }
+        });
+
+        // Reset poll delay
+        this._pollDelay = 8000;
+        this._pollFailures = 0;
+
+        // Poll notifications
         this._notifInterval = setInterval(async () => {
-            await this.loadNotifications();
-            this.updateNotifBadge();
-        }, 8000);
-        
-        // Poll dashboard every 30 seconds
+            try {
+                await this.loadNotifications();
+                this.updateNotifBadge();
+                // Reset delay on success
+                if (this._pollFailures > 0) {
+                    this._pollFailures = 0;
+                    this._pollDelay = 8000;
+                }
+            } catch (e) {
+                this._handlePollFailure();
+            }
+        }, this._pollDelay);
+
+        // Poll dashboard
         this._dashboardInterval = setInterval(async () => {
-            await this.loadDashboard();
-        }, 8000);
-        
-        // Poll transactions every 30 seconds
+            try {
+                await this.loadDashboard();
+            } catch (e) {
+                this._handlePollFailure();
+            }
+        }, this._pollDelay);
+
+        // Poll transactions
         this._txInterval = setInterval(async () => {
-            await this.loadTransactions();
-        }, 8000);
+            try {
+                await this.loadTransactions();
+            } catch (e) {
+                this._handlePollFailure();
+            }
+        }, this._pollDelay);
+    },
+
+    // Strategy 4: Exponential backoff on poll failures
+    _handlePollFailure() {
+        this._pollFailures++;
+        const newDelay = Math.min(this._pollDelay * 2, 60000); // Max 60s
+        if (newDelay !== this._pollDelay) {
+            this._pollDelay = newDelay;
+            // Restart polling with new delay
+            this.stopPolling();
+            this.startPolling();
+        }
     },
     
     // Stop polling
