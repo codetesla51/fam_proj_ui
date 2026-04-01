@@ -1,5 +1,82 @@
 // Pages with Lucide Icons
 
+// Strategy 5: Skeleton loaders that match content
+const Skeletons = {
+    kpiCard: () => `
+        <div class="premium-surface p-5 space-y-3">
+            <div class="skeleton skeleton-text-sm w-24"></div>
+            <div class="skeleton skeleton-text-lg w-32"></div>
+            <div class="skeleton skeleton-text-sm w-20"></div>
+        </div>
+    `,
+
+    transactionRow: () => `
+        <div class="flex items-center justify-between py-4 border-b border-border">
+            <div class="flex items-center gap-3 flex-1">
+                <div class="skeleton skeleton-avatar"></div>
+                <div class="space-y-2 flex-1">
+                    <div class="skeleton skeleton-text w-32"></div>
+                    <div class="skeleton skeleton-text-sm w-24"></div>
+                </div>
+            </div>
+            <div class="skeleton skeleton-text w-20"></div>
+        </div>
+    `,
+
+    tableRow: () => `
+        <tr>
+            <td class="px-4 py-3"><div class="skeleton skeleton-text w-24"></div></td>
+            <td class="px-4 py-3"><div class="skeleton skeleton-text w-20"></div></td>
+            <td class="px-4 py-3"><div class="skeleton skeleton-text w-16"></div></td>
+            <td class="px-4 py-3"><div class="skeleton skeleton-text w-24"></div></td>
+            <td class="px-4 py-3"><div class="skeleton skeleton-text w-20"></div></td>
+        </tr>
+    `,
+
+    requestCard: () => `
+        <div class="premium-surface p-5 space-y-3">
+            <div class="flex justify-between items-start">
+                <div class="flex-1 space-y-2">
+                    <div class="skeleton skeleton-text w-32"></div>
+                    <div class="skeleton skeleton-text-sm w-24"></div>
+                </div>
+                <div class="skeleton skeleton-text w-16"></div>
+            </div>
+            <div class="skeleton skeleton-text-sm w-full"></div>
+            <div class="skeleton skeleton-btn"></div>
+        </div>
+    `,
+
+    memberCard: () => `
+        <div class="premium-surface p-5 space-y-3">
+            <div class="flex items-center gap-3">
+                <div class="skeleton skeleton-avatar"></div>
+                <div class="flex-1 space-y-2">
+                    <div class="skeleton skeleton-text w-28"></div>
+                    <div class="skeleton skeleton-text-sm w-20"></div>
+                </div>
+            </div>
+            <div class="skeleton skeleton-text-sm w-full"></div>
+        </div>
+    `,
+
+    dashboard: () => `
+        <div class="premium-page space-y-6">
+            <div class="skeleton skeleton-text-lg w-48 mb-2"></div>
+            <div class="skeleton skeleton-text w-64 mb-6"></div>
+
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                ${[1,2,3,4].map(() => Skeletons.kpiCard()).join('')}
+            </div>
+
+            <div class="space-y-4">
+                <div class="skeleton skeleton-text w-32"></div>
+                ${[1,2,3,4,5].map(() => Skeletons.transactionRow()).join('')}
+            </div>
+        </div>
+    `
+};
+
 // Helper to clean reason text
 function cleanReason(reason, type) {
     if (!reason) return type === 'credit' ? 'Money In' : 'Money Out';
