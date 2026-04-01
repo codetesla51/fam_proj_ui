@@ -52,7 +52,7 @@ function unlockBodyScroll() {
 // Filter transactions for family view - hides private Pool 2 transactions from other members
 function filterFamilyTransactions(transactions, currentMemberId) {
     if (!transactions || !currentMemberId) return transactions || [];
-    return transactions.filter(t => {
+    return ensureArray(transactions).filter(t => {
         const pool = t.pool || t.Pool;
         const type = t.type || t.Type;
         const memberId = t.member_id || t.MemberID;
@@ -134,7 +134,7 @@ const pages = {
                         
                         <!-- Welcome Text -->
                         <div class="mb-8">
-                            <h2 class="text-2xl sm:text-3xl font-bold text-text-primary">Welcome back</h2>
+                            <h2 class="text-2xl sm:text-3xl font-bold text-text-primary">${tr('auth.welcomeBack', 'Welcome back')}</h2>
                             <p class="mt-2 text-sm text-text-muted">Sign in to see your family savings</p>
                         </div>
                         
@@ -397,7 +397,7 @@ const pages = {
                             ${Icons.shield()}
                             ${t('common.familyManagerAccess')}
                         </div>
-                        <h2 class="text-2xl sm:text-3xl font-bold text-text-primary">Welcome Back</h2>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-text-primary">${tr('auth.welcomeBack', 'Welcome back')}</h2>
                         <p class="text-text-muted mt-2">Enter your manager password to continue</p>
                     </div>
                     
@@ -468,20 +468,20 @@ const pages = {
         const d = dashboard || {};
         
         // Get pool2 balance from dashboard
-        let pool2Balance = d.my_pool2_contributions;
+        let pool2Balance = d?.my_pool2_contributions;
         
         // Get recent transactions - filter to hide other members' Pool 2 transactions
         const allTransactions = recentTx?.transactions || [];
         const filteredTransactions = filterFamilyTransactions(allTransactions, store.user?.id);
         let recent = filteredTransactions.slice(0, 10);
         
-        const name = store.user?.name?.split(' ')[0] || 'Friend';
+        const name = store.user?.name?.split(' ')[0] || tr('common.member', 'Member');
         return `
-            <div class="w-full min-w-0">
+            <div class="w-full min-w-0 premium-page">
                 <!-- Greeting -->
                 <div class="mb-6 flex items-center gap-4">
-                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-white text-xl font-bold shadow-lg shadow-brand/30">
-                        ${name.charAt(0)}
+                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-white shadow-lg shadow-brand/30">
+                        ${Icons.userRound()}
                     </div>
                     <div>
                         <p class="text-sm text-text-muted">${getGreeting()}</p>
@@ -491,8 +491,8 @@ const pages = {
                 
                 <!-- KPI Grid -->
                 <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-4">
-                    ${KpiCard({ label: t('member.familySavings'), amount: d.pool1_balance || 0, subtext: t('common.totalPool1'), highlight: true })}
-                    ${KpiCard({ label: t('member.mySavings'), amount: d.my_contributions || 0, subtext: t('common.yourContributions') })}
+                    ${KpiCard({ label: t('member.familySavings'), amount: d?.pool1_balance ?? 0, subtext: t('common.totalPool1'), highlight: true })}
+                    ${KpiCard({ label: t('member.mySavings'), amount: d?.my_contributions ?? 0, subtext: t('common.yourContributions') })}
                     ${KpiCard({ label: t('member.personalSavings'), amount: pool2Balance || 0, subtext: t('common.yourBalance') })}
                     ${KpiCard({ label: t('member.alerts'), amount: store.unreadCount || 0, subtext: t('common.unread'), isCurrency: false })}
                 </div>
@@ -510,7 +510,7 @@ const pages = {
                                 const pReason = p.reason || p.Reason || '';
                                 const pAmount = p.amount || p.Amount || 0;
                                 const pCreated = p.created_at || p.CreatedAt || '';
-                                const pMemberName = p.member_name || p.MemberName || 'Family member';
+                                const pMemberName = p.member_name || p.MemberName || tr('common.memberFull', 'Family member');
                                 const pReceiptUrl = p.receipt_url || p.ReceiptURL || '';
                                 const pReceiptData = p.receiptData || p.ReceiptData || '';
                                 return `
@@ -556,11 +556,11 @@ const pages = {
     memberSavings: async () => {
         // Load transactions (handles staleness)
         const allTx = await store.loadTransactions();
-        let transactions = (allTx || []).filter(t => t.pool === 'pool1' || t.Pool === 'pool1');
+        let transactions = ensureArray(allTx).filter(t => t?.pool === 'pool1' || t?.Pool === 'pool1');
         
         // Calculate summary
-        const totalIn = transactions.filter(t => t.type === 'credit' || t.Type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || t.Amount || 0), 0);
-        const totalOut = transactions.filter(t => t.type === 'debit' || t.Type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || t.Amount || 0), 0);
+        const totalIn = ensureArray(transactions).filter(t => t?.type === 'credit' || t?.Type === 'credit').reduce((sum, t) => sum + parseFloat(t?.amount || t?.Amount || 0), 0);
+        const totalOut = ensureArray(transactions).filter(t => t?.type === 'debit' || t?.Type === 'debit').reduce((sum, t) => sum + parseFloat(t?.amount || t?.Amount || 0), 0);
         
         return `
             <div class="w-full min-w-0 mb-4">
@@ -583,12 +583,12 @@ const pages = {
             <div class="w-full min-w-0">
             ${transactions.length > 0 ? `
                 <div class="w-full min-w-0 space-y-2">
-                    ${transactions.map((tx, i) => {
+                    ${ensureArray(transactions).map((tx) => {
                         const txType = tx.type || tx.Type || 'credit';
                         const txAmount = tx.amount || tx.Amount || 0;
                         const txReason = tx.reason || tx.Reason || '';
                         const txCreated = tx.created_at || tx.CreatedAt || '';
-                        const txMemberName = tx.member_name || tx.MemberName || 'Family member';
+                        const txMemberName = tx.member_name || tx.MemberName || tr('common.memberFull', 'Family member');
                         const txReceiptUrl = tx.receipt_url || tx.ReceiptURL || '';
                         const txReceiptData = tx.receiptData || tx.ReceiptData || '';
                         return `
@@ -633,8 +633,8 @@ const pages = {
         if (!pool2Balance || pool2Balance === '0') {
             const txns = await store.loadTransactions({ pool: 'pool2' });
             const txArray = Array.isArray(txns) ? txns : (txns?.data || []);
-            const credits = txArray.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-            const debits = txArray.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+            const credits = ensureArray(txArray).filter(t => t?.type === 'credit').reduce((sum, t) => sum + parseFloat(t?.amount || 0), 0);
+            const debits = ensureArray(txArray).filter(t => t?.type === 'debit').reduce((sum, t) => sum + parseFloat(t?.amount || 0), 0);
             pool2Balance = String(credits - debits);
         }
         
@@ -714,7 +714,7 @@ const pages = {
             const result = await memberApi.getTransactions({ limit: 100 });
             transactions = result?.transactions || result?.data || [];
             // Normalize field names from API (Pool, Type, Amount, CreatedAt)
-            transactions = transactions.map(tx => ({
+            transactions = ensureArray(transactions).map(tx => ({
                 id: tx.ID,
                 pool: tx.Pool,
                 type: tx.Type,
@@ -724,9 +724,9 @@ const pages = {
                 receipt_url: tx.ReceiptURL
             }));
             const rpts = await memberApi.getReceipts();
-            rpts.forEach(r => { receipts[r.TransactionID] = r; });
+            ensureArray(rpts).forEach(r => { receipts[r?.TransactionID] = r; });
             // Attach receipt to both sides of transfer
-            transactions.forEach(tx => {
+            ensureArray(transactions).forEach(tx => {
                 if (receipts[tx.id]) {
                     tx.receiptData = receipts[tx.id].ReceiptData;
                 }
@@ -736,11 +736,11 @@ const pages = {
         const filters = window.historyFilters;
         
         // Calculate summary
-        const totalIn = transactions.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        const totalOut = transactions.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        const totalIn = ensureArray(transactions).filter(t => t?.type === 'credit').reduce((sum, t) => sum + parseFloat(t?.amount || 0), 0);
+        const totalOut = ensureArray(transactions).filter(t => t?.type === 'debit').reduce((sum, t) => sum + parseFloat(t?.amount || 0), 0);
         
         // Apply filters
-        let filtered = transactions.filter(tx => {
+        let filtered = ensureArray(transactions).filter(tx => {
             if (filters.fund !== 'all' && tx.pool !== filters.fund) return false;
             if (filters.type !== 'all' && tx.type !== filters.type) return false;
             return true;
@@ -792,7 +792,7 @@ const pages = {
             <div class="w-full min-w-0">
                 ${filtered.length > 0 ? `
                     <div class="w-full min-w-0 space-y-2">
-                        ${paginatedTransactions.map((tx, i) => `
+                        ${ensureArray(paginatedTransactions).map((tx) => `
                             <div class="rounded-2xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
                                 <div class="flex items-start gap-3">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${tx.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
@@ -839,7 +839,7 @@ const pages = {
             const result = await memberApi.getAllTransactions({ limit: 100 });
             let rawTx = result?.transactions || result?.data || [];
             // Normalize PascalCase fields
-            transactions = rawTx.map(tx => ({
+            transactions = ensureArray(rawTx).map(tx => ({
                 id: tx.ID || tx.id,
                 member_id: tx.MemberID || tx.member_id,
                 member_name: tx.MemberName || tx.member_name,
@@ -853,8 +853,8 @@ const pages = {
             // Attach receipts from receipts table
             const receipts = await memberApi.getReceipts();
             const receiptMap = {};
-            receipts.forEach(r => { receiptMap[r.TransactionID] = r; });
-            transactions = transactions.map(p => ({
+            ensureArray(receipts).forEach(r => { receiptMap[r?.TransactionID] = r; });
+            transactions = ensureArray(transactions).map(p => ({
                 ...p,
                 receiptData: receiptMap[p.id]?.ReceiptData
             }));
@@ -880,7 +880,7 @@ const pages = {
             <div class="w-full min-w-0">
                 ${transactions.length > 0 ? `
                     <div class="w-full min-w-0 space-y-3">
-                        ${paginatedTransactions.map(p => `
+                        ${ensureArray(paginatedTransactions).map(p => `
                             <div class="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
                                 <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
                                     ${p.type === 'credit' || p.reason?.includes('Transfer from pool2') ? Icons.arrowUpRight() : Icons.arrowDownRight()}
@@ -921,14 +921,14 @@ const pages = {
         if (!pool2Balance || pool2Balance === '0') {
             const txns = await store.loadTransactions({ pool: 'pool2' });
             const txArray = Array.isArray(txns) ? txns : (txns?.data || []);
-            const credits = txArray.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-            const debits = txArray.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+            const credits = ensureArray(txArray).filter(t => t?.type === 'credit').reduce((sum, t) => sum + parseFloat(t?.amount || 0), 0);
+            const debits = ensureArray(txArray).filter(t => t?.type === 'debit').reduce((sum, t) => sum + parseFloat(t?.amount || 0), 0);
             pool2Balance = String(credits - debits);
         }
         
         // Group requests by type - normalize field name
-        const careFundRequests = requestList.filter(r => (r?.type || r?.Type) === 'care_fund');
-        const withdrawalRequests = requestList.filter(r => (r?.type || r?.Type) === 'withdrawal');
+        const careFundRequests = ensureArray(requestList).filter(r => (r?.type || r?.Type) === 'care_fund');
+        const withdrawalRequests = ensureArray(requestList).filter(r => (r?.type || r?.Type) === 'withdrawal');
         
         return `
             <div class="w-full min-w-0 mb-6">
@@ -1036,7 +1036,7 @@ const pages = {
                     title: tr('careFund.pastRequests', 'Family Help Requests'),
                     children: careFundRequests.length > 0 ? `
                         <div class="space-y-3">
-                            ${careFundRequests.map(r => {
+                            ${ensureArray(careFundRequests).map(r => {
                                 const amount = r.amount || r.Amount || 0;
                                 const occasion = r.occasion || r.Occasion || '';
                                 const status = r.status || r.Status || '';
@@ -1066,7 +1066,7 @@ const pages = {
                     title: tr('admin.careFund', 'Withdrawal Requests'),
                     children: withdrawalRequests.length > 0 ? `
                         <div class="space-y-3">
-                            ${withdrawalRequests.map(r => {
+                            ${ensureArray(withdrawalRequests).map(r => {
                                 const amount = r.amount || r.Amount || 0;
                                 const occasion = r.occasion || r.Occasion || '';
                                 const status = r.status || r.Status || '';
@@ -1116,11 +1116,11 @@ const pages = {
                     ${KpiCard({ label: tr('admin.behindOnSavings', 'Overdue'), amount: d.overdue_count || 0, subtext: t('member.behind'), isCurrency: false })}
                 </div>
                 
-                ${d.underfunded_members && d.underfunded_members.length > 0 ? `
+                ${ensureArray(d?.underfunded_members).length > 0 ? `
                     <div class="w-full min-w-0 mb-6 rounded-2xl border border-error/20 bg-error/5 p-4 overflow-x-hidden">
                         <div class="mb-3 flex items-center gap-2">${Icons.alertTriangle()}<p class="text-sm font-bold text-error">${t('admin.behindTitle')}</p></div>
                         <div class="w-full min-w-0 space-y-2 overflow-x-hidden">
-                            ${d.underfunded_members.map(m => {
+                            ${ensureArray(d?.underfunded_members).map(m => {
                                 const name = m.Name || m.name || '?';
                                 const committed = parseFloat(m.CommittedAmount || m.committed_amount || 0);
                                 const current = parseFloat(m.CurrentSum || m.current_sum || 0);
@@ -1128,7 +1128,7 @@ const pages = {
                                 return `
                                 <div class="flex items-center justify-between gap-2 rounded-lg bg-surface p-3 min-w-0">
                                     <div class="flex items-center gap-2 min-w-0">
-                                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-error/10 text-xs font-bold text-error flex-shrink-0">${name.charAt(0)}</div>
+                                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-error/10 text-xs font-bold text-error flex-shrink-0">${Icons.userRound()}</div>
                                         <span class="text-sm font-medium text-text-primary truncate min-w-0">${name}</span>
                                     </div>
                                     <span class="text-xs font-bold text-error whitespace-nowrap flex-shrink-0">${formatMoney(gap, { compact: true })} ${t('member.behind')}</span>
@@ -1167,7 +1167,7 @@ const pages = {
         let transactions = Array.isArray(txData) ? txData : (txData?.transactions || []);
         
         // Normalize fields
-        transactions = transactions.map(tx => ({
+        transactions = ensureArray(transactions).map(tx => ({
             id: tx.ID || tx.id,
             member_name: tx.member_name || tx.MemberName || '',
             pool: tx.pool || tx.Pool,
@@ -1181,7 +1181,7 @@ const pages = {
         const filters = window.adminTxFilters;
         
         // Apply filters
-        let filtered = transactions.filter(tx => {
+        let filtered = ensureArray(transactions).filter(tx => {
             if (filters.fund !== 'all' && tx.pool !== filters.fund) return false;
             if (filters.type !== 'all' && tx.type !== filters.type) return false;
             return true;
@@ -1195,12 +1195,12 @@ const pages = {
         const paginatedTransactions = filtered.slice(start, end);
         
         // Summary
-        const totalIn = filtered.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        const totalOut = filtered.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        const totalIn = ensureArray(filtered).filter(t => t?.type === 'credit').reduce((sum, t) => sum + parseFloat(t?.amount || 0), 0);
+        const totalOut = ensureArray(filtered).filter(t => t?.type === 'debit').reduce((sum, t) => sum + parseFloat(t?.amount || 0), 0);
         
         // Group by date (use paginated data)
         const grouped = {};
-        paginatedTransactions.forEach(tx => {
+        ensureArray(paginatedTransactions).forEach(tx => {
             const date = new Date(tx.created_at);
             const today = new Date();
             today.setHours(0,0,0,0);
@@ -1208,8 +1208,8 @@ const pages = {
             yesterday.setDate(yesterday.getDate() - 1);
             
             let dateKey = formatDate(tx.created_at);
-            if (date.toDateString() === today.toDateString()) dateKey = 'Today';
-            else if (date.toDateString() === yesterday.toDateString()) dateKey = 'Yesterday';
+            if (date.toDateString() === today.toDateString()) dateKey = tr('common.today', 'today');
+            else if (date.toDateString() === yesterday.toDateString()) dateKey = tr('common.yesterday', 'yesterday');
             
             if (!grouped[dateKey]) grouped[dateKey] = [];
             grouped[dateKey].push(tx);
@@ -1219,7 +1219,7 @@ const pages = {
             <div class="w-full min-w-0 mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">${Icons.clipboardList()}${t('transaction.familyMoneyHistory')}</h1>
-                    <p class="text-xs sm:text-sm text-text-muted">All family transactions</p>
+                    <p class="text-xs sm:text-sm text-text-muted">${tr('transaction.allFamilyTransactions', 'All family transactions')}</p>
                 </div>
                 <a href="/admin/transactions/new" class="flex h-12 items-center justify-center gap-2 rounded-2xl bg-brand px-4 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all select-none">${Icons.plus()} Record Payment</a>
             </div>
@@ -1253,11 +1253,11 @@ const pages = {
             <div class="w-full min-w-0">
             ${filtered.length > 0 ? `
                 <div class="space-y-6">
-                    ${Object.entries(grouped).map(([dateKey, txs]) => `
+                    ${ensureArray(Object.entries(grouped)).map(([dateKey, txs]) => `
                         <div>
                             <h3 class="text-sm font-semibold text-text-muted mb-3">${dateKey}</h3>
                             <div class="grid gap-3 grid-cols-1 md:grid-cols-2">
-                                ${txs.map(tx => `
+                                ${ensureArray(txs).map(tx => `
                                     <div class="rounded-2xl border border-border bg-surface p-4 hover:shadow-md transition-shadow">
                                         <div class="flex items-start gap-3">
                                             <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${tx.type === 'credit' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
@@ -1287,7 +1287,7 @@ const pages = {
             ` : `
                 <div class="rounded-2xl border border-border bg-surface p-8 text-center">
                     <div class="mb-3 flex justify-center">${Icons.wallet()}</div>
-                    <p class="text-sm font-medium text-text-primary">No transactions found</p>
+                    <p class="text-sm font-medium text-text-primary">${tr('transaction.noTransactions', 'No transactions found')}</p>
                     <p class="text-xs text-text-muted mt-1">Record a payment to get started</p>
                 </div>
             `}
@@ -1298,10 +1298,10 @@ const pages = {
     adminTransactionsNew: async () => {
         const dashboard = await store.loadDashboard();
         // all_members has all family members (excluding admin)
-        const members = dashboard?.all_members || dashboard?.underfunded_members || [];
+        const members = ensureArray(dashboard?.all_members || dashboard?.underfunded_members || []);
         return `
             <div class="w-full min-w-0 mb-6">
-                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">${Icons.plusCircle()} Record a Payment</h1>
+                <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-2">${Icons.plusCircle()} ${t('admin.recordPayment')}</h1>
                 <p class="text-xs sm:text-sm text-text-muted">Log a new transaction for a family member</p>
             </div>
             <div class="w-full min-w-0">
@@ -1311,7 +1311,7 @@ const pages = {
                             <label class="block text-sm font-semibold text-text-primary">${t('transaction.whichMember')} <span class="text-error">*</span></label>
                             <select id="txn-member" class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                                 <option value="">Select a member</option>
-                                ${members.map(m => `<option value="${m.id}">${m.name}</option>`).join('')}
+                                ${ensureArray(members).map(m => `<option value="${m?.id ?? ''}">${m?.name || tr('common.memberFull', 'Family member')}</option>`).join('')}
                                 <option value="other">Other member...</option>
                             </select>
                         </div>
@@ -1368,21 +1368,21 @@ const pages = {
     },
     
     memberSettings: async () => {
-        const name = store.user?.name || 'Member';
+        const name = store.user?.name || tr('common.memberFull', 'Family member');
         const profile = await store.loadProfile();
         const p = profile || store.user || {};
         return `
             <div class="w-full min-w-0">
                 <div class="mb-6">
                     <h1 class="text-2xl font-bold text-text-primary">${t('nav.settings')}</h1>
-                    <p class="text-sm text-text-muted mt-1">Manage your account</p>
+                    <p class="text-sm text-text-muted mt-1">${tr('settings.manageAccount', 'Manage your account')}</p>
                 </div>
                 
                 <!-- Profile -->
                 <div class="w-full min-w-0 mb-5 rounded-2xl border border-border bg-surface p-5">
                     <div class="flex items-center gap-4">
-                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-white text-xl font-bold shadow-lg shadow-brand/30">
-                            ${name.charAt(0)}
+                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-white shadow-lg shadow-brand/30">
+                            ${Icons.userRound()}
                         </div>
                         <div>
                             <p class="text-lg font-bold">${name}</p>
@@ -1479,7 +1479,7 @@ const pages = {
         
         // Get all requests, then filter by type on frontend
         const allRequests = await store.loadCareFundRequests();
-        let requests = allRequests || store.careFundRequests || [];
+        let requests = ensureArray(allRequests || store.careFundRequests || []);
         
         // Filter by type
         const currentType = window.careFundType;
@@ -1532,7 +1532,7 @@ const pages = {
         // Paginate
         const start = (page - 1) * limit;
         const end = start + limit;
-        const requestsToShow = allRequestsToShow.slice(start, end);
+        const requestsToShow = ensureArray(allRequestsToShow).slice(start, end);
         
         return `
             <div class="w-full min-w-0 mb-6">
@@ -1540,7 +1540,7 @@ const pages = {
                     ${Icons.heartHandshake()}
                     ${t('nav.helpRequests')}
                 </h1>
-                <p class="text-xs sm:text-sm text-text-muted">Review and respond to withdrawal requests</p>
+                <p class="text-xs sm:text-sm text-text-muted">${tr('admin.reviewRequestsDesc', 'Review and respond to withdrawal requests')}</p>
             </div>
             
             <div class="w-full min-w-0 mb-4 flex gap-1 rounded-2xl border border-border bg-surface p-1">
@@ -1557,7 +1557,7 @@ const pages = {
             </div>
             
             <div class="w-full min-w-0 space-y-3">
-                ${requestsToShow.length > 0 ? requestsToShow.map(r => {
+                ${ensureArray(requestsToShow).length > 0 ? ensureArray(requestsToShow).map(r => {
                     const occasion = r.Occasion || r.occasion;
                     const memberName = r.MemberName || r.member_name || 'Member';
                     const amount = r.Amount || r.amount;
@@ -1639,11 +1639,11 @@ const pages = {
         </div>
         
         <div class="w-full min-w-0 grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
-            ${paginatedMembers.map(m => `
+            ${ensureArray(paginatedMembers).map(m => `
                 <div class="w-full min-w-0 rounded-2xl border border-border bg-surface p-5 shadow-sm hover:shadow-lg hover:shadow-brand/5 transition-all group">
                     <div class="mb-4 flex items-center gap-3">
-                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand/10 to-brand/5 text-xl font-bold text-brand flex-shrink-0 group-hover:scale-110 transition-transform">
-                            ${m.name?.charAt(0) || '?'}
+                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-white flex-shrink-0 group-hover:scale-110 transition-transform">
+                            ${Icons.userRound()}
                         </div>
                         <div class="min-w-0 flex-1">
                             <h3 class="font-bold text-text-primary truncate text-base">${m.name}</h3>
@@ -1673,7 +1673,7 @@ const pages = {
                 </div>
             `}
         </div>
-         ${renderPagination('adminMembers', page, allMembers.length, limit)}
+         ${renderPagination('adminMembers', page, ensureArray(allMembers).length, limit)}
     `;
     },
     
@@ -1690,11 +1690,11 @@ const pages = {
         // Paginate
         const start = (page - 1) * limit;
         const end = start + limit;
-        const notifications = allNotifications.slice(start, end);
+        const notifications = ensureArray(allNotifications).slice(start, end);
         
         const safeNotifications = ensureArray(notifications);
-        const unread = safeNotifications.filter(n => !n?.read);
-        const read = safeNotifications.filter(n => n?.read);
+        const unread = ensureArray(safeNotifications).filter(n => !n?.read);
+        const read = ensureArray(safeNotifications).filter(n => n?.read);
         
         function item(n, isUnread) {
             return `
@@ -1741,7 +1741,7 @@ const pages = {
                     </div>
                 ` : `
                     <div class="space-y-3">
-                        ${safeNotifications.map(n => item(n, !n?.read)).join('')}
+                        ${ensureArray(safeNotifications).map(n => item(n, !n?.read)).join('')}
                     </div>
                     ${renderPagination('notif', page, safeNotifications.length, limit)}
                 `}
@@ -2150,8 +2150,8 @@ function selectRequestType(requestType) {
     } else {
         const txns = await store.loadTransactions({ pool: 'pool2' });
         const txArray = Array.isArray(txns) ? txns : (txns?.data || []);
-        const credits = txArray.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        const debits = txArray.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        const credits = ensureArray(txArray).filter(t => t?.type === 'credit').reduce((sum, t) => sum + parseFloat(t?.amount || 0), 0);
+        const debits = ensureArray(txArray).filter(t => t?.type === 'debit').reduce((sum, t) => sum + parseFloat(t?.amount || 0), 0);
         balance = credits - debits;
     }
     const requested = parseInt(amount);
@@ -2382,8 +2382,8 @@ async function handlePoolTransfer() {
     } else {
         const txns = await store.loadTransactions({ pool: 'pool2' });
         const txArray = Array.isArray(txns) ? txns : (txns?.data || []);
-        const credits = txArray.filter(t => t.type === 'credit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        const debits = txArray.filter(t => t.type === 'debit').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        const credits = ensureArray(txArray).filter(t => t?.type === 'credit').reduce((sum, t) => sum + parseFloat(t?.amount || 0), 0);
+        const debits = ensureArray(txArray).filter(t => t?.type === 'debit').reduce((sum, t) => sum + parseFloat(t?.amount || 0), 0);
         balance = credits - debits;
     }
     const requested = parseInt(amount);
