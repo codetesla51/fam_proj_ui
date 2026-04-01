@@ -774,7 +774,7 @@ const store = {
     _pollFailures: 0,
     _pollDelay: 8000,
     _visibilityListenerAttached: false,
-    _handleVisibilityChange: null,
+    _visibilityChangeHandler: null,
 
     // Strategy 3: Prefetch next likely pages
     _schedulePrefetch() {
@@ -819,14 +819,14 @@ const store = {
 
         // Strategy 4: Stop polling when tab is hidden
         if (!this._visibilityListenerAttached) {
-            this._handleVisibilityChange = () => {
+            this._visibilityChangeHandler = () => {
                 if (document.hidden) {
                     this.stopPolling();
                 } else if (this.isLoggedIn()) {
                     this.startPolling();
                 }
             };
-            document.addEventListener('visibilitychange', this._handleVisibilityChange);
+            document.addEventListener('visibilitychange', this._visibilityChangeHandler);
             this._visibilityListenerAttached = true;
         }
 

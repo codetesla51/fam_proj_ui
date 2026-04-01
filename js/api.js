@@ -117,7 +117,7 @@ async function refreshAccessToken() {
         if (res.ok) {
             const data = await res.json();
             tokens.access = data.access_token;
-            // Some backends return only access_token on refresh
+            // Some backends return only access_token on refresh; preserve existing refresh_token if omitted
             if (data.refresh_token) {
                 tokens.refresh = data.refresh_token;
             }

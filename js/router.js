@@ -84,6 +84,7 @@ const router = {
         return { pathname, params };
     },
 
+    // Match /admin and /admin/... only; avoid false positives like /administrator
     isAdminPath(path) {
         return /^\/admin(\/|$)/.test(path);
     },
