@@ -801,7 +801,8 @@ const store = {
             }, 1000);
         }
 
-        if (currentPath.includes('care-fund') && !this._prefetchInProgress['notifications']) {
+        // Only prefetch notifications for member routes, not admin routes
+        if (currentPath.includes('care-fund') && !currentPath.startsWith('/admin') && !this._prefetchInProgress['notifications']) {
             this._prefetchInProgress['notifications'] = true;
             setTimeout(() => {
                 this.loadNotifications(false).catch(() => {}).finally(() => {
