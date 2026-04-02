@@ -567,7 +567,13 @@
         async function renderNotifContent() {
             var container = document.getElementById('notif-content');
             if (!container) return;
-            
+
+            // Don't load notifications for admin users
+            if (store.isAdmin && store.isAdmin()) {
+                container.innerHTML = '<div class="py-12 text-center text-sm text-text-muted">' + safeT('common.noNewNotifications', 'No notifications available') + '</div>';
+                return;
+            }
+
             try {
                 var notifications = await store.loadNotifications();
                 var safeNotifications = (Array.isArray(notifications) ? notifications : []).filter(isValidNotification);

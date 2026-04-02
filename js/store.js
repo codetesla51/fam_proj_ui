@@ -254,28 +254,32 @@ const store = {
     async logout() {
         // Save language preference before clearing
         const lang = localStorage.getItem('language');
-        
+
+        // Check if admin before clearing
+        const wasAdmin = this.isAdmin();
+
         // Stop all polling first
         this.stopPolling();
-        
+
         // Clear auth state
         authState.clear();
-        
+
         // Clear all localStorage except language
         localStorage.clear();
-        
+
         // Restore language
         if (lang) localStorage.setItem('language', lang);
-        
+
         // Clear session storage
         sessionStorage.clear();
-        
+
         // Clear all data and timestamps
         this.data = { user: null, profile: null, transactions: null, notifications: null, careFundRequests: null, dashboard: null, members: null, receipts: null };
         this._clearTimestamps();
         this._justLoggedIn = false;
-        
-        router.navigate('/login', true);
+
+        // Navigate to correct login page based on user type
+        router.navigate(wasAdmin ? '/admin/login' : '/login', true);
     },
     
     // Load dashboard
@@ -801,7 +805,8 @@ const store = {
             }, 1000);
         }
 
-        if (currentPath.includes('care-fund') && !this._prefetchInProgress['notifications']) {
+        // Only prefetch notifications for member routes, not admin routes
+        if (currentPath.includes('care-fund') && !currentPath.startsWith('/admin') && !this._prefetchInProgress['notifications']) {
             this._prefetchInProgress['notifications'] = true;
             setTimeout(() => {
                 this.loadNotifications(false).catch(() => {}).finally(() => {
@@ -813,11 +818,12 @@ const store = {
 
     // Start polling
     startPolling() {
-        if (this._polling) return;
-        this._polling = true;
+        // First stop any existing polling to prevent stacking
         this.stopPolling();
 
+        // Now set the flag and start fresh
         if (!this.isLoggedIn()) return;
+        this._polling = true;
 
         // Strategy 4: Stop polling when tab is hidden
         if (!this._visibilityListenerAttached) {

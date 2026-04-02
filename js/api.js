@@ -9,37 +9,40 @@ function clearAuthStorage() {
 
 // Auth state - single source of truth for auth status
 const authState = {
-    token: localStorage.getItem('access_token'),
-    isAdmin: localStorage.getItem('is_admin') === 'true',
+    get token() {
+        return localStorage.getItem('access_token');
+    },
+    get isAdmin() {
+        return localStorage.getItem('is_admin') === 'true';
+    },
+    get isLoggedIn() {
+        return !!this.token;
+    },
     set(token, isAdmin) {
         console.log('[authState.set] token:', token, 'isAdmin:', isAdmin);
-        this.token = token;
-        this.isAdmin = isAdmin;
         localStorage.setItem('access_token', token);
         localStorage.setItem('is_admin', isAdmin ? 'true' : 'false');
         console.log('[authState.set] done. isLoggedIn:', this.isLoggedIn, 'isAdmin:', this.isAdmin);
     },
     clear() {
-        this.token = null;
-        this.isAdmin = false;
         clearAuthStorage();
-    },
-    get isLoggedIn() {
-        return !!this.token;
     }
 };
 
 // Token management (used by apiFetch)
 const tokens = {
-    get access() { return authState.token; },
-    set access(v) { authState.token = v; localStorage.setItem('access_token', v); },
+    get access() { return localStorage.getItem('access_token'); },
+    set access(v) {
+        localStorage.setItem('access_token', v);
+    },
     get refresh() { return localStorage.getItem('refresh_token'); },
-    set refresh(v) { localStorage.setItem('refresh_token', v); },
+    set refresh(v) {
+        if (v) {
+            localStorage.setItem('refresh_token', v);
+        }
+    },
     clear() {
-        // Only clear tokens, not authState
         clearAuthStorage();
-        authState.token = null;
-        authState.isAdmin = false;
     }
 };
 
@@ -71,12 +74,17 @@ async function apiFetch(endpoint, options = {}) {
         
         // Handle 401 - token expired (but not for login endpoints)
         if (response.status === 401 && endpoint !== '/auth/admin/login' && endpoint !== '/login') {
-            // Admin tokens cannot be refreshed - just logout
+            // Admin tokens cannot be refreshed
             if (authState.isAdmin) {
-                authState.clear();
-                if (!isReadOnlyRequest) {
-                    router.navigate('/admin/login', true);
+                // For read-only requests, don't clear auth - just fail gracefully
+                // This allows the user to continue with cached data
+                if (isReadOnlyRequest) {
+                    console.warn('[apiFetch] Admin 401 on read-only request, preserving session');
+                    throw new Error('Session expired. Please login again.');
                 }
+                // For write operations, clear and redirect
+                authState.clear();
+                router.navigate('/admin/login', true);
                 throw new Error('Session expired. Please login again.');
             }
             // Member tokens can be refreshed
@@ -88,11 +96,15 @@ async function apiFetch(endpoint, options = {}) {
                     return fetch(url, { ...options, headers });
                 }
             }
-            // Refresh failed or no refresh token, logout
-            authState.clear();
-            if (!isReadOnlyRequest) {
-                router.navigate('/login', true);
+            // Refresh failed or no refresh token
+            // For read-only requests, don't clear auth - just fail gracefully
+            if (isReadOnlyRequest) {
+                console.warn('[apiFetch] Member 401 on read-only request, preserving session');
+                throw new Error('Session expired. Please login again.');
             }
+            // For write operations, clear and redirect
+            authState.clear();
+            router.navigate('/login', true);
             throw new Error('Session expired. Please login again.');
         }
         
