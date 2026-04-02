@@ -71,12 +71,17 @@ async function apiFetch(endpoint, options = {}) {
         
         // Handle 401 - token expired (but not for login endpoints)
         if (response.status === 401 && endpoint !== '/auth/admin/login' && endpoint !== '/login') {
-            // Admin tokens cannot be refreshed - just logout
+            // Admin tokens cannot be refreshed
             if (authState.isAdmin) {
-                authState.clear();
-                if (!isReadOnlyRequest) {
-                    router.navigate('/admin/login', true);
+                // For read-only requests, don't clear auth - just fail gracefully
+                // This allows the user to continue with cached data
+                if (isReadOnlyRequest) {
+                    console.warn('[apiFetch] Admin 401 on read-only request, preserving session');
+                    throw new Error('Session expired. Please login again.');
                 }
+                // For write operations, clear and redirect
+                authState.clear();
+                router.navigate('/admin/login', true);
                 throw new Error('Session expired. Please login again.');
             }
             // Member tokens can be refreshed
@@ -88,11 +93,15 @@ async function apiFetch(endpoint, options = {}) {
                     return fetch(url, { ...options, headers });
                 }
             }
-            // Refresh failed or no refresh token, logout
-            authState.clear();
-            if (!isReadOnlyRequest) {
-                router.navigate('/login', true);
+            // Refresh failed or no refresh token
+            // For read-only requests, don't clear auth - just fail gracefully
+            if (isReadOnlyRequest) {
+                console.warn('[apiFetch] Member 401 on read-only request, preserving session');
+                throw new Error('Session expired. Please login again.');
             }
+            // For write operations, clear and redirect
+            authState.clear();
+            router.navigate('/login', true);
             throw new Error('Session expired. Please login again.');
         }
         
