@@ -254,28 +254,32 @@ const store = {
     async logout() {
         // Save language preference before clearing
         const lang = localStorage.getItem('language');
-        
+
+        // Check if admin before clearing
+        const wasAdmin = this.isAdmin();
+
         // Stop all polling first
         this.stopPolling();
-        
+
         // Clear auth state
         authState.clear();
-        
+
         // Clear all localStorage except language
         localStorage.clear();
-        
+
         // Restore language
         if (lang) localStorage.setItem('language', lang);
-        
+
         // Clear session storage
         sessionStorage.clear();
-        
+
         // Clear all data and timestamps
         this.data = { user: null, profile: null, transactions: null, notifications: null, careFundRequests: null, dashboard: null, members: null, receipts: null };
         this._clearTimestamps();
         this._justLoggedIn = false;
-        
-        router.navigate('/login', true);
+
+        // Navigate to correct login page based on user type
+        router.navigate(wasAdmin ? '/admin/login' : '/login', true);
     },
     
     // Load dashboard
