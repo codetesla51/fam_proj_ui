@@ -814,11 +814,12 @@ const store = {
 
     // Start polling
     startPolling() {
-        if (this._polling) return;
-        this._polling = true;
+        // First stop any existing polling to prevent stacking
         this.stopPolling();
 
+        // Now set the flag and start fresh
         if (!this.isLoggedIn()) return;
+        this._polling = true;
 
         // Strategy 4: Stop polling when tab is hidden
         if (!this._visibilityListenerAttached) {
