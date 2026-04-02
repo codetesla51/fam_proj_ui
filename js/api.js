@@ -9,37 +9,40 @@ function clearAuthStorage() {
 
 // Auth state - single source of truth for auth status
 const authState = {
-    token: localStorage.getItem('access_token'),
-    isAdmin: localStorage.getItem('is_admin') === 'true',
+    get token() {
+        return localStorage.getItem('access_token');
+    },
+    get isAdmin() {
+        return localStorage.getItem('is_admin') === 'true';
+    },
+    get isLoggedIn() {
+        return !!this.token;
+    },
     set(token, isAdmin) {
         console.log('[authState.set] token:', token, 'isAdmin:', isAdmin);
-        this.token = token;
-        this.isAdmin = isAdmin;
         localStorage.setItem('access_token', token);
         localStorage.setItem('is_admin', isAdmin ? 'true' : 'false');
         console.log('[authState.set] done. isLoggedIn:', this.isLoggedIn, 'isAdmin:', this.isAdmin);
     },
     clear() {
-        this.token = null;
-        this.isAdmin = false;
         clearAuthStorage();
-    },
-    get isLoggedIn() {
-        return !!this.token;
     }
 };
 
 // Token management (used by apiFetch)
 const tokens = {
-    get access() { return authState.token; },
-    set access(v) { authState.token = v; localStorage.setItem('access_token', v); },
+    get access() { return localStorage.getItem('access_token'); },
+    set access(v) {
+        localStorage.setItem('access_token', v);
+    },
     get refresh() { return localStorage.getItem('refresh_token'); },
-    set refresh(v) { localStorage.setItem('refresh_token', v); },
+    set refresh(v) {
+        if (v) {
+            localStorage.setItem('refresh_token', v);
+        }
+    },
     clear() {
-        // Only clear tokens, not authState
         clearAuthStorage();
-        authState.token = null;
-        authState.isAdmin = false;
     }
 };
 
