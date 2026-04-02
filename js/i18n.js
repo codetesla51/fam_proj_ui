@@ -49,7 +49,8 @@ const translations = {
             addMember: "Add Family Member", reviewRequests: "Review Withdrawals",
             dashboardDesc: "Family savings at a glance",
             members: "Family Members", behindTitle: "Members Behind on Savings",
-            active: "active", transactions: "Transactions", careFund: "Withdrawal Requests", dashboard: "Dashboard"
+            active: "active", transactions: "Transactions", careFund: "Withdrawal Requests", dashboard: "Dashboard",
+            reviewRequestsDesc: "Review and respond to withdrawal requests"
         },
         transfer: {
             title: "Transfer",
@@ -67,7 +68,8 @@ const translations = {
             date: "Date", type: "Type", amount: "Amount", reason: "Reason",
             proof: "Proof", member: "Member", fund: "Fund", status: "Status",
             showAll: "Show All", all: "All", moneyIn: "Money In", moneyOut: "Money Out",
-            totalIn: "Total In", totalOut: "Total Out", netBalance: "Net Balance"
+            totalIn: "Total In", totalOut: "Total Out", netBalance: "Net Balance",
+            from: "From", to: "To"
         },
         transaction: {
             recordPayment: "Record a Payment", whichMember: "Which family member?",
@@ -75,7 +77,9 @@ const translations = {
             howMuch: "How much?", whatFor: "What is this for?",
             whatForHelper: "e.g. Monthly contribution, Medical bill",
             attachProof: "Attach proof of payment", recordBtn: "Record Payment",
-            familyMoneyHistory: "Family Money History"
+            familyMoneyHistory: "Family Money History",
+            allFamilyTransactions: "All family transactions",
+            noTransactions: "No transactions found"
         },
         careFund: {
             balance: "Personal Savings Balance", requestHelp: "Withdraw from Savings",
@@ -83,7 +87,11 @@ const translations = {
             whatFor: "What is this for?", howMuchNeed: "How much do you need?",
             whenOccasion: "When is the occasion?", tellMore: "Tell us more",
             optional: "optional", sendRequest: "Request Withdraw", accept: "Accept",
-            accepted: "Approved", pending: "Pending", notApproved: "Declined"
+            accepted: "Approved", pending: "Pending", notApproved: "Declined",
+            withdrawFromSavings: "Withdraw from Savings",
+            withdrawFromSavingsDesc: "Take money from your personal savings",
+            detailsPlaceholder: "Enter details about this request",
+            withdrawInfo: "This will withdraw from your personal savings balance of"
         },
         members: {
             addMember: "Add Family Member", fullName: "Full Name",
@@ -134,7 +142,9 @@ const translations = {
             unread: "unread", markAllRead: "Mark all read",
             previous: "Previous", next: "Next", page: "Page", of: "of",
             receiptNumber: "Receipt No.",
-            member: "Member", from: "From", to: "To", date: "Date", time: "Time"
+            member: "Member", memberFull: "Family member", from: "From", to: "To", date: "Date", time: "Time",
+            today: "Today", select: "Select a reason", download: "Download",
+            reference: "Reference", totalPool2: "Total Personal Savings", notAvailable: "Not available"
         },
         validation: { required: "This field is required", passwordMismatch: "Passwords do not match" },
         occasions: { birthday: "Birthday", wedding: "Wedding", newBaby: "New Baby", graduation: "Graduation", medical: "Medical", other: "Other" },
@@ -144,7 +154,9 @@ const translations = {
             transfer: "Transfer", myProfile: "My Profile", viewReceipt: "View Receipt",
             noPaymentsYet: "No payments recorded yet", paymentsRecorded: "payments recorded",
             totalSaved: "Total Saved", totalWithdrawn: "Total Withdrawn",
-            clear: "Clear", allActivity: "All Activity", memberActivity: "Member Activity"
+            clear: "Clear", allActivity: "All Activity", memberActivity: "Member Activity",
+            paymentRecorded: "payment recorded", noMatchingTransactions: "No transactions match your filter",
+            clearFilters: "Clear filters to see all transactions"
         },
         errors: {
             tryAgain: "Something went wrong, please try again",
@@ -161,7 +173,8 @@ const translations = {
             invalidRequest: "Invalid information. Please check and try again.",
             insufficientFunds: "Not enough money in the fund",
             transferFailed: "Transfer failed. Please try again.",
-            uploadFailed: "Upload failed. Please try again."
+            uploadFailed: "Upload failed. Please try again.",
+            markReadFailed: "Could not mark this alert as read"
         }
     },
     yo: {
@@ -221,11 +234,12 @@ const translations = {
             quickActions: "Ise Yiyara", recordPayment: "Kọ̀ Owo",
             addMember: "Ṣe Ará Tuntun", reviewRequests: "Review Ìrànwọ́",
             dashboardDesc: "Ayo owo ifowopamọ́",
-            members: "Àwọn Ará", behindTitle: "Àwọn Ará Ti o Kuna", active: "ni active", transactions: "Ise Owo", careFund: "Ibéèrè Ìrànwọ́", dashboard: "Ile-iṣẹ́"
+            members: "Àwọn Ará", behindTitle: "Àwọn Ará Ti o Kuna", active: "ni active", transactions: "Ise Owo", careFund: "Ibéèrè Ìrànwọ́", dashboard: "Ile-iṣẹ́",
+            reviewRequestsDesc: "Wo àti dahun si awon ibeere yiyo"
         },
-        table: { date: "Ọjọ́", type: "Irú", amount: "Iye", reason: "Ìdí", proof: "Ìfihan", member: "Ará", fund: "Ibi", status: "Ipọ́", showAll: "Fihàn gbogbo", all: "Gbogbo", moneyIn: "Owo Wọlé", moneyOut: "Owo Lọ", totalIn: "Gbogbo ti wọlé", totalOut: "Gbogbo ti lọ", netBalance: "Iye ti o ku" },
-        transaction: { recordPayment: "Kọ̀ Owo", whichMember: "Ará wo?", whichFund: "Ibi wo?", whatType: "Irú wo?", howMuch: "Melo?", whatFor: "Kini?", whatForHelper: "e.g. Owo osù, Owo ilera", attachProof: "Fi ìfihan han", recordBtn: "Kọ̀ Owo", familyMoneyHistory: "Itan Owo Ará" },
-        careFund: { balance: "Owo Ti O ku", requestHelp: "Yi owo na", pastRequests: "Ibéèrè Àtijọ́", noRequests: "O ko ti béèrè ohunkan", whatFor: "Kini eleyi?", howMuchNeed: "Meloo ni o nira?", whenOccasion: "Nigbati?", tellMore: "Sọ̀ diẹ̀", optional: "laikafi", sendRequest: "Fi ìbéèrè rán", accept: "Gba", accepted: "Ti gba", pending: "Ndun", notApproved: "Ko gba" },
+        table: { date: "Ọjọ́", type: "Irú", amount: "Iye", reason: "Ìdí", proof: "Ìfihan", member: "Ará", fund: "Ibi", status: "Ipọ́", showAll: "Fihàn gbogbo", all: "Gbogbo", moneyIn: "Owo Wọlé", moneyOut: "Owo Lọ", totalIn: "Gbogbo ti wọlé", totalOut: "Gbogbo ti lọ", netBalance: "Iye ti o ku", from: "Láti", to: "Sí" },
+        transaction: { recordPayment: "Kọ̀ Owo", whichMember: "Ará wo?", whichFund: "Ibi wo?", whatType: "Irú wo?", howMuch: "Melo?", whatFor: "Kini?", whatForHelper: "e.g. Owo osù, Owo ilera", attachProof: "Fi ìfihan han", recordBtn: "Kọ̀ Owo", familyMoneyHistory: "Itan Owo Ará", allFamilyTransactions: "Gbogbo ise owo ará", noTransactions: "Ko si ise owo" },
+        careFund: { balance: "Owo Ti O ku", requestHelp: "Yi owo na", pastRequests: "Ibéèrè Àtijọ́", noRequests: "O ko ti béèrè ohunkan", whatFor: "Kini eleyi?", howMuchNeed: "Meloo ni o nira?", whenOccasion: "Nigbati?", tellMore: "Sọ̀ diẹ̀", optional: "laikafi", sendRequest: "Fi ìbéèrè rán", accept: "Gba", accepted: "Ti gba", pending: "Ndun", notApproved: "Ko gba", withdrawFromSavings: "Yi owo na", withdrawFromSavingsDesc: "Mu owo lati owo ti o fi pamọ", detailsPlaceholder: "Kọ alaye nipa ibeere yi", withdrawInfo: "Eyi yoo mu owo lati owo ti o fi pamọ ti o je" },
         members: { addMember: "Ṣe Ará Tuntun", fullName: "Orukọ Fúlànlọ̀", password: "Ọ̀ọ́pọ̀", passwordHelper: "Wọn le yi pada lẹ́ẹ̀kan", howOften: "Igbofu owo ro?", howMuchEach: "Meloo ni?", startingFrom: "Bẹ̀rẹ̀ láti?", resetPassword: "Yii Ọ̀ọ́pọ̀" },
         settings: { myDetails: "Àkọ̀ọ́ba Mi", changePassword: "Yi Ọ̀ọ́pọ̀ Pada", currentPassword: "Ọ̀ọ́pọ̀ Lọ́wọ́", newPassword: "Ọ̀ọ́pọ̀ Tuntun", confirmNew: "Yi ìdájú Ọ̀ọ́pọ̀", language: "Èdè", installApp: "Fọ̀nà App", installPrompt: "Fọ̀nà si homescreen rẹ fun irọ̀gẹ̀", install: "Fọ̀nà", iosInstructions: "Tap share, then Add to Home Screen", dismiss: "Fagilee", contactManager: "Pe oniṣọ̀", savingsSettings: "Ètò Ifowopamọ́", savingsInterval: "Igbofu owo?", committedAmount: "Meloo ni o fi pamọ́?", committedAmountHelper: "Owo ti o pinnu lati fi pamọ́" },
         common: {
@@ -237,7 +251,7 @@ const translations = {
             backOnline: "Nẹ́tíwọ́ọ̀kì ti padà ✓",
             offlineShowingSaved: "O wà ní àìní nẹ́tíwọ́ọ̀kì — a n fi data tó ti fipamọ hàn",
             back: "Padà", viewReceipt: "Wo Resi", justNow: "Nìsẹ́yì",
-            yesterday: "Alẹ́", confirm: "F确认", delete: "Paarẹ̀",
+            yesterday: "Alẹ́", confirm: "Jẹ́rìsí", delete: "Paarẹ̀",
             edit: "Yíi pada", close: "Pade", search: "Wadi", noData: "Ko si data",
             upToDate: "Ti wa ni akọ̀ọ́", new: "Tuntun", earlier: "Nígbàtẹ̀wọ́",
             noNewNotifications: "Ko si iwifun tuntun",
@@ -260,12 +274,14 @@ const translations = {
             unread: "ti o ka", markAllRead: "Mark gbogbo ka",
             previous: "Tẹ́lẹ̀", next: "Tó kàn", page: "Ojúewé", of: "nínú",
             receiptNumber: "Nọ́mbà Ìwé-ẹri",
-            member: "Ará", from: "Láti", to: "Sí", date: "Ọjọ́", time: "Àkókò"
+            member: "Ará", memberFull: "Ará ìdílé", from: "Láti", to: "Sí", date: "Ọjọ́", time: "Àkókò",
+            today: "Òní", select: "Yan ìdí", download: "Gba silẹ",
+            reference: "Nọmba itọkasi", totalPool2: "Gbogbo Owo Ti Mo", notAvailable: "Ko sí"
         },
         validation: { required: "A nilo eleyi", passwordMismatch: "Ọ̀ọ́pọ̀ kii to" },
         occasions: { birthday: "Ọjọ́ ibi", wedding: "Ìgbéyàwó", newBaby: "Ọmọ tuntun", graduation: "Graduation", medical: "Ilera", other: "Ọ̀nà" },
-        ui: { mySavings: "Owo Ti Mo Fi Pamọ́", myHistory: "Itan Owo Mi", familyActivity: "Ise Awọn Ará", personalSavings: "Owo Ti Mo", familySavings: "Owo Ifowopamọ́ Ará", transfer: "Gbigbe Owo", myProfile: "Ìfipamọ́ Mi", viewReceipt: "Wo Resi", noPaymentsYet: "Ko si owo ti a kọ̀", paymentsRecorded: "owo ti a kọ̀", totalSaved: "Gbogbo Ti A Fi Pamọ́", totalWithdrawn: "Gbogbo Ti A Yiyo", clear: "Korí", allActivity: "Gbogbo Ise", memberActivity: "Ise Ara" },
-        errors: { tryAgain: "Nnkan ti lọ. Jọ̀wọ́ gbiyanju.", pageNotFound: "A ko rí oju opo", pageNotFoundDesc: "Oju yii ko si.", userNotFound: "A ko mọ̀ orukọ yii", wrongPassword: "Ọ̀ọ́pọ̀ kuna. Jọ̀wọ́ gbiyanju.", notAdmin: "O ko ni Oniṣọ̀", useAdminLogin: "Jọ̀wọ́ lo ìwọlé Oniṣọ̀", networkError: "Ko si nẹ́tọ́ọ̀kì. Jọ̀wọ́ ṣàyẹ̀wò.", serverError: "Nnkan ti lọ. Jọ̀wọ́ gbiyanju.", sessionExpired: "Session ti pari. Jọ̀wọ́ ṣe àlàáfià lẹ́ẹ̀kan si.", unauthorized: "Jọ̀wọ́ ṣe àlàáfià lati tẹ̀síwájú", invalidRequest: "Ail信息. Jọ̀wọ́ ṣàyẹ̀wò.", insufficientFunds: "Ko si owo ga", transferFailed: "Transfer kuna. Gbiyanju.", uploadFailed: "Upload kuna. Gbiyanju." }
+        ui: { mySavings: "Owo Ti Mo Fi Pamọ́", myHistory: "Itan Owo Mi", familyActivity: "Ise Awọn Ará", personalSavings: "Owo Ti Mo", familySavings: "Owo Ifowopamọ́ Ará", transfer: "Gbigbe Owo", myProfile: "Ìfipamọ́ Mi", viewReceipt: "Wo Resi", noPaymentsYet: "Ko si owo ti a kọ̀", paymentsRecorded: "owo ti a kọ̀", totalSaved: "Gbogbo Ti A Fi Pamọ́", totalWithdrawn: "Gbogbo Ti A Yiyo", clear: "Korí", allActivity: "Gbogbo Ise", memberActivity: "Ise Ara", paymentRecorded: "owo kan ti a kọ̀", noMatchingTransactions: "Ko si owo ti o bamu", clearFilters: "Korí awon asẹ lati wo gbogbo" },
+        errors: { tryAgain: "Nnkan ti lọ. Jọ̀wọ́ gbiyanju.", pageNotFound: "A ko rí oju opo", pageNotFoundDesc: "Oju yii ko si.", userNotFound: "A ko mọ̀ orukọ yii", wrongPassword: "Ọ̀ọ́pọ̀ kuna. Jọ̀wọ́ gbiyanju.", notAdmin: "O ko ni Oniṣọ̀", useAdminLogin: "Jọ̀wọ́ lo ìwọlé Oniṣọ̀", networkError: "Ko si nẹ́tọ́ọ̀kì. Jọ̀wọ́ ṣàyẹ̀wò.", serverError: "Nnkan ti lọ. Jọ̀wọ́ gbiyanju.", sessionExpired: "Session ti pari. Jọ̀wọ́ ṣe àlàáfià lẹ́ẹ̀kan si.", unauthorized: "Jọ̀wọ́ ṣe àlàáfià lati tẹ̀síwájú", invalidRequest: "Alaye ko to. Jọ̀wọ́ ṣàyẹ̀wò.", insufficientFunds: "Ko si owo ga", transferFailed: "Transfer kuna. Gbiyanju.", uploadFailed: "Upload kuna. Gbiyanju.", markReadFailed: "A ko le samisi bi a ti ka" }
     },
     ig: {
         app: { name: "Odelade Family Ledger", tagline: "Ego nchekwa gi ni otu ebe" },
