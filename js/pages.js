@@ -538,47 +538,50 @@ const pages = {
             store.loadDashboard(),
             member.getAllTransactions({ limit: 50 })
         ]);
-        
+
         const d = dashboard || {};
-        
+
         // Get pool2 balance from dashboard
         let pool2Balance = d?.my_pool2_contributions;
-        
+
         // Get recent transactions - filter to hide other members' Pool 2 transactions
         const allTransactions = recentTx?.transactions || [];
         const filteredTransactions = filterFamilyTransactions(allTransactions, store.user?.id);
         let recent = filteredTransactions.slice(0, 10);
-        
+
         const name = store.user?.name?.split(' ')[0] || tr('common.member', 'Member');
         return `
-            <div class="w-full min-w-0 premium-page">
+            <div class="w-full min-w-0 premium-page page-fade-in">
                 <!-- Greeting -->
-                <div class="mb-6 flex items-center gap-4">
-                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-white shadow-lg shadow-brand/30">
+                <div class="mb-8 flex items-center gap-4">
+                    <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-accent text-white shadow-lg shadow-brand/30">
                         ${Icons.userRound()}
                     </div>
                     <div>
-                        <p class="text-sm text-text-muted">${getGreeting()}</p>
-                        <h1 class="text-2xl font-bold text-text-primary">${name}</h1>
+                        <p class="text-sm font-medium text-text-muted">${getGreeting()}</p>
+                        <h1 class="text-title">${name}</h1>
                     </div>
                 </div>
-                
+
                 <!-- KPI Grid -->
-                <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-4">
+                <div class="w-full min-w-0 mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
                     ${KpiCard({ label: t('member.familySavings'), amount: d?.pool1_balance ?? 0, subtext: t('common.totalPool1'), highlight: true })}
                     ${KpiCard({ label: t('member.mySavings'), amount: d?.my_contributions ?? 0, subtext: t('common.yourContributions') })}
                     ${KpiCard({ label: t('member.personalSavings'), amount: pool2Balance || 0, subtext: t('common.yourBalance') })}
                     ${KpiCard({ label: t('member.alerts'), amount: store.unreadCount || 0, subtext: t('common.unread'), isCurrency: false })}
                 </div>
-                
+
                 <!-- Recent Activity -->
-                <div class="w-full min-w-0 mb-6">
-                    <div class="mb-4 flex items-center justify-between">
-                        <h2 class="text-base font-bold text-text-primary">${t('common.recentActivity')}</h2>
-                        <a href="/member/activity" class="flex items-center gap-1 text-sm font-semibold text-brand select-none">${Icons.arrowRight()} ${t('common.viewAll')}</a>
+                <div class="w-full min-w-0 mb-8">
+                    <div class="mb-5 flex items-center justify-between">
+                        <h2 class="text-lg font-bold text-text-primary">${t('common.recentActivity')}</h2>
+                        <a href="/member/activity" class="flex items-center gap-1.5 text-sm font-semibold text-brand hover:text-brand-hover transition-colors select-none">
+                            <span>${t('common.viewAll')}</span>
+                            ${Icons.arrowRight()}
+                        </a>
                     </div>
                     ${recent.length > 0 ? `
-                        <div class="w-full min-w-0 space-y-3">
+                        <div class="premium-surface w-full min-w-0 overflow-hidden">
                             ${ensureArray(recent).map(p => {
                                 const pType = p.type || p.Type || 'credit';
                                 const pReason = p.reason || p.Reason || '';
@@ -587,40 +590,46 @@ const pages = {
                                 const pMemberName = p.member_name || p.MemberName || tr('common.memberFull', 'Family member');
                                 const pReceiptUrl = p.receipt_url || p.ReceiptURL || '';
                                 const pReceiptData = p.receiptData || p.ReceiptData || '';
+                                const isCredit = pType === 'credit' || pReason?.includes('Transfer from pool2');
                                 return `
-                                <div class="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3 hover:shadow-md transition-shadow">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${pType === 'credit' || pReason?.includes('Transfer from pool2') ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
-                                        ${pType === 'credit' || pReason?.includes('Transfer from pool2') ? Icons.arrowUpRight() : Icons.arrowDownRight()}
+                                <div class="list-item">
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-xl flex-shrink-0 ${isCredit ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}">
+                                        ${isCredit ? Icons.arrowUpRight() : Icons.arrowDownRight()}
                                     </div>
-                                    <div class="flex-1 min-w-0">
+                                    <div class="flex-1 min-w-0 px-4">
                                         <p class="text-sm font-semibold text-text-primary truncate">${cleanReason(pReason, pType)}</p>
-                                        <p class="text-xs text-text-muted">${pMemberName} • ${formatDate(pCreated)}</p>
+                                        <p class="list-date mt-0.5">${pMemberName} • ${formatDate(pCreated)}</p>
                                     </div>
-                                    <div class="flex items-center gap-2">
-                                        ${pReceiptUrl ? `<button onclick="showReceiptImage('${pReceiptUrl}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="${t('common.viewReceipt')}">${Icons.fileText()}</button>` : ''}
-                                        ${!pReceiptUrl && pReceiptData ? `<button onclick="showTransferReceiptData('${p.id || p.ID}', '${encodeURIComponent(pReceiptData)}')" class="p-2 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all" title="${t('common.viewReceipt')}">${Icons.fileText()}</button>` : ''}
-                                        <p class="text-sm font-bold whitespace-nowrap ${pType === 'credit' || pReason?.includes('Transfer from pool2') ? 'text-success' : 'text-error'}">
-                                            ${pType === 'credit' || pReason?.includes('Transfer from pool2') ? '+' : '-'}${formatMoney(pAmount, { compact: true })}
+                                    <div class="flex items-center gap-3 flex-shrink-0">
+                                        ${pReceiptUrl ? `<button onclick="showReceiptImage('${pReceiptUrl}')" class="p-2.5 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all select-none" title="${t('common.viewReceipt')}">${Icons.fileText()}</button>` : ''}
+                                        ${!pReceiptUrl && pReceiptData ? `<button onclick="showTransferReceiptData('${p.id || p.ID}', '${encodeURIComponent(pReceiptData)}')" class="p-2.5 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all select-none" title="${t('common.viewReceipt')}">${Icons.fileText()}</button>` : ''}
+                                        <p class="list-amount ${isCredit ? 'text-success' : 'text-error'}">
+                                            ${isCredit ? '+' : '-'}${formatMoney(pAmount, { compact: true })}
                                         </p>
                                     </div>
                                 </div>
                             `}).join('')}
                         </div>
                     ` : `
-                        <div class="rounded-2xl border border-border bg-surface p-8 text-center">
-                            <div class="mb-3 flex justify-center">${Icons.wallet()}</div>
-                            <p class="text-sm text-text-muted">${t('member.noPayments')}</p>
+                        <div class="premium-surface p-12">
+                            <div class="empty-state py-4">
+                                <div class="empty-state-icon mb-4">${Icons.wallet()}</div>
+                                <p class="empty-state-title">${t('member.noPayments')}</p>
+                                <p class="empty-state-text mt-2">Your recent activity will appear here</p>
+                            </div>
                         </div>
                     `}
                 </div>
-                
+
                 <!-- Quick Actions -->
-                <div class="w-full min-w-0 grid grid-cols-2 gap-4">
-                    <a href="/member/transfer" class="flex items-center justify-center gap-3 rounded-2xl bg-brand p-4 font-bold text-white shadow-lg shadow-brand/25 select-none">
-                        ${Icons.arrowRightLeft()} ${t('common.transfer')}
+                <div class="w-full min-w-0 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <a href="/member/transfer" class="premium-button flex items-center justify-center gap-3 rounded-2xl bg-gradient-accent p-5 font-bold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/35 select-none">
+                        ${Icons.arrowRightLeft()}
+                        <span>${t('common.transfer')}</span>
                     </a>
-                    <a href="/member/care-fund" class="flex items-center justify-center gap-3 rounded-2xl border-2 border-border bg-surface p-4 font-bold select-none">
-                        ${Icons.heartHandshake()} ${t('common.requestWithdraw')}
+                    <a href="/member/care-fund" class="premium-button flex items-center justify-center gap-3 rounded-2xl border-2 border-brand/30 bg-brand-light/30 p-5 font-bold text-brand hover:bg-brand-light hover:border-brand select-none">
+                        ${Icons.heartHandshake()}
+                        <span>${t('common.requestWithdraw')}</span>
                     </a>
                 </div>
             </div>
@@ -1175,55 +1184,72 @@ const pages = {
         }
         const d = dashboard || {};
         return `
-            <div class="w-full min-w-0">
+            <div class="w-full min-w-0 premium-page page-fade-in">
                 <!-- Title -->
-                <div class="mb-6">
-                    <h1 class="text-2xl font-bold text-text-primary">${t('admin.familyOverview')}</h1>
-                    <p class="text-sm text-text-muted mt-1">${t('admin.dashboardDesc')}</p>
+                <div class="mb-8">
+                    <h1 class="text-title">${t('admin.familyOverview')}</h1>
+                    <p class="text-secondary mt-2">${t('admin.dashboardDesc')}</p>
                 </div>
-                
+
                 <!-- KPI Grid -->
-                <div class="w-full min-w-0 mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+                <div class="w-full min-w-0 mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
                     ${KpiCard({ label: t('member.familySavings'), amount: d.pool1_balance || 0, subtext: t('common.totalPool1'), highlight: true })}
                     ${KpiCard({ label: t('member.personalSavings'), amount: d.pool2_balance || 0, subtext: tr('common.totalPool2', 'Total Pool 2') })}
                     ${KpiCard({ label: t('admin.members'), amount: d.member_count || 0, subtext: (d.active_count || 0) + ' ' + t('common.active'), isCurrency: false })}
                     ${KpiCard({ label: tr('admin.behindOnSavings', 'Overdue'), amount: d.overdue_count || 0, subtext: t('member.behind'), isCurrency: false })}
                 </div>
-                
+
                 ${ensureArray(d?.underfunded_members).length > 0 ? `
-                    <div class="w-full min-w-0 mb-6 rounded-2xl border border-error/20 bg-error/5 p-4 overflow-x-hidden">
-                        <div class="mb-3 flex items-center gap-2">${Icons.alertTriangle()}<p class="text-sm font-bold text-error">${t('admin.behindTitle')}</p></div>
-                        <div class="w-full min-w-0 space-y-2 overflow-x-hidden">
+                    <div class="w-full min-w-0 mb-8 premium-surface overflow-hidden">
+                        <div class="p-5 border-b border-error/10 bg-error/5">
+                            <div class="flex items-center gap-2.5">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-error/10 text-error">
+                                    ${Icons.alertTriangle()}
+                                </div>
+                                <p class="text-label text-error">${t('admin.behindTitle')}</p>
+                            </div>
+                        </div>
+                        <div class="p-5 space-y-3">
                             ${ensureArray(d?.underfunded_members).map(m => {
                                 const name = m.Name || m.name || '?';
                                 const committed = parseFloat(m.CommittedAmount || m.committed_amount || 0);
                                 const current = parseFloat(m.CurrentSum || m.current_sum || 0);
                                 const gap = committed - current;
                                 return `
-                                <div class="flex items-center justify-between gap-2 rounded-lg bg-surface p-3 min-w-0">
-                                    <div class="flex items-center gap-2 min-w-0">
-                                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-error/10 text-xs font-bold text-error flex-shrink-0">${Icons.userRound()}</div>
-                                        <span class="text-sm font-medium text-text-primary truncate min-w-0">${name}</span>
+                                <div class="flex items-center justify-between gap-4 p-3 rounded-xl bg-surface-soft hover:bg-surface-raised transition-colors">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-error/10 text-error flex-shrink-0">${Icons.userRound()}</div>
+                                        <span class="text-sm font-semibold text-text-primary truncate">${name}</span>
                                     </div>
-                                    <span class="text-xs font-bold text-error whitespace-nowrap flex-shrink-0">${formatMoney(gap, { compact: true })} ${t('member.behind')}</span>
+                                    <span class="badge badge-overdue whitespace-nowrap">${formatMoney(gap, { compact: true })} ${t('member.behind')}</span>
                                 </div>
                             `}).join('')}
                         </div>
                     </div>
-                ` : `<div class="w-full min-w-0 mb-6 rounded-2xl border border-success/20 bg-success/5 p-4 flex items-center gap-2">${Icons.checkCircle()}<p class="text-sm font-semibold text-success">${t('admin.allUpToDate')}</p></div>`}
-                
+                ` : `
+                    <div class="w-full min-w-0 mb-8 premium-surface p-5 flex items-center gap-3 bg-success/5">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10 text-success flex-shrink-0">
+                            ${Icons.checkCircle()}
+                        </div>
+                        <p class="text-sm font-semibold text-success">${t('admin.allUpToDate')}</p>
+                    </div>
+                `}
+
                 <!-- Quick Actions -->
                 <div class="w-full min-w-0">
-                    <h2 class="mb-4 text-base font-bold text-text-primary">${t('admin.quickActions')}</h2>
+                    <h2 class="mb-5 text-lg font-bold text-text-primary">${t('admin.quickActions')}</h2>
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <a href="/admin/transactions/new" class="flex items-center justify-center gap-3 rounded-2xl bg-brand p-5 font-bold text-white shadow-lg shadow-brand/25 select-none">
-                            ${Icons.plusCircle()}<span>${t('admin.recordPayment')}</span>
+                        <a href="/admin/transactions/new" class="premium-button flex items-center justify-center gap-3 rounded-2xl bg-gradient-accent p-6 font-bold text-white shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/35 select-none">
+                            ${Icons.plusCircle()}
+                            <span>${t('admin.recordPayment')}</span>
                         </a>
-                        <a href="/admin/members" class="flex items-center justify-center gap-3 rounded-2xl border-2 border-border bg-surface p-5 font-bold select-none">
-                            ${Icons.userPlus()}<span>${t('admin.addMember')}</span>
+                        <a href="/admin/members" class="premium-button flex items-center justify-center gap-3 rounded-2xl border-2 border-brand/30 bg-brand-light/30 p-6 font-bold text-brand hover:bg-brand-light hover:border-brand select-none">
+                            ${Icons.userPlus()}
+                            <span>${t('admin.addMember')}</span>
                         </a>
-                        <a href="/admin/care-fund" class="flex items-center justify-center gap-3 rounded-2xl border-2 border-border bg-surface p-5 font-bold select-none">
-                            ${Icons.heartHandshake()}<span>${t('admin.reviewRequests')}</span>
+                        <a href="/admin/care-fund" class="premium-button flex items-center justify-center gap-3 rounded-2xl border-2 border-border bg-surface p-6 font-bold text-text-primary hover:bg-surface-soft hover:border-brand/30 select-none">
+                            ${Icons.heartHandshake()}
+                            <span>${t('admin.reviewRequests')}</span>
                         </a>
                     </div>
                 </div>
@@ -1825,28 +1851,36 @@ const pages = {
     
     // Error Pages
     notFound: () => `
-        <div class="flex min-h-screen flex-col items-center justify-center p-6">
-            <div class="text-8xl text-brand mb-6">${Icons.alertCircle()}</div>
-            <h1 class="text-4xl font-bold mb-2">404</h1>
-            <h2 class="text-xl font-semibold text-text-secondary mb-4">${t('errors.pageNotFound')}</h2>
-            <p class="text-text-muted mb-8 text-center max-w-md">${t('errors.pageNotFoundDesc')}</p>
-            <a href="/" class="flex h-12 items-center justify-center rounded-2xl bg-brand px-6 font-medium text-white hover:bg-brand-hover active:bg-brand-hover">
-                ${Icons.home()}
-                ${t('nav.home')}
-            </a>
+        <div class="flex min-h-screen flex-col items-center justify-center p-6 page-fade-in">
+            <div class="empty-state">
+                <div class="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-brand/10 text-brand">
+                    ${Icons.compass()}
+                </div>
+                <h1 class="text-6xl font-extrabold text-brand mb-3">404</h1>
+                <h2 class="empty-state-title">${t('errors.pageNotFound')}</h2>
+                <p class="empty-state-text">${t('errors.pageNotFoundDesc')}</p>
+                <a href="/" class="premium-button mt-8 flex h-12 items-center justify-center gap-2 rounded-xl bg-brand px-8 font-semibold text-white hover:bg-brand-hover active:scale-95 select-none">
+                    ${Icons.home()}
+                    <span>${t('nav.home')}</span>
+                </a>
+            </div>
         </div>
     `,
-    
+
     serverError: () => `
-        <div class="flex min-h-screen flex-col items-center justify-center p-6">
-            <div class="text-8xl text-error mb-6">${Icons.alertOctagon()}</div>
-            <h1 class="text-4xl font-bold mb-2">500</h1>
-            <h2 class="text-xl font-semibold text-text-secondary mb-4">${t('errors.serverError')}</h2>
-            <p class="text-text-muted mb-8 text-center max-w-md">${t('common.error')}</p>
-            <button onclick="router.refresh()" class="flex h-12 items-center justify-center rounded-2xl bg-brand px-6 font-medium text-white hover:bg-brand-hover active:bg-brand-hover">
-                ${Icons.refreshCw()}
-                ${t('common.tryAgain')}
-            </button>
+        <div class="flex min-h-screen flex-col items-center justify-center p-6 page-fade-in">
+            <div class="empty-state">
+                <div class="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-error/10 text-error">
+                    ${Icons.alertOctagon()}
+                </div>
+                <h1 class="text-6xl font-extrabold text-error mb-3">500</h1>
+                <h2 class="empty-state-title">${t('errors.serverError')}</h2>
+                <p class="empty-state-text">${t('common.error')}</p>
+                <button onclick="router.refresh()" class="premium-button mt-8 flex h-12 items-center justify-center gap-2 rounded-xl bg-brand px-8 font-semibold text-white hover:bg-brand-hover active:scale-95 select-none">
+                    ${Icons.refreshCw()}
+                    <span>${t('common.tryAgain')}</span>
+                </button>
+            </div>
         </div>
     `,
     
