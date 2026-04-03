@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0, user-scalable=yes">
     <meta name="theme-color" content="#0D9488">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -278,9 +278,10 @@
         
         /* ========== CROSS-BROWSER COMPATIBILITY FIXES ========== */
         
-        /* Safari iOS - prevent zoom on input focus */
+        /* Safari iOS - prevent zoom on input focus while maintaining readability */
         input, select, textarea {
             font-size: 16px !important;
+            min-height: 48px;
         }
         
         /* Safari iOS - remove tap delay */
@@ -365,7 +366,8 @@
             touch-action: manipulation;
         }
         button, [role="button"], a.touch-target {
-            min-height: 44px;
+            min-height: 48px;
+            min-width: 48px;
         }
         
         /* Safe area for iPhone notch and home bar */
@@ -425,11 +427,11 @@
             <form onsubmit="handleAddMember(event)" class="space-y-4">
                 <div class="space-y-1.5">
                     <label class="block text-sm font-medium text-text-primary"><span id="lbl-name"></label>
-                    <input type="text" id="new-member-name" class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                    <input type="text" id="new-member-name" class="h-14 w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                 </div>
                 <div class="space-y-1.5">
                     <label class="block text-sm font-medium text-text-primary"><span id="lbl-password"></label>
-                    <input type="password" id="new-member-password" class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                    <input type="password" id="new-member-password" class="h-14 w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                 </div>
                 <div class="space-y-1.5">
                     <label class="block text-sm font-medium text-text-primary"><span id="lbl-interval"></label>
@@ -443,12 +445,12 @@
                     <label class="block text-sm font-medium text-text-primary"><span id="lbl-amount"></label>
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">₦</span>
-                        <input type="number" id="new-member-amount" placeholder="0" class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                        <input type="number" id="new-member-amount" placeholder="0" class="h-14 w-full min-w-0 rounded-2xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                     </div>
                 </div>
                 <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="closeAddMemberModal()" class="flex h-12 flex-1 items-center justify-center rounded-2xl border border-border font-medium select-none"><span id="btn-cancel"></span></button>
-                    <button type="submit" id="btn-submit-member" class="flex h-12 flex-1 items-center justify-center rounded-2xl bg-brand font-medium text-white select-none"><span id="btn-add"></span></button>
+                    <button type="button" onclick="closeAddMemberModal()" class="flex h-14 flex-1 items-center justify-center rounded-2xl border border-border font-medium select-none"><span id="btn-cancel"></span></button>
+                    <button type="submit" id="btn-submit-member" class="flex h-14 flex-1 items-center justify-center rounded-2xl bg-brand font-medium text-white select-none"><span id="btn-add"></span></button>
                 </div>
             </form>
         </div>
