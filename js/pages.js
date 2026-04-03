@@ -222,15 +222,15 @@ const pages = {
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.yourName')}</label>
                                 <input type="text" id="login-name" placeholder="${t('auth.yourNamePlaceholder')}"
                                     onblur="this.classList.toggle('border-error', !this.value.trim())"
-                                    class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                    class="h-12 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                             </div>
-                            
+
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.password')}</label>
                                 <div class="relative">
-                                    <input type="password" id="login-password" 
+                                    <input type="password" id="login-password"
                                         onblur="this.classList.toggle('border-error', !this.value.trim())"
-                                        class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                        class="h-12 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                                     <button type="button" onclick="togglePassword('login-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
                                         ${Icons.eye()}
                                     </button>
@@ -339,32 +339,32 @@ const pages = {
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.fullName')} <span class="text-error">*</span></label>
                                 <input type="text" id="reg-name" placeholder="${t('auth.yourNamePlaceholder')}"
-                                    class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                    class="h-12 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                                 <p class="text-xs text-text-muted pl-1">${t('auth.fullNameHelper')}</p>
                             </div>
-                            
+
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.createPassword')} <span class="text-error">*</span></label>
                                 <div class="relative">
                                     <input type="password" id="reg-password"
-                                        class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                        class="h-12 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                                     <button type="button" onclick="togglePassword('reg-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
                                         ${Icons.eye()}
                                     </button>
                                 </div>
                             </div>
-                            
+
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.confirmPassword')} <span class="text-error">*</span></label>
                                 <div class="relative">
                                     <input type="password" id="reg-confirm"
-                                        class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                        class="h-12 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                                     <button type="button" onclick="togglePassword('reg-confirm')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
                                         ${Icons.eye()}
                                     </button>
                                 </div>
                             </div>
-                            
+
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-text-primary">${t('register.howOften')} <span class="text-error">*</span></label>
                                 <div class="flex rounded-2xl border-2 border-border p-1.5 gap-2">
@@ -378,13 +378,13 @@ const pages = {
                                     </button>
                                 </div>
                             </div>
-                            
+
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-text-primary">${t('register.howMuch')} <span class="text-error">*</span></label>
                                 <div class="relative">
                                     <span class="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
                                     <input type="number" id="reg-amount" placeholder="50,000"
-                                        class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface py-3 pl-12 pr-4 text-lg font-semibold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                        class="h-12 w-full min-w-0 rounded-2xl border-2 border-border bg-surface py-3 pl-12 pr-4 text-lg font-semibold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                                 </div>
                                 <p class="text-xs text-text-muted pl-1">${t('register.howMuchHelper')}</p>
                             </div>
