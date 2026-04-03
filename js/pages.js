@@ -222,7 +222,7 @@ const pages = {
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.yourName')}</label>
                                 <input type="text" id="login-name" placeholder="${t('auth.yourNamePlaceholder')}"
                                     onblur="this.classList.toggle('border-error', !this.value.trim())"
-                                    class="h-12 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                    class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                             </div>
 
                             <div class="space-y-2">
@@ -230,8 +230,8 @@ const pages = {
                                 <div class="relative">
                                     <input type="password" id="login-password"
                                         onblur="this.classList.toggle('border-error', !this.value.trim())"
-                                        class="h-12 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
-                                    <button type="button" onclick="togglePassword('login-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
+                                        class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                    <button type="button" onclick="togglePassword('login-password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted h-12 w-12 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
                                         ${Icons.eye()}
                                     </button>
                                 </div>
@@ -339,7 +339,7 @@ const pages = {
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.fullName')} <span class="text-error">*</span></label>
                                 <input type="text" id="reg-name" placeholder="${t('auth.yourNamePlaceholder')}"
-                                    class="h-12 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                    class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                                 <p class="text-xs text-text-muted pl-1">${t('auth.fullNameHelper')}</p>
                             </div>
 
@@ -347,8 +347,8 @@ const pages = {
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.createPassword')} <span class="text-error">*</span></label>
                                 <div class="relative">
                                     <input type="password" id="reg-password"
-                                        class="h-12 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
-                                    <button type="button" onclick="togglePassword('reg-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
+                                        class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                    <button type="button" onclick="togglePassword('reg-password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted h-12 w-12 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
                                         ${Icons.eye()}
                                     </button>
                                 </div>
@@ -358,8 +358,8 @@ const pages = {
                                 <label class="block text-sm font-semibold text-text-primary">${t('auth.confirmPassword')} <span class="text-error">*</span></label>
                                 <div class="relative">
                                     <input type="password" id="reg-confirm"
-                                        class="h-12 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
-                                    <button type="button" onclick="togglePassword('reg-confirm')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
+                                        class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                    <button type="button" onclick="togglePassword('reg-confirm')" class="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted h-12 w-12 flex items-center justify-center hover:text-text-secondary active:scale-90 transition-all select-none">
                                         ${Icons.eye()}
                                     </button>
                                 </div>
@@ -384,7 +384,7 @@ const pages = {
                                 <div class="relative">
                                     <span class="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
                                     <input type="number" id="reg-amount" placeholder="50,000"
-                                        class="h-12 w-full min-w-0 rounded-2xl border-2 border-border bg-surface py-3 pl-12 pr-4 text-lg font-semibold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
+                                        class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface py-3 pl-12 pr-4 text-lg font-semibold transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 hover:border-brand/40">
                                 </div>
                                 <p class="text-xs text-text-muted pl-1">${t('register.howMuchHelper')}</p>
                             </div>
@@ -502,7 +502,7 @@ const pages = {
                                 <div class="relative">
                                     <input type="password" id="admin-password" placeholder="Enter your password"
                                         class="h-14 w-full min-w-0 rounded-2xl border-2 border-border bg-surface px-4 pr-14 text-base transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 placeholder:text-text-muted">
-                                    <button type="button" onclick="togglePassword('admin-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted h-10 w-10 flex items-center justify-center hover:text-brand transition-colors select-none">
+                                    <button type="button" onclick="togglePassword('admin-password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted h-12 w-12 flex items-center justify-center hover:text-brand transition-colors select-none">
                                         ${Icons.eye()}
                                     </button>
                                 </div>
@@ -1383,7 +1383,7 @@ const pages = {
                     <form onsubmit="handleRecordPayment(event)" class="space-y-5">
                         <div class="space-y-2">
                             <label class="block text-sm font-semibold text-text-primary">${t('transaction.whichMember')} <span class="text-error">*</span></label>
-                            <select id="txn-member" class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                            <select id="txn-member" class="h-14 w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                                 <option value="">Select a member</option>
                                 ${ensureArray(members).map(m => `<option value="${m?.id ?? ''}">${m?.name || tr('common.memberFull', 'Family member')}</option>`).join('')}
                                 <option value="other">Other member...</option>
@@ -1410,13 +1410,13 @@ const pages = {
                             <label class="block text-sm font-semibold text-text-primary">${t('transaction.howMuch')} <span class="text-error">*</span></label>
                             <div class="relative">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg">₦</span>
-                                <input type="number" id="txn-amount" placeholder="0" class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                <input type="number" id="txn-amount" placeholder="0" class="h-14 w-full min-w-0 rounded-2xl border border-border bg-surface py-3 pl-8 pr-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                             </div>
                         </div>
                         
                         <div class="space-y-2">
                             <label class="block text-sm font-semibold text-text-primary">${t('transaction.whatFor')} <span class="text-error">*</span></label>
-                            <input type="text" id="txn-reason" placeholder="${t('transaction.whatForHelper')}" class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                            <input type="text" id="txn-reason" placeholder="${t('transaction.whatForHelper')}" class="h-14 w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base sm:text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                             <p class="text-xs text-text-muted">${t('transaction.whatForHelper')}</p>
                         </div>
                         
@@ -1487,7 +1487,7 @@ const pages = {
                             <div class="relative">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">₦</span>
                                 <input type="number" id="settings-amount" value="${p.committed_amount || ''}" placeholder="0"
-                                    class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface pl-10 pr-4 text-base font-medium focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                    class="h-14 w-full min-w-0 rounded-2xl border border-border bg-surface pl-10 pr-4 text-base font-medium focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                             </div>
                             <p class="text-xs text-text-muted">${t('settings.committedAmountHelper')}</p>
                         </div>
@@ -1505,17 +1505,17 @@ const pages = {
                         <div class="space-y-2">
                             <label class="block text-sm font-semibold text-text-primary">${t('settings.currentPassword')}</label>
                             <input type="password" id="settings-current-pw" placeholder="${t('settings.currentPassword')}"
-                                class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                class="h-14 w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                         </div>
                         <div class="space-y-2">
                             <label class="block text-sm font-semibold text-text-primary">${t('settings.newPassword')}</label>
                             <input type="password" id="settings-new-pw" placeholder="${t('settings.newPassword')}"
-                                class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                class="h-14 w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                         </div>
                         <div class="space-y-2">
                             <label class="block text-sm font-semibold text-text-primary">${t('settings.confirmNew')}</label>
                             <input type="password" id="settings-confirm-pw" placeholder="${t('settings.confirmNew')}"
-                                class="h-[52px] w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                                class="h-14 w-full min-w-0 rounded-2xl border border-border bg-surface px-4 text-base focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
                         </div>
                         <button type="submit" id="password-btn" class="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-brand text-base font-semibold text-brand select-none">
                             ${Icons.lock()} ${t('settings.changePassword')}
@@ -3046,10 +3046,10 @@ function showTransferReceiptData(transactionId, receiptData) {
                     
                     <!-- Footer -->
                     <div class="flex gap-3 p-4 border-t border-border bg-surface-soft">
-                        <button onclick="downloadReceiptData('${transactionId}', '${encodeURIComponent(rawData)}')" class="flex-1 flex items-center justify-center gap-2 h-11 rounded-2xl bg-brand text-white font-semibold hover:bg-brand-hover">
+                        <button onclick="downloadReceiptData('${transactionId}', '${encodeURIComponent(rawData)}')" class="flex-1 flex items-center justify-center gap-2 h-12 rounded-2xl bg-brand text-white font-semibold hover:bg-brand-hover">
                             ${Icons.download()} Download
                         </button>
-                        <button onclick="closeReceiptModal()" class="flex-1 flex items-center justify-center gap-2 h-11 rounded-2xl border-2 border-border font-semibold hover:bg-surface">
+                        <button onclick="closeReceiptModal()" class="flex-1 flex items-center justify-center gap-2 h-12 rounded-2xl border-2 border-border font-semibold hover:bg-surface">
                             ${Icons.x()} Close
                         </button>
                     </div>
